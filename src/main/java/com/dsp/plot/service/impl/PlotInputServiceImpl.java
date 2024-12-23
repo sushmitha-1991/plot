@@ -9,10 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.dsp.plot.dto.ApplicationInstanceDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
@@ -36,8 +41,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlotInputServiceImpl implements PlotInputService {
-    // @Value("${application.number.service.url}")
-    // private String applicationNumberUrl;
+    @Value("${feign.client.bearer.url}")
+    private String applicationNumberUrl;
     @Autowired
     private BearerClient bearerClient;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
@@ -82,21 +87,42 @@ public class PlotInputServiceImpl implements PlotInputService {
             serialNumberRequest.setAppId(entity.getApplicationId());
             serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             System.out.println("apppppppppppppppppppp");
+            System.out.println(serialNumberRequest);
             System.out.println(bearerClient.getResource(serialNumberRequest));
             SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
             System.out.println(applicationNo.getId());
             entity.setApplicationNo(applicationNo.getId());
             entity.setRefNo(applicationNo.getId());
+            String url = applicationNumberUrl + "/master/serial-number";
+
+            // try {
+            //     ResponseEntity<GenericResponse<SerialNumberResponse>> response = restTemplate.exchange(url,
+            //             HttpMethod.POST, new HttpEntity<>(serialNumberRequest),
+            //             new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
+            //             });
+            //     System.out.println("response");
+            //     System.out.println(response);
+            //     System.out.println("response.getBody()");
+            //     System.out.println(response.getBody());
+            //     System.out.println("response.getBody().getData()");
+            //     System.out.println(response.getBody().getData());
+            //     System.out.println("response.getBody().getData().getId()");
+            //     System.out.println(response.getBody().getData().getId());
+
+            //     if (response == null || response.getBody() == null || response.getBody().getData() == null) {
+            //         log.error("Response in null");
+            //         throw new RuntimeException("Failed to generate Application no, response is null");
+            //     }
+            // } catch (ResourceNotFoundException e) {
+            //     log.error("App Id  or Session Id are incorrect: {}", e.getMessage());
+            //     throw e; // Re-throw the exception for further handling
+            // } catch (Exception e) {
+            //     log.error("Error calling service: ", e);
+            //     throw new RuntimeException("Failed to generating Application no", e);
+            // }
+
             entity = plotinputRepository.save(entity);
-            // MyRequestDTO requestDTO=MyRequestDTO.builder()
-            // .sessionId(2l)
-            // .appId(10l)
-            // .build();
-            // ResponseEntity<MyResponseDTO> response = restTemplate.postForEntity(
-            // "https://example.com/api/external",
-            // requestDTO,
-            // MyResponseDTO.class
-            // );
+            
             log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
 
             entity = plotinputRepository.save(entity);
