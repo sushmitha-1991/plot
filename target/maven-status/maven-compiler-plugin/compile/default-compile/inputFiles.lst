@@ -10,6 +10,11 @@ C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\s
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\DocumentDTO.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\HouseDTO.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\InputInstanceDTO.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\MasterCodeDTO.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\MastersBranchDTO.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\MastersLokSabhaDTO.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\MastersLokSabhaSessionDTO.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\MastersRajyaSabhaSessionDTO.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\PlotGenerateDTO.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\PlotInputDTO.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\dto\RequestDTO.java
@@ -19,10 +24,16 @@ C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\s
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\ApplicationInstance.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\Auditable.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\BaseUser.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\Designation.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\enums\Status.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\feignclient\BearerClient.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\feignclient\BearerFeignConfiguration.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\InputInstance.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\MasterCode.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\MastersBranch.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\MastersLokSabha.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\MastersLokSabhaSession.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\MastersRajyaSabha.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\NotificationInPlot.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\OtherPapersInPlot.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\entity\PlotDetails.java
@@ -45,6 +56,8 @@ C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\s
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\mapper\PlotInputMapper.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\mapper\RequestMapper.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\PlotSystemApplication.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\repository\MasterLSSRepository.java
+C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\repository\MastersRSSRepository.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\repository\MyUserRepository.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\repository\PlotGenerateRepository.java
 C:\Users\TF362XX\OneDrive - EY\Documents\Deployed Proj\dsp-portal-plot-service\src\main\java\com\dsp\plot\repository\PlotInputRepository.java

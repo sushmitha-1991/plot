@@ -22,12 +22,17 @@ import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
+import com.dsp.plot.entity.MastersLokSabhaSession;
+import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.exception.ResourceNotFoundException; // TODO: Correct package may need to be set
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
+import com.dsp.plot.repository.MasterLSSRepository;
+import com.dsp.plot.repository.MastersRSSRepository;
+import com.dsp.plot.repository.MyUserRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
@@ -44,7 +49,14 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String masterServiceUrl;
     @Autowired
     private HttpServletRequest httpRequest;
+ @Autowired
+    private MastersRSSRepository mastersRSSRepository;
+    
+    @Autowired
+    private MasterLSSRepository masterLSSRepository;
 
+    @Autowired
+    private MyUserRepository userRepository;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
@@ -81,48 +93,45 @@ public class PlotInputServiceImpl implements PlotInputService {
             log.debug("Converted PlotInputDTO to entity: {}", entity);
             // Save PlotInput entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
-
             serialNumberRequest.setAppId(entity.getApplicationId());
-            serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
+            Long houseId=getHouseId();
+            if (houseId == 1) {
+                if (entity.getRajyaSabhaSessionNo() == null) {
+                    Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
+                    entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
+                }
+                MastersRajyaSabha session = mastersRSSRepository.findById(entity.getRajyaSabhaSessionNo()).get();
+                entity.setRajyaSabhaSession(session.getSessionNumber());
+                entity.setLokSabhaSessionNo(null);
+                entity.setLokSabhaNo(null);
+                entity.setPendingAt("Table Office");
+                serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
+    
+            } else if (houseId == 2) {
+                if (entity.getLokSabhaSessionNo() == null) {
+                    Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
+                    entity.setLokSabhaSessionNo(lokSabhaSession);
+                }
+                MastersLokSabhaSession session = masterLSSRepository.findById(entity.getLokSabhaSessionNo()).get();
+                entity.setLokSabhaSessionNumber(session.getSessionNumber());
+                entity.setLokSabhaNo(session.getLokSabha().getId());
+                entity.setLokSabhaSession(session.getLokSabha().getLokSabhaNumber());
+                entity.setRajyaSabhaSessionNo(null);
+                entity.setPendingAt("Table Office A");
+                serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
+            }
             System.out.println("apppppppppppppppppppp");
             System.out.println(serialNumberRequest);
+
             SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
             System.out.println(applicationNo.getId());
             entity.setApplicationNo(applicationNo.getId());
             entity.setRefNo(applicationNo.getId());
-            // try {
-            // ResponseEntity<GenericResponse<SerialNumberResponse>> response =
-            // restTemplate.exchange(url,
-            // HttpMethod.POST, new HttpEntity<>(serialNumberRequest),
-            // new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
-            // });
-            // System.out.println("response");
-            // System.out.println(response);
-            // System.out.println("response.getBody()");
-            // System.out.println(response.getBody());
-            // System.out.println("response.getBody().getData()");
-            // System.out.println(response.getBody().getData());
-            // System.out.println("response.getBody().getData().getId()");
-            // System.out.println(response.getBody().getData().getId());
-
-            // if (response == null || response.getBody() == null ||
-            // response.getBody().getData() == null) {
-            // log.error("Response in null");
-            // throw new RuntimeException("Failed to generate Application no, response is
-            // null");
-            // }
-            // } catch (ResourceNotFoundException e) {
-            // log.error("App Id or Session Id are incorrect: {}", e.getMessage());
-            // throw e; // Re-throw the exception for further handling
-            // } catch (Exception e) {
-            // log.error("Error calling service: ", e);
-            // throw new RuntimeException("Failed to generating Application no", e);
-            // }
-
+            entity.setCurrentStatus(entity.getStatus());
+            entity.setDocumentDate(entity.getSubmissionDate());
             entity = plotinputRepository.save(entity);
-
+            entity.setRefId(entity.getId());
             log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
-
             entity = plotinputRepository.save(entity);
             // Convert saved entity back to DTO
             PlotInputDTO responseDTO = PlotInputMapper.toDTO(entity);

@@ -28,8 +28,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/plot-generate")
 public class PlotGenerateController {
     
+    private final PlotGenerateService plotService;
+
     @Autowired
-    private PlotGenerateService plotService;
+    public PlotGenerateController(PlotGenerateService plotService) {
+        this.plotService = plotService;
+    }
 
     @Operation(summary = "Create a new PlotGenerate", description = "Creates a new PlotGenerate and returns the created PlotGenerate details.")
     @ApiResponses(value = {
