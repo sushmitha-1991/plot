@@ -18,5 +18,8 @@ public class ApplicationInstanceDTO {
 private LocalDate documentDate;
 //  private String publishedDocumentUrl;
  private Long refId;
+ private String lokSabhaSession;
+    private String lokSabhaSessionNumber;
+    private String rajyaSabhaSession;
 //  private String processInstanceId;
 }

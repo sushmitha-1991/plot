@@ -30,7 +30,7 @@ public class PlotInputDTO {
     private Boolean digitallySigned;
     private Long actId;
     private Boolean draftFlag;
-    private Status status;
+    private String status;
     private String remarks;
     private String refNo;
     private Long generatePlotId;

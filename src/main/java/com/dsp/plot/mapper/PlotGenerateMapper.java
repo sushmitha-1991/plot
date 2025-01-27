@@ -64,6 +64,9 @@ public class PlotGenerateMapper {
                         .refId(entity.getRefId())
                         .currentStatus(entity.getCurrentStatus())
                         .documentDate(entity.getDocumentDate())
+                        .lokSabhaSession(entity.getLokSabhaSession())
+                        .lokSabhaSessionNumber(entity.getLokSabhaSessionNumber())
+                        .rajyaSabhaSession(entity.getRajyaSabhaSession())
                         .build())
                 .build();
     }

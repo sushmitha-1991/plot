@@ -94,6 +94,11 @@ public class PlotInputMapper {
                         .applicationNo(entity.getApplicationNo())
                         .refId(entity.getRefId())
                         .documentDate(entity.getDocumentDate())
+                        .pendingAt(entity.getPendingAt())
+                        .lokSabhaSession(entity.getLokSabhaSession())
+                        .lokSabhaSessionNumber(entity.getLokSabhaSessionNumber())
+                        .rajyaSabhaSession(entity.getRajyaSabhaSession())
+                        .applicationInstanceId(entity.getApplicationInstanceId())
                         .build())
                 .build();
 

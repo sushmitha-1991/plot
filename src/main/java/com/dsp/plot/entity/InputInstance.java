@@ -74,4 +74,10 @@ public class InputInstance  extends Auditable{
     @Column(name = "document_date")
     private LocalDate documentDate;
 
+    @Column(name = "pending_at",length = 50)
+    private String pendingAt;
+
+    @Column(name = "application_instance_id")
+    private Long applicationInstanceId;
+
 }

@@ -11,6 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -19,7 +23,9 @@ import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
+import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.PlotGenerate;
+import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.enums.Status;
 import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.entity.specification.PlotGenerateSpec;
@@ -27,10 +33,13 @@ import com.dsp.plot.exception.CustomBadRequestException;
 import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.NoDataFoundException;
 import com.dsp.plot.exception.ResourceNotFoundException;
+import com.dsp.plot.exception.UserNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
 import com.dsp.plot.repository.PlotGenerateRepository;
+import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.service.PlotGenerateService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -45,10 +54,16 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     @Autowired
     private PlotGenerateRepository plotRepository;
     @Autowired
+    private PlotInputRepository inputRepository;
+    @Autowired
     private BearerClient bearerClient;
+   @Value("${master.service.url}")
+    private String masterServiceUrl;
+    @Autowired
+    private HttpServletRequest httpRequest;
+
     @Autowired
     private RestTemplate restTemplate;
-
     @Override
     public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
         try {
@@ -89,40 +104,71 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
     @Override
     public PlotGenerateDTO save(PlotGenerateDTO plotDTO) {
-        if (plotDTO.getDraftFlag() == null) {
-            plotDTO.setDraftFlag(false);
-        }
+
         if (plotDTO.getStatus() == null) {
-            plotDTO.setStatus(Status.SUBMITTED);
+            plotDTO.setStatus("Sumbitted");
         }
-        if (plotDTO.getDraftFlag()) {
-            plotDTO.setStatus(Status.DRAFTED);
-        }
+
         log.debug("Entering savePlotGenerate with PlotGenerate DTO: {}", plotDTO);
         try {
             // Convert DTO to entity
             PlotGenerate entity = PlotGenerateMapper.toEntity(plotDTO);
             entity.setDocumentDate(entity.getPlotDate());
+            entity.setCurrentStatus(entity.getStatus());
             log.debug("Converted PlotGenerateDTO to entity: {}", entity);
             // Save PlotGenerate entity
-            //generating application no
-            SerialNumberRequest serialNumberRequest=new SerialNumberRequest();
-		serialNumberRequest.setAppId(entity.getApplicationId());
-		serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
-		System.out.println("apppppppppppppppppppp");
-		System.out.println(bearerClient.getResource(serialNumberRequest));
-		SerialNumberResponse applicationNo= bearerClient.getResource(serialNumberRequest);
-		System.out.println(applicationNo.getId());
-        entity.setApplicationNo(applicationNo.getId());
-        
-            entity.setCurrentStatus("" + entity.getStatus());
+            // generating application no
+            SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
+            serialNumberRequest.setAppId(entity.getApplicationId());
+            serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
+            System.out.println("apppppppppppppppppppp");
+            SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
+            System.out.println(applicationNo.getId());
+            entity.setApplicationNo(applicationNo.getId());
             entity = plotRepository.save(entity);
             entity.setRefId(entity.getId());
-            
+
             log.info("Saved PLOT attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
             System.out.println("after generating applno");
             System.out.println(entity);
             entity = plotRepository.save(entity);
+            if (plotDTO.getPlotInputs() != null) {
+                for (Long id : plotDTO.getPlotInputs()) {
+                    if (!inputRepository.existsById(id)) {
+                        log.error("plot input not found with ID: ", id);
+                        // throw new UserNotFoundException(" not found with ID: " + id);
+                    } else {
+                        log.info("plot input found with ID: ", id);
+                    }
+                    log.info("Attempting to fetch and update with ID: {}", id);
+                    PlotInput existingInput = inputRepository.findById(id)
+                            .orElseThrow(() -> {
+                                log.error("lob input not found with ID: {}", id);
+                                return new UserNotFoundException("lob input not found with ID: " + id);
+                            });
+
+                    log.info("Successfully fetched List Of Business with ID: {}", id);
+                    existingInput.setId(id);
+                    existingInput.setGeneratedPlotId(entity.getId());
+                    existingInput.setApplicationInstanceId(entity.getId());
+                    try {
+                        inputRepository.save(existingInput);
+                    } catch (Exception e) {
+                        log.error("Error in updating plot id in lob input", existingInput);
+
+                    }
+                }
+
+            } else {
+                log.info("plot input need to be provided");
+            }
+
+
+
+
+
+
+
             // Convert saved entity back to DTO
             PlotGenerateDTO responseDTO = PlotGenerateMapper.toDTO(entity);
             log.debug("Returning PlotGenerateDTO: {}", responseDTO);
@@ -132,15 +178,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             throw e;
         }
     }
-
-    public String generateApplicationNo(Long id, Long session, Boolean saveAsDraft) {
-        if (saveAsDraft) {
-            return "DPLOT" + session + id;
-        } else {
-            return "PLOT" + session + id;
-        }
-    }
-
     @Override
     public List<PlotGenerateDTO> getAll() {
         log.info("Entering getAll Plots");
@@ -181,23 +218,15 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         // are updated
         PlotGenerate dbEntityNew = PlotGenerateMapper.toEntity(plotDTO);
         dbEntityNew.setId(dbEntity.getId());
-        if(dbEntityNew.getStatus()==null)
-        {
-            if(dbEntityNew.getDraftFlag())
-            {
-                dbEntityNew.setStatus(Status.DRAFTED);
-            }
-            else{
-                dbEntityNew.setStatus(Status.IN_PROGRESS);
-            }
+        if (dbEntityNew.getStatus() == null) {
+                dbEntityNew.setStatus("In Progress");
         }
         dbEntityNew.setCurrentStatus("" + dbEntity.getStatus());
-        if(dbEntityNew.getPlotDate()!=null)
-        {
+        if (dbEntityNew.getPlotDate() != null) {
             dbEntityNew.setDocumentDate(dbEntityNew.getPlotDate());
         }
         // Save the updated Plot
-        
+        dbEntityNew=plotRepository.save(dbEntityNew);
         // Prepare the response DTO
         return (PlotGenerateMapper.toDTO(dbEntityNew));
     }
@@ -212,5 +241,44 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         dBEntry.setIsDeleted(true);
         dBEntry.setIsActive(false);
         plotRepository.saveAndFlush(dBEntry);
+    }
+
+    // Generate Application No Functionality
+    public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
+        String url = masterServiceUrl + "/serial-number";
+        String token = getTokenFromRequest();
+        if (token == null) {
+            throw new IllegalStateException("Authorization token is missing");
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
+
+        try {
+            // RestTemplate restTemplate = new RestTemplate();
+            return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
+        } catch (Exception e) {
+            System.err.println("Error during API call: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public String getTokenFromRequest() {
+        String authorizationHeader = httpRequest.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        return null;
+    }
+
+    private Long getHouseId() {
+        Long houseId = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetailsDTO) {
+            houseId = ((UserDetailsDTO) principal).getHouseId();
+        }
+        return houseId;
     }
 }

@@ -42,7 +42,7 @@ public class PlotIndex extends Auditable {
     private Boolean draftFlag;
 
     @Column(name = "status", nullable = false)
-    private Status status;
+    private String status;
 
     @Column(name = "ref_no")
     private String refNo;

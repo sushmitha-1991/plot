@@ -57,7 +57,7 @@ public class PlotGenerate extends ApplicationInstance {
     @Column(name = "draft_flag", columnDefinition = "boolean default false")
     private Boolean draftFlag;
     @Column(name = "status")
-    private Status status;
+    private String status;
     @Column(name = "content", columnDefinition = "text")
     private String content;
     @Column(name = "foot_note", columnDefinition = "text")

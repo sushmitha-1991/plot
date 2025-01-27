@@ -9,19 +9,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import com.dsp.plot.dto.ApplicationInstanceDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
+import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.enums.Status;
@@ -31,9 +31,9 @@ import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
-import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotInputService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -43,6 +43,13 @@ import lombok.NoArgsConstructor;
 public class PlotInputServiceImpl implements PlotInputService {
     @Value("${feign.client.bearer.url}")
     private String applicationNumberUrl;
+    @Value("${master.service.url}")
+    private String masterServiceUrl;
+    @Autowired
+    private HttpServletRequest httpRequest;
+
+    @Autowired
+    private RestTemplate restTemplate;
     @Autowired
     private BearerClient bearerClient;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
@@ -51,21 +58,15 @@ public class PlotInputServiceImpl implements PlotInputService {
     private PlotInputRepository plotinputRepository;
     @Autowired
     private RequestRepository requestRepository;
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Transactional
     @Override
     public PlotInputDTO save(PlotInputDTO plotinputDTO) {
-        if (plotinputDTO.getDraftFlag() == null) {
-            plotinputDTO.setDraftFlag(false);
-        }
+     
         if (plotinputDTO.getStatus() == null) {
-            plotinputDTO.setStatus(Status.SUBMITTED);
+            plotinputDTO.setStatus("Submitted");
         }
-        if (plotinputDTO.getDraftFlag()) {
-            plotinputDTO.setStatus(Status.DRAFTED);
-        }
+
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
         if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
@@ -88,41 +89,41 @@ public class PlotInputServiceImpl implements PlotInputService {
             serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             System.out.println("apppppppppppppppppppp");
             System.out.println(serialNumberRequest);
-            System.out.println(bearerClient.getResource(serialNumberRequest));
-            SerialNumberResponse applicationNo = bearerClient.getResource(serialNumberRequest);
+            SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
             System.out.println(applicationNo.getId());
             entity.setApplicationNo(applicationNo.getId());
             entity.setRefNo(applicationNo.getId());
-            String url = applicationNumberUrl + "/master/serial-number";
-
             // try {
-            //     ResponseEntity<GenericResponse<SerialNumberResponse>> response = restTemplate.exchange(url,
-            //             HttpMethod.POST, new HttpEntity<>(serialNumberRequest),
-            //             new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
-            //             });
-            //     System.out.println("response");
-            //     System.out.println(response);
-            //     System.out.println("response.getBody()");
-            //     System.out.println(response.getBody());
-            //     System.out.println("response.getBody().getData()");
-            //     System.out.println(response.getBody().getData());
-            //     System.out.println("response.getBody().getData().getId()");
-            //     System.out.println(response.getBody().getData().getId());
+            // ResponseEntity<GenericResponse<SerialNumberResponse>> response =
+            // restTemplate.exchange(url,
+            // HttpMethod.POST, new HttpEntity<>(serialNumberRequest),
+            // new ParameterizedTypeReference<GenericResponse<SerialNumberResponse>>() {
+            // });
+            // System.out.println("response");
+            // System.out.println(response);
+            // System.out.println("response.getBody()");
+            // System.out.println(response.getBody());
+            // System.out.println("response.getBody().getData()");
+            // System.out.println(response.getBody().getData());
+            // System.out.println("response.getBody().getData().getId()");
+            // System.out.println(response.getBody().getData().getId());
 
-            //     if (response == null || response.getBody() == null || response.getBody().getData() == null) {
-            //         log.error("Response in null");
-            //         throw new RuntimeException("Failed to generate Application no, response is null");
-            //     }
+            // if (response == null || response.getBody() == null ||
+            // response.getBody().getData() == null) {
+            // log.error("Response in null");
+            // throw new RuntimeException("Failed to generate Application no, response is
+            // null");
+            // }
             // } catch (ResourceNotFoundException e) {
-            //     log.error("App Id  or Session Id are incorrect: {}", e.getMessage());
-            //     throw e; // Re-throw the exception for further handling
+            // log.error("App Id or Session Id are incorrect: {}", e.getMessage());
+            // throw e; // Re-throw the exception for further handling
             // } catch (Exception e) {
-            //     log.error("Error calling service: ", e);
-            //     throw new RuntimeException("Failed to generating Application no", e);
+            // log.error("Error calling service: ", e);
+            // throw new RuntimeException("Failed to generating Application no", e);
             // }
 
             entity = plotinputRepository.save(entity);
-            
+
             log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
 
             entity = plotinputRepository.save(entity);
@@ -247,16 +248,9 @@ public class PlotInputServiceImpl implements PlotInputService {
         // are updated
         PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
         dbEntity.setId(id);
+
+
         // Save the updated PlotInput
-        if (dbEntityNew.getLokSabhaSessionNo() == null) {
-            String refNo = generateApplicationNo(dbEntityNew.getId(), dbEntityNew.getRajyaSabhaSessionNo(),
-                    dbEntityNew.getDraftFlag());
-            dbEntityNew.setRefNo(refNo);
-        } else {
-            String refNo = generateApplicationNo(dbEntityNew.getId(), dbEntityNew.getLokSabhaSessionNo(),
-                    dbEntityNew.getDraftFlag());
-            dbEntityNew.setRefNo(refNo);
-        }
         dbEntityNew = plotinputRepository.save(dbEntityNew);
         // Prepare the response DTO
         return (PlotInputMapper.toDTO(dbEntityNew));
@@ -288,5 +282,44 @@ public class PlotInputServiceImpl implements PlotInputService {
             log.error("Error in save Request: ", e);
             throw e;
         }
+    }
+
+    // Generate Application No Functionality
+    public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
+        String url = masterServiceUrl + "/serial-number";
+        String token = getTokenFromRequest();
+        if (token == null) {
+            throw new IllegalStateException("Authorization token is missing");
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
+
+        try {
+            // RestTemplate restTemplate = new RestTemplate();
+            return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
+        } catch (Exception e) {
+            System.err.println("Error during API call: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public String getTokenFromRequest() {
+        String authorizationHeader = httpRequest.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        return null;
+    }
+
+    private Long getHouseId() {
+        Long houseId = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetailsDTO) {
+            houseId = ((UserDetailsDTO) principal).getHouseId();
+        }
+        return houseId;
     }
 }

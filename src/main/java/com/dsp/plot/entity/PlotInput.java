@@ -97,7 +97,7 @@ public class PlotInput extends InputInstance {
     private Boolean draftFlag;
 
     @Column(name = "status", nullable = false)
-    private Status status;
+    private String status;
 
     @Column(name = "remarks")
     private String remarks;

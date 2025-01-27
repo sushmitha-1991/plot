@@ -4,8 +4,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
-import com.dsp.plot.entity.enums.Status;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +22,7 @@ public class PlotGenerateDTO {
     private Long designation;
     private String location;
     private Boolean draftFlag;
-    private Status status;
+    private String status;
     private String content;
     private String footNote;
     private List<Map<String, Object>> referenceFiles;

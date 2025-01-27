@@ -2,6 +2,7 @@ package com.dsp.plot.dto;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,9 @@ public class InputInstanceDTO {
 	private Long refId;
 	// private String processInstanceId;
 	private LocalDate documentDate;
+	private String lokSabhaSession;
+    private String lokSabhaSessionNumber;
+    private String rajyaSabhaSession;
+	 private String pendingAt;
+    private Long applicationInstanceId;
 }
