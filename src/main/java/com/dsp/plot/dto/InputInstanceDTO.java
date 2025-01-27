@@ -2,7 +2,6 @@ package com.dsp.plot.dto;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

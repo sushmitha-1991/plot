@@ -24,7 +24,6 @@ import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
-import com.dsp.plot.entity.enums.Status;
 import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.exception.ResourceNotFoundException; // TODO: Correct package may need to be set
 import com.dsp.plot.mapper.PlotInputMapper;
@@ -41,8 +40,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlotInputServiceImpl implements PlotInputService {
-    @Value("${feign.client.bearer.url}")
-    private String applicationNumberUrl;
     @Value("${master.service.url}")
     private String masterServiceUrl;
     @Autowired

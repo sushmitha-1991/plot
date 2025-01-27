@@ -2,8 +2,6 @@ package com.dsp.plot.entity;
 
 import org.hibernate.envers.Audited;
 
-import com.dsp.plot.entity.enums.Status;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
