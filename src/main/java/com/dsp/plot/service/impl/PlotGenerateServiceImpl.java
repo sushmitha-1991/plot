@@ -26,19 +26,18 @@ import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotInput;
-import com.dsp.plot.entity.enums.Status;
 import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.entity.specification.PlotGenerateSpec;
 import com.dsp.plot.exception.CustomBadRequestException;
 import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.NoDataFoundException;
 import com.dsp.plot.exception.ResourceNotFoundException;
-import com.dsp.plot.exception.UserNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
 import com.dsp.plot.repository.PlotGenerateRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.service.PlotGenerateService;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -106,7 +105,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     public PlotGenerateDTO save(PlotGenerateDTO plotDTO) {
 
         if (plotDTO.getStatus() == null) {
-            plotDTO.setStatus("Sumbitted");
+            plotDTO.setStatus("In Progress");
         }
 
         log.debug("Entering savePlotGenerate with PlotGenerate DTO: {}", plotDTO);
@@ -122,14 +121,18 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             serialNumberRequest.setAppId(entity.getApplicationId());
             serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             System.out.println("apppppppppppppppppppp");
+            if (StringUtils.isBlank(entity.getApplicationNo())) {
             SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
             System.out.println(applicationNo.getId());
             entity.setApplicationNo(applicationNo.getId());
+            }
             entity = plotRepository.save(entity);
             entity.setRefId(entity.getId());
-
             log.info("Saved PLOT attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
             System.out.println("after generating applno");
+
+
+
             System.out.println(entity);
             entity = plotRepository.save(entity);
             if (plotDTO.getPlotInputs() != null) {
@@ -139,13 +142,13 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                         // throw new UserNotFoundException(" not found with ID: " + id);
                     } else {
                         log.info("plot input found with ID: ", id);
-                    }
+                    
                     log.info("Attempting to fetch and update with ID: {}", id);
-                    PlotInput existingInput = inputRepository.findById(id)
-                            .orElseThrow(() -> {
-                                log.error("lob input not found with ID: {}", id);
-                                return new UserNotFoundException("lob input not found with ID: " + id);
-                            });
+                    PlotInput existingInput = inputRepository.findById(id).get();
+                            // .orElseThrow(() -> {
+                            //     log.error("lob input not found with ID: {}", id);
+                            //     return new UserNotFoundException("lob input not found with ID: " + id);
+                            // });
 
                     log.info("Successfully fetched List Of Business with ID: {}", id);
                     existingInput.setId(id);
@@ -158,6 +161,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
                     }
                 }
+            }
 
             } else {
                 log.info("plot input need to be provided");

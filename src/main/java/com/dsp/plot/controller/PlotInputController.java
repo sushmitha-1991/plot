@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.response.GenericResponse; // TODO: Set exact file location
@@ -137,6 +138,30 @@ public class PlotInputController {
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
 
+        @Operation(summary = "Save Date Chart ", description = "Adding Date Chart in Plot")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Date Chart Saved Properly"),
+                        @ApiResponse(responseCode = "404", description = "PlotDoc not found"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @PostMapping("/addDateChart")
+        public ResponseEntity<GenericResponse<PlotDateChartDTO>> addDateChart(@RequestBody PlotDateChartDTO dto) {
+                PlotDateChartDTO response=plotinputService.addDateChart(dto);
+                GenericResponse<PlotDateChartDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
+                true," Manage Date Chart submitted successfully.", response);
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        }
+        @Operation(summary = "Get all request ", description = "Retrieve request by its id.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "PlotDoc retrieved successfully"),
+                        @ApiResponse(responseCode = "404", description = "PlotDoc not found"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @GetMapping("/getDateChart/{id}")
+        public ResponseEntity<GenericResponse<PlotDateChartDTO>> getDateChartById(@PathVariable Long id) {
+                PlotDateChartDTO response=plotinputService.getDateChartById(id);
+                GenericResponse<PlotDateChartDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
+                true,"Requests retrieved successfully.", response);
+                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        }
         @Operation(summary = "Get all request ", description = "Retrieve request by its id.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "PlotDoc retrieved successfully"),

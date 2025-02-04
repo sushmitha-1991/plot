@@ -8,6 +8,7 @@ package com.dsp.plot.entity;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.hibernate.envers.Audited;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -27,6 +28,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Audited
 @Table(schema = "authentication") // Updated table name to match entity
 public class BaseUser extends Auditable implements UserDetails {
 

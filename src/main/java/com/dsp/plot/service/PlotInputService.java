@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.dsp.plot.dto.DocumentDTO;
+import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.RequestDTO;
+import com.dsp.plot.entity.PlotDateChart;
 @Service
 public interface PlotInputService {
 
@@ -25,5 +27,7 @@ public interface PlotInputService {
      
     List<RequestDTO> getAllRequests();
         // DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
-     
+     PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
+
+     PlotDateChartDTO getDateChartById(Long id);
      }

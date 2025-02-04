@@ -74,10 +74,6 @@ public class PlotInput extends InputInstance {
 
     @Column(name = "generated_plot_id")
     private Long generatedPlotId;
-    
-    // @ManyToOne
-    // @JoinColumn(name = "generated_plot_id", referencedColumnName = "id")
-    // private PlotGenerate plotGenerate; 
 
     @Convert(converter = JsonMapConverter.class)
     @Column(name = "paper_details", columnDefinition = "JSONB")
@@ -122,9 +118,22 @@ public class PlotInput extends InputInstance {
 
     @Column(name = "nodal_officer_mobile_no", length = 13)
     private String nodalOfficerMobileNo;  
-
-    // @ManyToOne
-    // @JoinColumn(name = "plot_id", referencedColumnName = "id")
-    // private PlotGenerate plot;
-
+    @ManyToOne
+    @JoinColumn(name = "generated_plot_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private PlotGenerate plotGenerate;
+    @ManyToOne
+    @JoinColumn(name = "authenticated_by_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private BaseUser authenticatorDetails;
+    @ManyToOne
+    @JoinColumn(name = "nodal_officer_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private BaseUser nodalOfficerDetails;
+    @ManyToOne
+    @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
+    private MastersLokSabhaSession lokSabhSessionDetails;
+    @ManyToOne
+    @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
+    private MastersRajyaSabha rajyaSabhaSessionDetails;
+    @ManyToOne
+    @JoinColumn(name = "ministry_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private Ministries ministries;
    }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
@@ -24,6 +26,7 @@ import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
+import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.feignclient.BearerClient;
@@ -33,6 +36,7 @@ import com.dsp.plot.mapper.RequestMapper;
 import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MyUserRepository;
+import com.dsp.plot.repository.PlotDateChartRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
@@ -55,6 +59,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Autowired
     private MasterLSSRepository masterLSSRepository;
 
+    @Autowired
+    private PlotDateChartRepository plotDateChartRepository;
     @Autowired
     private MyUserRepository userRepository;
     @Autowired
@@ -122,11 +128,13 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
             System.out.println("apppppppppppppppppppp");
             System.out.println(serialNumberRequest);
-
+            if(StringUtils.isBlank(plotinputDTO.getApplicationNo()))
+            {
             SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
             System.out.println(applicationNo.getId());
             entity.setApplicationNo(applicationNo.getId());
             entity.setRefNo(applicationNo.getId());
+            }
             entity.setCurrentStatus(entity.getStatus());
             entity.setDocumentDate(entity.getSubmissionDate());
             entity = plotinputRepository.save(entity);
@@ -143,13 +151,13 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
 
-    public String generateApplicationNo(Long id, Long session, Boolean saveAsDraft) {
-        if (saveAsDraft) {
-            return "Ref-DPLOT" + id;
-        } else {
-            return "Ref-PLOT" + id;
-        }
-    }
+    // public String generateApplicationNo(Long id, Long session, Boolean saveAsDraft) {
+    //     if (saveAsDraft) {
+    //         return "Ref-DPLOT" + id;
+    //     } else {
+    //         return "Ref-PLOT" + id;
+    //     }
+    // }
 
     @Override
     public List<RequestDTO> getAllRequests() {
@@ -290,6 +298,28 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
 
+
+    // date chart Services
+    @Override
+    public PlotDateChartDTO addDateChart(PlotDateChartDTO dto) {
+        
+        PlotDateChart savedEntity=plotDateChartRepository.save(PlotInputMapper.dateChartMapToEntity(dto));
+        PlotInputMapper.dateChartMapToDTO(savedEntity);
+        
+        return PlotInputMapper.dateChartMapToDTO(savedEntity);
+
+    }
+
+    
+    @Override
+    public PlotDateChartDTO getDateChartById(Long id) {
+        // TODO Auto-generated method stub
+        PlotDateChart savedEntity=plotDateChartRepository.findById(id).get();
+        System.out.println("@@@@@@@@@@");
+        System.out.println();
+        return PlotInputMapper.dateChartMapToDTO(savedEntity);
+    }
+
     // Generate Application No Functionality
     public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
         String url = masterServiceUrl + "/serial-number";
@@ -328,4 +358,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         return houseId;
     }
+
+  
 }

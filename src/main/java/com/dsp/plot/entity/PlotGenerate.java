@@ -13,6 +13,8 @@ import com.dsp.plot.util.JsonMapConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -69,7 +71,10 @@ public class PlotGenerate extends ApplicationInstance {
     private String paperName;
     @Column(name = "remarks", length = 200)
     private String remarks;
-
-    // @OneToMany(mappedBy = "plotGenerate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<PlotInput> plotInputs;
+     @ManyToOne
+    @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
+    private MastersLokSabhaSession lokSabhSessionDetails;
+    @ManyToOne
+    @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
+    private MastersRajyaSabha rajyaSabhaSessionDetails;
 }

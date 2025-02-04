@@ -1,12 +1,17 @@
 package com.dsp.plot.mapper;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 import com.dsp.plot.dto.InputInstanceDTO;
+import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
+import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotInput;
 
 public class PlotInputMapper {
+
     public static PlotInput toEntity(PlotInputDTO dto) {
         return PlotInput.builder()
                 .id(dto.getId())
@@ -118,5 +123,29 @@ public class PlotInputMapper {
         // .isModifiedByHouse(entity.getIsModifiedByHouse())
         // .actAndSection(entity.getActAndSection())
         // .build();
+    }
+
+    public static PlotDateChartDTO dateChartMapToDTO(PlotDateChart entity) {
+        return PlotDateChartDTO.builder()
+                .id(entity.getId())
+                .lokSabhaNo(entity.getLokSabhaNo())
+                .lokSabhaSessionNo(entity.getLokSabhaSessionNo())
+                .rajyaSabhaSessionNo(entity.getRajyaSabhaSessionNo())
+                .ministryId(entity.getMinistryId())
+                .groupName(entity.getGroupName())
+                .dates(entity.getDates())
+                .build();
+    }
+
+    public static PlotDateChart dateChartMapToEntity(PlotDateChartDTO dto) {
+        return PlotDateChart.builder()
+                .id(dto.getId())
+                .lokSabhaNo(dto.getLokSabhaNo())
+                .lokSabhaSessionNo(dto.getLokSabhaSessionNo())
+                .rajyaSabhaSessionNo(dto.getRajyaSabhaSessionNo())
+                .ministryId(dto.getMinistryId())
+                .groupName(dto.getGroupName())
+                .dates(dto.getDates())
+                .build();
     }
 }
