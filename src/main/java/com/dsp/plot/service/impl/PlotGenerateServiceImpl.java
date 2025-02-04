@@ -13,7 +13,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,8 +49,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Service
 public class PlotGenerateServiceImpl implements PlotGenerateService {
-    // @Value("${application.number.service.url}")
-    // private String applicationNumberUrl;
+    @Value("${draft.service.url}")
+    private String draftUrl;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
     // private final PlotInputMapper mapper;
     @Autowired
@@ -130,9 +133,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             entity.setRefId(entity.getId());
             log.info("Saved PLOT attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
             System.out.println("after generating applno");
-
-
-
             System.out.println(entity);
             entity = plotRepository.save(entity);
             if (plotDTO.getPlotInputs() != null) {
@@ -166,12 +166,15 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             } else {
                 log.info("plot input need to be provided");
             }
+            if (!StringUtils.isBlank(plotDTO.getApplicationNo())) {
+                // Get the Draft ID from draft table using appNo
+                System.out.println("before deleting draft entry");
+                String res = deleteDraftEntry(plotDTO.getApplicationNo());
 
 
-
-
-
-
+                System.out.println("res:::::::"+res);
+                // /delete-save-as-draft
+            }
 
             // Convert saved entity back to DTO
             PlotGenerateDTO responseDTO = PlotGenerateMapper.toDTO(entity);
@@ -285,4 +288,56 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         }
         return houseId;
     }
+    // private String deleteDraftEntry(String applicationNo)
+    // {
+    //     String url = draftUrl+"/delete-save-as-draft/applicationNo="+applicationNo;
+    //     String token = getTokenFromRequest();
+    //     if (token == null) {
+    //         throw new IllegalStateException("Authorization token is missing");
+    //     }
+    //     HttpHeaders headers = new HttpHeaders();
+    //     headers.set("Authorization", "Bearer " + token);
+    //     headers.setContentType(MediaType.APPLICATION_JSON);
+
+    //     HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
+
+    //     try {
+    //         // RestTemplate restTemplate = new RestTemplate();
+    //         return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
+    //     } catch (Exception e) {
+    //         System.err.println("Error during API call: " + e.getMessage());
+    //         throw e;
+    //     }
+    //     return "";
+    // } 
+    private String deleteDraftEntry(String applicationNo) {
+    String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
+    String token = getTokenFromRequest();
+
+    System.out.println("url:::"+url+"\n applicationNo:::::"+applicationNo+"\n token:::::::"+token);
+    if (token == null) {
+        throw new IllegalStateException("Authorization token is missing");
+    }
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "Bearer " + token);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    HttpEntity<Void> entity = new HttpEntity<>(headers); // No body needed for DELETE request
+
+    try {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return "Draft deleted successfully";
+        } else {
+            return "Failed to delete draft";
+        }
+    } catch (Exception e) {
+        System.err.println("Error during API call: " + e.getMessage());
+        throw e;
+    }
+}
+
+
 }
