@@ -368,4 +368,10 @@ public class PlotInputServiceImpl implements PlotInputService {
         return houseId;
     }
 
+    @Override
+    public List<PlotInputDTO> getAll() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+    }
+
 }

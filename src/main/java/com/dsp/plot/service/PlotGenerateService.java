@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.PlotIndexDTO;
+import com.dsp.plot.dto.PlotInputDTO;
 @Service
 public interface PlotGenerateService {
 
@@ -16,6 +17,7 @@ public interface PlotGenerateService {
     List<PlotGenerateDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
     Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
     String status);
+    List<PlotGenerateDTO> getAll();
 
     PlotGenerateDTO getById(Long id);
     

@@ -151,7 +151,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                         // throw new UserNotFoundException(" not found with ID: " + id);
                     } else {
                         log.info("plot input found with ID: ", id);
-
                         log.info("Attempting to fetch and update with ID: {}", id);
                         PlotInput existingInput = inputRepository.findById(id).get();
                         log.info("Successfully fetched List Of Business with ID: {}", id);
@@ -394,6 +393,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         // TODO Auto-generated method stub
         PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(id).get());
         return dto;
+    }
+
+    @Override
+    public List<PlotGenerateDTO> getAll() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAll'");
     }
 
 }
