@@ -116,7 +116,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
     @Override
     public PlotGenerateDTO save(PlotGenerateDTO plotDTO) {
-
         if (plotDTO.getStatus() == null) {
             plotDTO.setStatus("In Progress");
         }
@@ -155,11 +154,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
                         log.info("Attempting to fetch and update with ID: {}", id);
                         PlotInput existingInput = inputRepository.findById(id).get();
-                        // .orElseThrow(() -> {
-                        //     log.error("lob input not found with ID: {}", id);
-                        //     return new UserNotFoundException("lob input not found with ID: " + id);
-                        // });
-
                         log.info("Successfully fetched List Of Business with ID: {}", id);
                         existingInput.setId(id);
                         existingInput.setGeneratedPlotId(entity.getId());
@@ -180,7 +174,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 // Get the Draft ID from draft table using appNo
                 System.out.println("before deleting draft entry");
                 String res = deleteDraftEntry(plotDTO.getApplicationNo());
-
                 System.out.println("res:::::::" + res);
                 // /delete-save-as-draft
             }
@@ -243,20 +236,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         log.info("Returning list of PlotDTOs: {}", dtoList);
         log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
-        // Optional<List<PlotGenerate>> dBEntryOptional = plotRepository.findByIsActive(true);
-        // List<PlotGenerate> dbEntities = dBEntryOptional.get();
-        // log.debug("Fetched all Plots: {}", dbEntities);
-        // List<PlotGenerateDTO> dtoList = new ArrayList<>();
-        // for (PlotGenerate dbEntity : dbEntities) {
-        //     log.debug("Processing Plot: {}", dbEntity);
-        //     PlotGenerateDTO dto = PlotGenerateMapper.toDTO(dbEntity);
-        //     dtoList.add(dto);
-        // }
-        // log.debug("Returning list of PlotDTOs: {}", dtoList);
-        // log.info("Returning list of PlotDTOs: {}", dtoList);
-        // log.error("Returning list of PlotDTOs: {}", dtoList);
-
-        // return dtoList;
     }
 
     @Override

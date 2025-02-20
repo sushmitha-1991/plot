@@ -86,7 +86,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     public PlotInputDTO save(PlotInputDTO plotinputDTO) {
 
         if (plotinputDTO.getStatus() == null) {
-            plotinputDTO.setStatus("Submitted");
+            plotinputDTO.setStatus("In Progress");
         }
 
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
