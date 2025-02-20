@@ -1,5 +1,6 @@
 package com.dsp.plot.service.impl;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,10 +29,14 @@ import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.PlotDateChart;
+import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.feignclient.BearerClient;
+import com.dsp.plot.entity.specification.PlotGenerateSpec;
+import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException; // TODO: Correct package may need to be set
+import com.dsp.plot.mapper.PlotGenerateMapper;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
 import com.dsp.plot.repository.MasterLSSRepository;
@@ -49,13 +55,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlotInputServiceImpl implements PlotInputService {
+
     @Value("${master.service.url}")
     private String masterServiceUrl;
     @Autowired
     private HttpServletRequest httpRequest;
- @Autowired
+    @Autowired
     private MastersRSSRepository mastersRSSRepository;
-    
+
     @Autowired
     private MasterLSSRepository masterLSSRepository;
 
@@ -77,7 +84,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Transactional
     @Override
     public PlotInputDTO save(PlotInputDTO plotinputDTO) {
-     
+
         if (plotinputDTO.getStatus() == null) {
             plotinputDTO.setStatus("Submitted");
         }
@@ -87,10 +94,10 @@ public class PlotInputServiceImpl implements PlotInputService {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
                     plotinputDTO.getProposedDateOfLaying());
             if (daysDifference < 2) {
-                log.debug("Submission date must be at least 2 days before the previous paper", plotinputDTO);
-                log.info("Submission date must be at least 2 days before the previous paper", plotinputDTO);
+                log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
+                log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
                 throw new IllegalArgumentException(
-                        "Submission date must be at least 2 days before the previous paper laid date.");
+                        "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
             }
         }
         try {
@@ -100,7 +107,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // Save PlotInput entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
-            Long houseId=getHouseId();
+            Long houseId = getHouseId();
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
@@ -112,7 +119,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 entity.setLokSabhaNo(null);
                 entity.setPendingAt("Table Office");
                 serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
-    
+
             } else if (houseId == 2) {
                 if (entity.getLokSabhaSessionNo() == null) {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
@@ -128,12 +135,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
             System.out.println("apppppppppppppppppppp");
             System.out.println(serialNumberRequest);
-            if(StringUtils.isBlank(plotinputDTO.getApplicationNo()))
-            {
-            SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
-            System.out.println(applicationNo.getId());
-            entity.setApplicationNo(applicationNo.getId());
-            entity.setRefNo(applicationNo.getId());
+            if (StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
+                SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
+                System.out.println(applicationNo.getId());
+                entity.setApplicationNo(applicationNo.getId());
+                entity.setRefNo(applicationNo.getId());
             }
             entity.setCurrentStatus(entity.getStatus());
             entity.setDocumentDate(entity.getSubmissionDate());
@@ -158,7 +164,6 @@ public class PlotInputServiceImpl implements PlotInputService {
     //         return "Ref-PLOT" + id;
     //     }
     // }
-
     @Override
     public List<RequestDTO> getAllRequests() {
         List<RequestDTO> dtoList = new ArrayList<>();
@@ -187,57 +192,64 @@ public class PlotInputServiceImpl implements PlotInputService {
         // return new GenericResponse<>("Requests fetched successfully", dtoList);
     }
 
-    // @Override
-    // public List<RequestDTO> getAllRequests()
-    // {
-    // try{
-    // List<Request> entities = requestRepository.findAll();
-    // // List<PlotInput> dbEntities = dBEntryOptional.get();
-    // log.debug("Fetched all PlotInputs: {}", entities);
-    // List<RequestDTO> dtoList = new ArrayList<>();
-    // for (Request dbEntity : entities)
-    // {
-    // PlotInput input =
-    // plotinputRepository.findById(dbEntity.getPlotInputId()).orElse(null);
-    // if (input != null) {
-    // PlotInputDTO plotDto = PlotInputMapper.toDTO(input);
-    // log.debug("Processing Request: {}", dbEntity);
-    // RequestDTO dto = RequestMapper.toDTO(dbEntity);
-    // dto.setPlotDetails(plotDto);
-    // dtoList.add(dto);
-    // } else {
-    // log.warn("No PlotInput found for PlotInputId: {}",
-    // dbEntity.getPlotInputId());
-    // }
-    // // PlotInput input=
-    // plotinputRepository.findById(dbEntity.getPlotInputId()).get();
-    // // PlotInputDTO plotDto=PlotInputMapper.toDTO(input);
-    // // log.debug("Processing Request: {}", dbEntity);
-    // // RequestDTO dto = RequestMapper.toDTO(dbEntity);
-    // // dto.setPlotDetails(plotDto);
-    // // dtoList.add(dto);
-    // }
-    // log.debug("Returning list of request: {}", dtoList);
-    // return dtoList;
-    // }
-    // catch(Exception e)
-    // {
-    // log.info("error in creating request", e);
-    // }
-    // }
     @Override
-    public List<PlotInputDTO> getAll() {
-        log.debug("Entering getAll PlotInputs");
-        Optional<List<PlotInput>> dBEntryOptional = plotinputRepository.findByIsActive(true);
-        List<PlotInput> dbEntities = dBEntryOptional.get();
-        log.debug("Fetched all PlotInputs: {}", dbEntities);
+    public List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
+            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+            String status) {
+        log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
-        for (PlotInput dbEntity : dbEntities) {
-            log.debug("Processing PlotInput: {}", dbEntity);
-            PlotInputDTO dto = PlotInputMapper.toDTO(dbEntity);
-            dtoList.add(dto);
+        List<PlotInput> entitys;
+        // if (draftStatus == null) {
+        //     draftStatus = false;
+        // }
+        if (isActive == null) {
+            isActive = true;
         }
-        log.debug("Returning list of PlotInputDTOs: {}", dtoList);
+        Specification<PlotInput> spec = Specification.where(null);
+        spec = spec.and(PlotInputSpec.isActive(isActive));
+        if (draftStatus != null) {
+            spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
+        }
+        if (lokSabhaSessionNo != null) {
+            spec = spec.and(PlotInputSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
+        }
+        if (rajyaSabhaSessionNo != null) {
+            spec = spec.and(PlotInputSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
+        }
+        if (startDate != null || endDate != null) {
+            spec = spec.and(PlotInputSpec.hasDateBetween(startDate, endDate));
+        }
+        if (status != null) {
+            spec = spec.and(PlotInputSpec.hasStatus(status));
+        }
+
+        entitys = plotinputRepository.findAll(spec);
+        // entitys=plotinputRepository.findAll();
+        System.out.println("@@@@@@@");
+        System.out.println(entitys);
+        Long houseId = getHouseId();
+        for (PlotInput entity : entitys) {
+            System.out.println("########");
+            System.out.println(entity);
+            if (houseId == 1) {
+                System.out.println("!!!!!!! " + houseId);
+                System.out.println(entity);
+                if (entity.getRajyaSabhaSessionNo() != null) {
+                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    dtoList.add(dto);
+                }
+            } else if (houseId == 2) {
+                System.out.println("!!!!!! " + houseId);
+                System.out.println(entity);
+                if (entity.getLokSabhaSessionNo() != null) {
+                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    dtoList.add(dto);
+                }
+            }
+        }
+        log.debug("Returning list of PlotDTOs: {}", dtoList);
+        log.info("Returning list of PlotDTOs: {}", dtoList);
+        log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
     }
 
@@ -262,7 +274,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         // are updated
         PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
         dbEntity.setId(id);
-
 
         // Save the updated PlotInput
         dbEntityNew = plotinputRepository.save(dbEntityNew);
@@ -298,23 +309,21 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
 
-
     // date chart Services
     @Override
     public PlotDateChartDTO addDateChart(PlotDateChartDTO dto) {
-        
-        PlotDateChart savedEntity=plotDateChartRepository.save(PlotInputMapper.dateChartMapToEntity(dto));
+
+        PlotDateChart savedEntity = plotDateChartRepository.save(PlotInputMapper.dateChartMapToEntity(dto));
         PlotInputMapper.dateChartMapToDTO(savedEntity);
-        
+
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
 
     }
 
-    
     @Override
     public PlotDateChartDTO getDateChartById(Long id) {
         // TODO Auto-generated method stub
-        PlotDateChart savedEntity=plotDateChartRepository.findById(id).get();
+        PlotDateChart savedEntity = plotDateChartRepository.findById(id).get();
         System.out.println("@@@@@@@@@@");
         System.out.println();
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
@@ -359,5 +368,4 @@ public class PlotInputServiceImpl implements PlotInputService {
         return houseId;
     }
 
-  
 }

@@ -1,5 +1,6 @@
 package com.dsp.plot.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dsp.plot.dto.PlotDateChartDTO;
@@ -53,9 +55,18 @@ public class PlotInputController {
                         @ApiResponse(responseCode = "200", description = "PlotInputs retrieved successfully"),
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @GetMapping("/getAll")
-        public ResponseEntity<GenericResponse<List<PlotInputDTO>>> getAllPlotInputs() {
+        public ResponseEntity<GenericResponse<List<PlotInputDTO>>> getAllPlotInputs(
+                @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Boolean draftStatus,
+            @RequestParam(required = false) Long lokSabhaNo,
+            @RequestParam(required = false) Long lokSabhaSessionNo,
+            @RequestParam(required = false) Long rajyaSabhaSessionNo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String status) {
 
-                List<PlotInputDTO> fectchedEntities = plotinputService.getAll();
+                List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive,draftStatus,lokSabhaNo,lokSabhaSessionNo,
+                rajyaSabhaSessionNo,startDate,endDate,status);
 
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);

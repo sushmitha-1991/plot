@@ -1,5 +1,6 @@
 package com.dsp.plot.entity.specification;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -20,7 +21,7 @@ public class PlotGenerateSpec
         return (root, query, criteriaBuilder) ->
                 draftStatus != null ? criteriaBuilder.equal(root.get("draftFlag"), draftStatus) : null;
     }
-    public static Specification<PlotGenerate> hasDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
+    public static Specification<PlotGenerate> hasDateBetween(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> 
         {
             if (startDate != null && endDate != null) {
@@ -43,5 +44,8 @@ public class PlotGenerateSpec
         return (root, query, criteriaBuilder) -> 
         rajyaSabhaSessionNo != null ? criteriaBuilder.equal(root.get("rajyaSabhaSessionNo"), rajyaSabhaSessionNo) : null;
     }
+    public static Specification<PlotGenerate> hasStatus( String status) {
+        return (root, query, criteriaBuilder) -> 
+        status != null ? criteriaBuilder.equal(root.get("status"), status) : null;
+    }
 }
-    

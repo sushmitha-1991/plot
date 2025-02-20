@@ -15,7 +15,9 @@ public interface PlotInputService {
 
     PlotInputDTO save(PlotInputDTO plotinputDTO);
 
-    List<PlotInputDTO> getAll();
+    List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
+    Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+    String status);
 
     PlotInputDTO getById(Long id);
     

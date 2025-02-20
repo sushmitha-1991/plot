@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
+import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotGenerateService;
 
@@ -43,8 +44,6 @@ public class PlotGenerateController {
     @PostMapping("/create")
     public ResponseEntity<GenericResponse<PlotGenerateDTO>> createPlotGenerate(
             @RequestBody PlotGenerateDTO plotGenerateDTO) {
-
-     
         PlotGenerateDTO savedEntity = plotService.save(plotGenerateDTO);
         
         GenericResponse<PlotGenerateDTO> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
@@ -59,9 +58,18 @@ public class PlotGenerateController {
             @ApiResponse(responseCode = "200", description = "PlotGenerates retrieved successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error") })
     @GetMapping("/getAll")
-    public ResponseEntity<GenericResponse<List<PlotGenerateDTO>>> getAllPlotGenerates() {
+    public ResponseEntity<GenericResponse<List<PlotGenerateDTO>>> getAllPlotGenerates(
+        @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Boolean draftStatus,
+            @RequestParam(required = false) Long lokSabhaNo,
+            @RequestParam(required = false) Long lokSabhaSessionNo,
+            @RequestParam(required = false) Long rajyaSabhaSessionNo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String status) {
         
-        List<PlotGenerateDTO> fectchedEntities = plotService.getAll();
+        List<PlotGenerateDTO> fectchedEntities = plotService.getAll(isActive,draftStatus,lokSabhaNo,lokSabhaSessionNo,
+        rajyaSabhaSessionNo,startDate,endDate,status);
   
         GenericResponse<List<PlotGenerateDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                 "PlotGenerates retrieved successfully", fectchedEntities);        
@@ -120,23 +128,6 @@ public class PlotGenerateController {
         
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-//     @Operation(summary = "Generate Application No", description = "Generate Application No.")
-//     @ApiResponses(value = {
-//             @ApiResponse(responseCode = "200", description = "ApplicationNo generated successfully"),
-//             @ApiResponse(responseCode = "404", description = "Id not found"),
-//             @ApiResponse(responseCode = "500", description = "Internal server error") })
-//     @PostMapping("/generateNo")
-//     public String generateApplicationNo(@RequestBody GenerateDTO dto) 
-//     {
-//         if(dto.getDraftFlag()==null || (!dto.getDraftFlag()))
-//         {
-//                 return "PLOT"+dto.getId()+"";
-//         }
-//         else{
-//                 return "DPLOT"+dto.getId()+"";
-//         }
-//     }
     
     @Operation(summary = "Get PlotDocument By Date", description = "Retrieve PlotDoc by its Date.")
     @ApiResponses(value = {
@@ -151,7 +142,50 @@ public class PlotGenerateController {
                 DocumentDTO docDTO = plotService.getDocumentByDate(dateOfDocument, doc);
                 System.out.println(docDTO);
                 GenericResponse<DocumentDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                                "List of Business Input retrieved successfully.", docDTO);
+                                "Plot Document retrieved successfully.", docDTO);
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        @Operation(summary = "Get PlotDocument By Date", description = "Retrieve PlotDoc by its Date.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "PlotDoc retrieved successfully"),
+                @ApiResponse(responseCode = "404", description = "PlotDoc not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @GetMapping("/getIndexList")
+            public ResponseEntity<GenericResponse<List<PlotIndexDTO>>> getIndexes() {
+                    System.out.println("############");
+                    List<PlotIndexDTO> docDTO = plotService.getIndexes();
+                    System.out.println(docDTO);
+                    GenericResponse<List<PlotIndexDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                    "Plot Index List retrieved successfully.", docDTO);
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+
+            @Operation(summary = "Create a new PlotGenerate", description = "Creates a new PlotGenerate and returns the created PlotGenerate details.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "PlotGenerate created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input, object invalid"),
+            @ApiResponse(responseCode = "500", description = "Internal server error") })
+    @PostMapping("/saveIndex")
+    public ResponseEntity<GenericResponse<PlotIndexDTO>> saveIndex(
+            @RequestBody PlotIndexDTO plotIndexDTO) {
+        PlotIndexDTO savedEntity = plotService.saveIndex(plotIndexDTO);
+        GenericResponse<PlotIndexDTO> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
+                "PlotGenerate created successfully", savedEntity);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    @Operation(summary = "Get PlotGenerate By Id", description = "Retrieve PlotGenerate by its Id.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "PlotGenerate retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "PlotGenerate not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error") })
+    @GetMapping("/getIndex/{id}")
+    public ResponseEntity<GenericResponse<PlotIndexDTO>> getIndexById(@PathVariable Long id) {
+       
+        PlotIndexDTO fetchedEntity = plotService.getIndexById(id);
+        
+        GenericResponse<PlotIndexDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                "Retrieved PlotGenerate By Id", fetchedEntity);             
+  
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

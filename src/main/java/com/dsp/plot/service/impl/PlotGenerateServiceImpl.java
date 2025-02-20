@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.hibernate.persister.collection.CollectionPersister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +26,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
+import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.PlotGenerate;
+import com.dsp.plot.entity.PlotIndex;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.entity.specification.PlotGenerateSpec;
@@ -37,6 +41,7 @@ import com.dsp.plot.exception.NoDataFoundException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
 import com.dsp.plot.repository.PlotGenerateRepository;
+import com.dsp.plot.repository.PlotIndexRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.service.PlotGenerateService;
 
@@ -49,23 +54,28 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Service
 public class PlotGenerateServiceImpl implements PlotGenerateService {
-    @Value("${draft.service.url}")
+
+    @Value("${workflow.service.url}")
     private String draftUrl;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
     // private final PlotInputMapper mapper;
     @Autowired
     private PlotGenerateRepository plotRepository;
     @Autowired
+    private PlotIndexRepository plotIndexRepo;
+     
+    @Autowired
     private PlotInputRepository inputRepository;
     @Autowired
     private BearerClient bearerClient;
-   @Value("${master.service.url}")
+    @Value("${master.service.url}")
     private String masterServiceUrl;
     @Autowired
     private HttpServletRequest httpRequest;
 
     @Autowired
     private RestTemplate restTemplate;
+
     @Override
     public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
         try {
@@ -125,9 +135,9 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             System.out.println("apppppppppppppppppppp");
             if (StringUtils.isBlank(entity.getApplicationNo())) {
-            SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
-            System.out.println(applicationNo.getId());
-            entity.setApplicationNo(applicationNo.getId());
+                SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
+                System.out.println(applicationNo.getId());
+                entity.setApplicationNo(applicationNo.getId());
             }
             entity = plotRepository.save(entity);
             entity.setRefId(entity.getId());
@@ -142,26 +152,26 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                         // throw new UserNotFoundException(" not found with ID: " + id);
                     } else {
                         log.info("plot input found with ID: ", id);
-                    
-                    log.info("Attempting to fetch and update with ID: {}", id);
-                    PlotInput existingInput = inputRepository.findById(id).get();
-                            // .orElseThrow(() -> {
-                            //     log.error("lob input not found with ID: {}", id);
-                            //     return new UserNotFoundException("lob input not found with ID: " + id);
-                            // });
 
-                    log.info("Successfully fetched List Of Business with ID: {}", id);
-                    existingInput.setId(id);
-                    existingInput.setGeneratedPlotId(entity.getId());
-                    existingInput.setApplicationInstanceId(entity.getId());
-                    try {
-                        inputRepository.save(existingInput);
-                    } catch (Exception e) {
-                        log.error("Error in updating plot id in lob input", existingInput);
+                        log.info("Attempting to fetch and update with ID: {}", id);
+                        PlotInput existingInput = inputRepository.findById(id).get();
+                        // .orElseThrow(() -> {
+                        //     log.error("lob input not found with ID: {}", id);
+                        //     return new UserNotFoundException("lob input not found with ID: " + id);
+                        // });
 
+                        log.info("Successfully fetched List Of Business with ID: {}", id);
+                        existingInput.setId(id);
+                        existingInput.setGeneratedPlotId(entity.getId());
+                        existingInput.setApplicationInstanceId(entity.getId());
+                        try {
+                            inputRepository.save(existingInput);
+                        } catch (Exception e) {
+                            log.error("Error in updating plot id in lob input", existingInput);
+
+                        }
                     }
                 }
-            }
 
             } else {
                 log.info("plot input need to be provided");
@@ -171,8 +181,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 System.out.println("before deleting draft entry");
                 String res = deleteDraftEntry(plotDTO.getApplicationNo());
 
-
-                System.out.println("res:::::::"+res);
+                System.out.println("res:::::::" + res);
                 // /delete-save-as-draft
             }
 
@@ -185,23 +194,69 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             throw e;
         }
     }
+
     @Override
-    public List<PlotGenerateDTO> getAll() {
+    public List<PlotGenerateDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
+    Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+    String status) {
         log.info("Entering getAll Plots");
-        Optional<List<PlotGenerate>> dBEntryOptional = plotRepository.findByIsActive(true);
-        List<PlotGenerate> dbEntities = dBEntryOptional.get();
-        log.debug("Fetched all Plots: {}", dbEntities);
+
         List<PlotGenerateDTO> dtoList = new ArrayList<>();
-        for (PlotGenerate dbEntity : dbEntities) {
-            log.debug("Processing Plot: {}", dbEntity);
-            PlotGenerateDTO dto = PlotGenerateMapper.toDTO(dbEntity);
-            dtoList.add(dto);
+        List<PlotGenerate> entitys;
+        if (draftStatus == null) {
+            draftStatus = false;
+        }
+        if (isActive == null) {
+            isActive = true;
+        }
+        Specification<PlotGenerate> spec = Specification.where(null);
+        spec = spec.and(PlotGenerateSpec.isActive(isActive));
+        spec = spec.and(PlotGenerateSpec.hasDraftStatus(draftStatus));
+        if (lokSabhaSessionNo != null) {
+            spec = spec.and(PlotGenerateSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
+        }
+        if (rajyaSabhaSessionNo != null) {
+            spec = spec.and(PlotGenerateSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
+        }
+        if (startDate != null || endDate != null) {
+            spec = spec.and(PlotGenerateSpec.hasDateBetween(startDate, endDate));
+        }
+        if (status != null) {
+            spec = spec.and(PlotGenerateSpec.hasStatus(status));
+        }
+        entitys = plotRepository.findAll(spec);
+        Long houseId = getHouseId();
+        for (PlotGenerate entity : entitys) {
+            if (houseId == 1) {
+                if (entity.getRajyaSabhaSessionNo() != null) {
+                    PlotGenerateDTO dto = PlotGenerateMapper.toDTO(entity);
+                    dtoList.add(dto);
+                }
+            } else if (houseId == 2) {
+                if (entity.getLokSabhaSessionNo() != null) {
+                    PlotGenerateDTO dto = PlotGenerateMapper.toDTO(entity);
+                    dtoList.add(dto);
+                }
+            }
         }
         log.debug("Returning list of PlotDTOs: {}", dtoList);
         log.info("Returning list of PlotDTOs: {}", dtoList);
         log.error("Returning list of PlotDTOs: {}", dtoList);
-
         return dtoList;
+        // Optional<List<PlotGenerate>> dBEntryOptional = plotRepository.findByIsActive(true);
+        // List<PlotGenerate> dbEntities = dBEntryOptional.get();
+        // log.debug("Fetched all Plots: {}", dbEntities);
+        // List<PlotGenerateDTO> dtoList = new ArrayList<>();
+        // for (PlotGenerate dbEntity : dbEntities) {
+        //     log.debug("Processing Plot: {}", dbEntity);
+        //     PlotGenerateDTO dto = PlotGenerateMapper.toDTO(dbEntity);
+        //     dtoList.add(dto);
+        // }
+        // log.debug("Returning list of PlotDTOs: {}", dtoList);
+        // log.info("Returning list of PlotDTOs: {}", dtoList);
+        // log.error("Returning list of PlotDTOs: {}", dtoList);
+
+        // return dtoList;
     }
 
     @Override
@@ -226,14 +281,14 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         PlotGenerate dbEntityNew = PlotGenerateMapper.toEntity(plotDTO);
         dbEntityNew.setId(dbEntity.getId());
         if (dbEntityNew.getStatus() == null) {
-                dbEntityNew.setStatus("In Progress");
+            dbEntityNew.setStatus("In Progress");
         }
         dbEntityNew.setCurrentStatus("" + dbEntity.getStatus());
         if (dbEntityNew.getPlotDate() != null) {
             dbEntityNew.setDocumentDate(dbEntityNew.getPlotDate());
         }
         // Save the updated Plot
-        dbEntityNew=plotRepository.save(dbEntityNew);
+        dbEntityNew = plotRepository.save(dbEntityNew);
         // Prepare the response DTO
         return (PlotGenerateMapper.toDTO(dbEntityNew));
     }
@@ -300,7 +355,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     //     headers.setContentType(MediaType.APPLICATION_JSON);
 
     //     HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
-
     //     try {
     //         // RestTemplate restTemplate = new RestTemplate();
     //         return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
@@ -311,33 +365,56 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     //     return "";
     // } 
     private String deleteDraftEntry(String applicationNo) {
-    String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
-    String token = getTokenFromRequest();
+        String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
+        String token = getTokenFromRequest();
 
-    System.out.println("url:::"+url+"\n applicationNo:::::"+applicationNo+"\n token:::::::"+token);
-    if (token == null) {
-        throw new IllegalStateException("Authorization token is missing");
-    }
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Authorization", "Bearer " + token);
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    HttpEntity<Void> entity = new HttpEntity<>(headers); // No body needed for DELETE request
-
-    try {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return "Draft deleted successfully";
-        } else {
-            return "Failed to delete draft";
+        System.out.println("url:::" + url + "\n applicationNo:::::" + applicationNo + "\n token:::::::" + token);
+        if (token == null) {
+            throw new IllegalStateException("Authorization token is missing");
         }
-    } catch (Exception e) {
-        System.err.println("Error during API call: " + e.getMessage());
-        throw e;
-    }
-}
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers); // No body needed for DELETE request
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return "Draft deleted successfully";
+            } else {
+                return "Failed to delete draft";
+            }
+        } catch (Exception e) {
+            System.err.println("Error during API call: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public List<PlotIndexDTO> getIndexes() {
+        // TODO Auto-generated method stub
+        List<PlotIndexDTO> responseDto = plotIndexRepo.findAll().stream()
+        .map(PlotGenerateMapper::toIndexDTO)
+        .collect(Collectors.toList());
+        return responseDto;
+    }
+
+    @Override
+    public PlotIndexDTO saveIndex(PlotIndexDTO dto) {
+        // TODO Auto-generated method stub
+        PlotIndex entity=PlotGenerateMapper.toEntityIndex(dto);
+        PlotIndexDTO responseDto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(entity.getId()).get());
+        return responseDto;
+    }
+
+    @Override
+    public PlotIndexDTO getIndexById(Long id) {
+        // TODO Auto-generated method stub
+        PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(id).get());
+        return dto;
+    }
 
 }

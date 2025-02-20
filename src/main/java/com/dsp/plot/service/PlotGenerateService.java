@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 
 import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
+import com.dsp.plot.dto.PlotIndexDTO;
 @Service
 public interface PlotGenerateService {
 
     PlotGenerateDTO save(PlotGenerateDTO plotDTO);
 
-    List<PlotGenerateDTO> getAll();
+    List<PlotGenerateDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
+    Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+    String status);
 
     PlotGenerateDTO getById(Long id);
     
@@ -21,4 +24,10 @@ public interface PlotGenerateService {
     void delete(Long id);
     
 	DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
+
+    List<PlotIndexDTO> getIndexes();
+
+    PlotIndexDTO saveIndex(PlotIndexDTO dto);
+
+    PlotIndexDTO getIndexById(Long id);
 }

@@ -2,9 +2,14 @@ package com.dsp.plot.mapper;
 
 import com.dsp.plot.dto.ApplicationInstanceDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
+import com.dsp.plot.dto.PlotIndexDTO;
+import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.entity.PlotGenerate;
+import com.dsp.plot.entity.PlotIndex;
+import com.dsp.plot.entity.Request;
 
 public class PlotGenerateMapper {
+
     public static PlotGenerate toEntity(PlotGenerateDTO dto) {
         return PlotGenerate.builder()
                 .lokSabhaNo(dto.getLokSabhaNo())
@@ -70,4 +75,31 @@ public class PlotGenerateMapper {
                         .build())
                 .build();
     }
+
+    public static PlotIndex toEntityIndex(PlotIndexDTO dto) {
+        return PlotIndex.builder()
+                .id(dto.getId())
+                .lokSabhaNo(dto.getLokSabhaNo())
+                .lokSabhaSessionNo(dto.getLokSabhaSessionNo())
+                .rajyaSabhaSessionNo(dto.getRajyaSabhaSessionNo())
+                .draftFlag(dto.getDraftFlag())
+                .status(dto.getStatus())
+                .refNo(dto.getRefNo())
+                .content(dto.getContent())
+                .build();
+    }
+
+    public static PlotIndexDTO toIndexDTO(PlotIndex entity) {
+        return PlotIndexDTO.builder()
+                .id(entity.getId())
+                .lokSabhaNo(entity.getLokSabhaNo())
+                .lokSabhaSessionNo(entity.getLokSabhaSessionNo())
+                .rajyaSabhaSessionNo(entity.getRajyaSabhaSessionNo())
+                .draftFlag(entity.getDraftFlag())
+                .status(entity.getStatus())
+                .refNo(entity.getRefNo())
+                .content(entity.getContent())
+                .build();
+    }
+
 }
