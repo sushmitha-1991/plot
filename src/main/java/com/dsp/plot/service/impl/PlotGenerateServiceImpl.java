@@ -30,6 +30,8 @@ import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
+import com.dsp.plot.entity.MastersLokSabhaSession;
+import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotIndex;
 import com.dsp.plot.entity.PlotInput;
@@ -40,6 +42,8 @@ import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.NoDataFoundException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
+import com.dsp.plot.repository.MasterLSSRepository;
+import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.PlotGenerateRepository;
 import com.dsp.plot.repository.PlotIndexRepository;
 import com.dsp.plot.repository.PlotInputRepository;
@@ -59,20 +63,21 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     private String draftUrl;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
     // private final PlotInputMapper mapper;
-    @Autowired
-    private PlotGenerateRepository plotRepository;
-    @Autowired
-    private PlotIndexRepository plotIndexRepo;
-     
-    @Autowired
-    private PlotInputRepository inputRepository;
-    @Autowired
-    private BearerClient bearerClient;
     @Value("${master.service.url}")
     private String masterServiceUrl;
     @Autowired
     private HttpServletRequest httpRequest;
+    @Autowired
+    private MastersRSSRepository mastersRSSRepository;
 
+    @Autowired
+    private MasterLSSRepository masterLSSRepository;
+    @Autowired
+    private PlotGenerateRepository plotRepository;
+    @Autowired
+    private PlotIndexRepository plotIndexRepo;
+    @Autowired
+    private PlotInputRepository inputRepository;
     @Autowired
     private RestTemplate restTemplate;
 
@@ -131,7 +136,42 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             // generating application no
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
-            serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
+            Long houseId = getHouseId();
+            if (houseId == 1) {
+                if (entity.getRajyaSabhaSessionNo() == null) {
+
+                    Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
+
+                    entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
+                }
+                Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository.findById(entity.getRajyaSabhaSessionNo());
+                if (optionalSession == null) {
+                    throw new RuntimeException(
+                            "Session No is not valid");
+                }
+                MastersRajyaSabha session = optionalSession.get();
+                entity.setRajyaSabhaSession(session.getSessionNumber());
+                entity.setLokSabhaSessionNo(null);
+                entity.setLokSabhaNo(null);
+                serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
+
+            } else if (houseId == 2) {
+                if (entity.getLokSabhaSessionNo() == null) {
+                    Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
+                    entity.setLokSabhaSessionNo(lokSabhaSession);
+                }
+                Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository.findById(entity.getLokSabhaSessionNo());
+                if (optionalSession == null) {
+                    throw new RuntimeException(
+                            "Session Number is not valid");
+                }
+                MastersLokSabhaSession session = optionalSession.get();
+                entity.setLokSabhaSessionNumber(session.getSessionNumber());
+                entity.setLokSabhaNo(session.getLokSabha().getId());
+                entity.setLokSabhaSession(session.getLokSabha().getLokSabhaNumber());
+                entity.setRajyaSabhaSessionNo(null);
+                serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
+            }
             System.out.println("apppppppppppppppppppp");
             if (StringUtils.isBlank(entity.getApplicationNo())) {
                 SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
@@ -189,8 +229,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
     @Override
     public List<PlotGenerateDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
-    Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-    String status) {
+            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+            String status) {
         log.info("Entering getAll Plots");
 
         List<PlotGenerateDTO> dtoList = new ArrayList<>();
@@ -375,15 +415,15 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     public List<PlotIndexDTO> getIndexes() {
         // TODO Auto-generated method stub
         List<PlotIndexDTO> responseDto = plotIndexRepo.findAll().stream()
-        .map(PlotGenerateMapper::toIndexDTO)
-        .collect(Collectors.toList());
+                .map(PlotGenerateMapper::toIndexDTO)
+                .collect(Collectors.toList());
         return responseDto;
     }
 
     @Override
     public PlotIndexDTO saveIndex(PlotIndexDTO dto) {
         // TODO Auto-generated method stub
-        PlotIndex entity=PlotGenerateMapper.toEntityIndex(dto);
+        PlotIndex entity = PlotGenerateMapper.toEntityIndex(dto);
         PlotIndexDTO responseDto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(entity.getId()).get());
         return responseDto;
     }

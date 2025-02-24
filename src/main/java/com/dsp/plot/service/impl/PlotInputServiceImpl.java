@@ -88,7 +88,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (plotinputDTO.getStatus() == null) {
             plotinputDTO.setStatus("In Progress");
         }
-
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
         if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
@@ -110,10 +109,18 @@ public class PlotInputServiceImpl implements PlotInputService {
             Long houseId = getHouseId();
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
+
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
+                    
                     entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
                 }
-                MastersRajyaSabha session = mastersRSSRepository.findById(entity.getRajyaSabhaSessionNo()).get();
+                Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository.findById(entity.getRajyaSabhaSessionNo());
+                if(optionalSession==null)
+                {
+                    throw new RuntimeException(
+                        "Session No is not present in Session List");
+                }
+                MastersRajyaSabha session=optionalSession.get();
                 entity.setRajyaSabhaSession(session.getSessionNumber());
                 entity.setLokSabhaSessionNo(null);
                 entity.setLokSabhaNo(null);
@@ -125,7 +132,13 @@ public class PlotInputServiceImpl implements PlotInputService {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
                     entity.setLokSabhaSessionNo(lokSabhaSession);
                 }
-                MastersLokSabhaSession session = masterLSSRepository.findById(entity.getLokSabhaSessionNo()).get();
+                Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository.findById(entity.getLokSabhaSessionNo());
+                if(optionalSession==null)
+                {
+                    throw new RuntimeException(
+                        "Session No is not present in Session List");
+                }
+                MastersLokSabhaSession session=optionalSession.get();
                 entity.setLokSabhaSessionNumber(session.getSessionNumber());
                 entity.setLokSabhaNo(session.getLokSabha().getId());
                 entity.setLokSabhaSession(session.getLokSabha().getLokSabhaNumber());
@@ -222,25 +235,16 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (status != null) {
             spec = spec.and(PlotInputSpec.hasStatus(status));
         }
-
         entitys = plotinputRepository.findAll(spec);
-        // entitys=plotinputRepository.findAll();
-        System.out.println("@@@@@@@");
-        System.out.println(entitys);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
-            System.out.println("########");
-            System.out.println(entity);
             if (houseId == 1) {
-                System.out.println("!!!!!!! " + houseId);
-                System.out.println(entity);
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     dtoList.add(dto);
                 }
-            } else if (houseId == 2) {
-                System.out.println("!!!!!! " + houseId);
-                System.out.println(entity);
+            } else if (houseId == 2) 
+            {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     dtoList.add(dto);
@@ -252,7 +256,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
     }
-
     @Override
     public PlotInputDTO getById(Long id) {
         log.debug("Entering getById with id: {}", id);

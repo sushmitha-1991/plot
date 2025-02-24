@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.dto.ApproverDTO;
 import com.dsp.plot.dto.InputInstanceDTO;
 import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
@@ -62,7 +63,7 @@ public class PlotInputMapper {
     }
 
     public static PlotInputDTO toDTO(PlotInput entity) {
-        return PlotInputDTO.builder()
+        PlotInputDTO dto = PlotInputDTO.builder()
                 .id(entity.getId())
                 .ministryId(entity.getMinistryId())
                 .departmentId(entity.getDepartmentId())
@@ -97,6 +98,7 @@ public class PlotInputMapper {
                         .id(entity.getId())
                         .applicationId(entity.getApplicationId())
                         .applicationNo(entity.getApplicationNo())
+                        .currentStatus(entity.getCurrentStatus())
                         .refId(entity.getRefId())
                         .documentDate(entity.getDocumentDate())
                         .pendingAt(entity.getPendingAt())
@@ -106,6 +108,28 @@ public class PlotInputMapper {
                         .applicationInstanceId(entity.getApplicationInstanceId())
                         .build())
                 .build();
+        if (entity.getAuthenticatorDetails() != null) {
+            dto.setAuthenticatorDTO(ApproverDTO.builder()
+                    .id(entity.getAuthenticatorDetails().getId())
+                    .username(entity.getAuthenticatorDetails().getFirstName() + " "
+                            + entity.getAuthenticatorDetails().getLastName())
+                    .designation(entity.getAuthenticatorDetails().getDesignation().getAbbr())
+                    .build());
+        }
+        if (entity.getNodalOfficerDetails() != null) {
+            String designation = "";
+            if (entity.getNodalOfficerDetails().getDesignation() != null) {
+                designation = entity.getNodalOfficerDetails().getDesignation().getAbbr();
+            }
+
+            dto.setNodalOfficerDTO(ApproverDTO.builder()
+                    .id(entity.getNodalOfficerDetails().getId())
+                    .username(entity.getNodalOfficerDetails().getFirstName() + " "
+                            + entity.getNodalOfficerDetails().getLastName())
+                    .designation(designation)
+                    .build());
+        }
+        return dto;
 
         // .paperTiltle(entity.getPaperTiltle())
         // .article(entity.getArticle())

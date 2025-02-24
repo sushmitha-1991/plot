@@ -77,4 +77,9 @@ public class PlotGenerate extends ApplicationInstance {
     @ManyToOne
     @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
     private MastersRajyaSabha rajyaSabhaSessionDetails;
+    @ManyToOne
+    @JoinColumn(name = "approver_authority", referencedColumnName = "id",insertable=false,updatable=false)
+    private BaseUser approverDetails;
+
+
 }

@@ -48,6 +48,10 @@ public class PlotInputDTO {
 	// private String processInstanceId;
 	private LocalDate documentDate;
     private InputInstanceDTO inputInstanceDTO;
+    private ApproverDTO nodalOfficerDTO;
+    private ApproverDTO authenticatorDTO;
+
     // requests
     private List<RequestDTO> requests;
+
 }

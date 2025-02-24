@@ -39,6 +39,7 @@ public class PlotGenerateDTO {
 	private String currentStatus;
 	// private String publishedDocumentUrl;
 	// private String processInstanceId;
+    private ApproverDTO approverDTO;
     private ApplicationInstanceDTO applicationInstanceDTO;
 }
 

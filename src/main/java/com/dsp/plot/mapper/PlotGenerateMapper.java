@@ -1,6 +1,7 @@
 package com.dsp.plot.mapper;
 
 import com.dsp.plot.dto.ApplicationInstanceDTO;
+import com.dsp.plot.dto.ApproverDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.dto.RequestDTO;
@@ -40,7 +41,7 @@ public class PlotGenerateMapper {
     }
 
     public static PlotGenerateDTO toDTO(PlotGenerate entity) {
-        return PlotGenerateDTO.builder()
+        PlotGenerateDTO dto = PlotGenerateDTO.builder()
                 .lokSabhaNo(entity.getLokSabhaNo())
                 .lokSabhaSessionNo(entity.getLokSabhaSessionNo())
                 .rajyaSabhaSessionNo(entity.getRajyaSabhaSessionNo())
@@ -74,6 +75,20 @@ public class PlotGenerateMapper {
                         .rajyaSabhaSession(entity.getRajyaSabhaSession())
                         .build())
                 .build();
+        if (entity.getApproverDetails() != null) {
+            String designation = "";
+            if (entity.getApproverDetails().getDesignation() != null) {
+                designation = entity.getApproverDetails().getDesignation().getAbbr();
+            }
+            dto.setApproverDTO(ApproverDTO.builder()
+                    .id(entity.getApproverDetails().getId())
+                    .username(entity.getApproverDetails().getFirstName() + " "
+                            + entity.getApproverDetails().getLastName())
+                    .designation(designation)
+            .build());
+        }
+                
+                return dto;
     }
 
     public static PlotIndex toEntityIndex(PlotIndexDTO dto) {
