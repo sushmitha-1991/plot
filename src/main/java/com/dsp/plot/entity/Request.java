@@ -22,7 +22,7 @@ import lombok.Setter;
 @Getter
 @Entity
 @Table(name = "plot_request",schema = "plot")
-public class Request {
+public class Request extends Auditable{
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "plotrequest_seq")
     @SequenceGenerator(name = "plotrequest_seq", sequenceName = "plotrequest_seq", allocationSize = 1)

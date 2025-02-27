@@ -1,12 +1,11 @@
 package com.dsp.plot.service.impl;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.hibernate.persister.collection.CollectionPersister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,8 @@ import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotIndex;
 import com.dsp.plot.entity.PlotInput;
-import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.entity.specification.PlotGenerateSpec;
+import com.dsp.plot.entity.specification.PlotIndexSpec;
 import com.dsp.plot.exception.CustomBadRequestException;
 import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.NoDataFoundException;
@@ -144,7 +143,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
                     entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
                 }
-                Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository.findById(entity.getRajyaSabhaSessionNo());
+                Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
+                        .findById(entity.getRajyaSabhaSessionNo());
                 if (optionalSession == null) {
                     throw new RuntimeException(
                             "Session No is not valid");
@@ -160,7 +160,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
                     entity.setLokSabhaSessionNo(lokSabhaSession);
                 }
-                Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository.findById(entity.getLokSabhaSessionNo());
+                Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
+                        .findById(entity.getLokSabhaSessionNo());
                 if (optionalSession == null) {
                     throw new RuntimeException(
                             "Session Number is not valid");
@@ -172,17 +173,13 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 entity.setRajyaSabhaSessionNo(null);
                 serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             }
-            System.out.println("apppppppppppppppppppp");
             if (StringUtils.isBlank(entity.getApplicationNo())) {
                 SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
-                System.out.println(applicationNo.getId());
                 entity.setApplicationNo(applicationNo.getId());
             }
             entity = plotRepository.save(entity);
             entity.setRefId(entity.getId());
             log.info("Saved PLOT attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
-            System.out.println("after generating applno");
-            System.out.println(entity);
             entity = plotRepository.save(entity);
             if (plotDTO.getPlotInputs() != null) {
                 for (Long id : plotDTO.getPlotInputs()) {
@@ -211,9 +208,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             }
             if (!StringUtils.isBlank(plotDTO.getApplicationNo())) {
                 // Get the Draft ID from draft table using appNo
-                System.out.println("before deleting draft entry");
                 String res = deleteDraftEntry(plotDTO.getApplicationNo());
-                System.out.println("res:::::::" + res);
                 // /delete-save-as-draft
             }
 
@@ -286,6 +281,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         PlotGenerateDTO dto = PlotGenerateMapper.toDTO(dBEntity);
         return dto;
     }
+    
 
     @Transactional
     @Override
@@ -305,10 +301,24 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         if (dbEntityNew.getPlotDate() != null) {
             dbEntityNew.setDocumentDate(dbEntityNew.getPlotDate());
         }
+        Field[] fields = dbEntityNew.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true); // Allow access to private fields
+                try {
+                    Object newValue = field.get(dbEntityNew);
+                    if (newValue != null) {
+                        Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
+                        entityField.setAccessible(true);
+                        entityField.set(dbEntity, newValue);
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new RuntimeException("Error updating field: " + field.getName(), e);
+                }
+            }
         // Save the updated Plot
-        dbEntityNew = plotRepository.save(dbEntityNew);
+        dbEntity=plotRepository.save(dbEntity);
         // Prepare the response DTO
-        return (PlotGenerateMapper.toDTO(dbEntityNew));
+        return (PlotGenerateMapper.toDTO(dbEntity));
     }
 
     @Override
@@ -363,30 +373,28 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     }
     // private String deleteDraftEntry(String applicationNo)
     // {
-    //     String url = draftUrl+"/delete-save-as-draft/applicationNo="+applicationNo;
-    //     String token = getTokenFromRequest();
-    //     if (token == null) {
-    //         throw new IllegalStateException("Authorization token is missing");
-    //     }
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.set("Authorization", "Bearer " + token);
-    //     headers.setContentType(MediaType.APPLICATION_JSON);
+    // String url = draftUrl+"/delete-save-as-draft/applicationNo="+applicationNo;
+    // String token = getTokenFromRequest();
+    // if (token == null) {
+    // throw new IllegalStateException("Authorization token is missing");
+    // }
+    // HttpHeaders headers = new HttpHeaders();
+    // headers.set("Authorization", "Bearer " + token);
+    // headers.setContentType(MediaType.APPLICATION_JSON);
 
-    //     HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
-    //     try {
-    //         // RestTemplate restTemplate = new RestTemplate();
-    //         return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
-    //     } catch (Exception e) {
-    //         System.err.println("Error during API call: " + e.getMessage());
-    //         throw e;
-    //     }
-    //     return "";
-    // } 
+    // HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
+    // try {
+    // // RestTemplate restTemplate = new RestTemplate();
+    // return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
+    // } catch (Exception e) {
+    // System.err.println("Error during API call: " + e.getMessage());
+    // throw e;
+    // }
+    // return "";
+    // }
     private String deleteDraftEntry(String applicationNo) {
         String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
         String token = getTokenFromRequest();
-
-        System.out.println("url:::" + url + "\n applicationNo:::::" + applicationNo + "\n token:::::::" + token);
         if (token == null) {
             throw new IllegalStateException("Authorization token is missing");
         }
@@ -412,18 +420,80 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     }
 
     @Override
-    public List<PlotIndexDTO> getIndexes() {
-        // TODO Auto-generated method stub
-        List<PlotIndexDTO> responseDto = plotIndexRepo.findAll().stream()
-                .map(PlotGenerateMapper::toIndexDTO)
-                .collect(Collectors.toList());
-        return responseDto;
+    public List<PlotIndexDTO> getIndexes(Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
+            LocalDate startDate, LocalDate endDate, String status, String reportName, Long createdBy) {
+        Specification<PlotIndex> spec = Specification.where(PlotIndexSpec.isActive(true));
+        if (startDate != null || endDate != null) {
+            // spec = spec.and(PlotIndexSpec.hasDateBetween(startDate, endDate));
+        }
+        if (reportName != null) {
+            spec = spec.and(PlotIndexSpec.hasReportName(reportName));
+        }
+        if (createdBy != null) {
+            spec = spec.and(PlotIndexSpec.hasCreatedBy(createdBy));
+        }
+        if (lokSabhaNo != null) {
+            spec = spec.and(PlotIndexSpec.hasLokSabhaNo(lokSabhaNo));
+        }
+        if (lokSabhaSessionNo != null) {
+            spec = spec.and(PlotIndexSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
+        }
+        if (rajyaSabhaSessionNo != null) {
+            spec = spec.and(PlotIndexSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
+        }
+        List<PlotIndex> response = plotIndexRepo.findAll(spec);
+        
+        List<PlotIndexDTO> responseDTO=new ArrayList<>();
+        for(PlotIndex entity:response)
+        {
+            responseDTO.add(PlotGenerateMapper.toIndexDTO(entity));
+        }
+        return responseDTO;
     }
 
     @Override
     public PlotIndexDTO saveIndex(PlotIndexDTO dto) {
         // TODO Auto-generated method stub
         PlotIndex entity = PlotGenerateMapper.toEntityIndex(dto);
+        SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
+        serialNumberRequest.setAppId(entity.getApplicationId());
+        Long houseId = getHouseId();
+        if (houseId == 1) {
+            if (entity.getRajyaSabhaSessionNo() == null) {
+                Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
+                entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
+            }
+            Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
+                    .findById(entity.getRajyaSabhaSessionNo());
+            if (optionalSession == null) {
+                throw new RuntimeException(
+                        "Session No is not valid");
+            }
+            MastersRajyaSabha session = optionalSession.get();
+            entity.setLokSabhaSessionNo(null);
+            entity.setLokSabhaNo(null);
+            serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
+
+        } else if (houseId == 2) {
+            if (entity.getLokSabhaSessionNo() == null) {
+                Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
+                entity.setLokSabhaSessionNo(lokSabhaSession);
+            }
+            Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
+                    .findById(entity.getLokSabhaSessionNo());
+            if (optionalSession == null) {
+                throw new RuntimeException(
+                        "Session Number is not valid");
+            }
+            MastersLokSabhaSession session = optionalSession.get();
+            entity.setLokSabhaNo(session.getLokSabha().getId());
+            entity.setRajyaSabhaSessionNo(null);
+            serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
+        }
+
+        SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
+        entity.setRefNo(applicationNo.getId());
+        entity = plotIndexRepo.save(entity);
         PlotIndexDTO responseDto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(entity.getId()).get());
         return responseDto;
     }
@@ -434,6 +504,13 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(id).get());
         return dto;
     }
+    // @Override
+    // public List<PlotIndexDTO> getIndexByReportName(String reportName) {
+    // // TODO Auto-generated method stub
+    // List<PlotIndexDTO> dto =
+    // PlotGenerateMapper.toIndexDTO(plotIndexRepo.findByReportName(reportName));
+    // return dto;
+    // }
 
     @Override
     public List<PlotGenerateDTO> getAll() {

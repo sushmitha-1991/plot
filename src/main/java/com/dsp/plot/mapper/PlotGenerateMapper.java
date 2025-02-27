@@ -101,6 +101,9 @@ public class PlotGenerateMapper {
                 .status(dto.getStatus())
                 .refNo(dto.getRefNo())
                 .content(dto.getContent())
+                .indexDetails(dto.getIndexDetails())
+                .applicationId(dto.getApplicationId())
+                .reportName(dto.getReportName())
                 .build();
     }
 
@@ -114,6 +117,9 @@ public class PlotGenerateMapper {
                 .status(entity.getStatus())
                 .refNo(entity.getRefNo())
                 .content(entity.getContent())
+                .applicationId(entity.getApplicationId())
+                .reportName(entity.getReportName())
+                .indexDetails(entity.getIndexDetails())
                 .build();
     }
 

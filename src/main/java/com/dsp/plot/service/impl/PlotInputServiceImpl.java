@@ -1,10 +1,12 @@
 package com.dsp.plot.service.impl;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,17 +31,14 @@ import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.PlotDateChart;
-import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
-import com.dsp.plot.entity.feignclient.BearerClient;
-import com.dsp.plot.entity.specification.PlotGenerateSpec;
+// import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.entity.specification.PlotInputSpec;
-import com.dsp.plot.exception.ResourceNotFoundException; // TODO: Correct package may need to be set
-import com.dsp.plot.mapper.PlotGenerateMapper;
+import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
-import com.dsp.plot.repository.MasterLSSRepository;
+import com.dsp.plot.repository.MasterLSSRepository; // TODO: Correct package may need to be set
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MyUserRepository;
 import com.dsp.plot.repository.PlotDateChartRepository;
@@ -72,8 +71,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private MyUserRepository userRepository;
     @Autowired
     private RestTemplate restTemplate;
-    @Autowired
-    private BearerClient bearerClient;
+    // @Autowired
+    // private BearerClient bearerClient;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
     // private final PlotInputMapper mapper;
     @Autowired
@@ -84,7 +83,6 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Transactional
     @Override
     public PlotInputDTO save(PlotInputDTO plotinputDTO) {
-
         if (plotinputDTO.getStatus() == null) {
             plotinputDTO.setStatus("In Progress");
         }
@@ -109,9 +107,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             Long houseId = getHouseId();
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
-
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
-                    
                     entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
                 }
                 Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository.findById(entity.getRajyaSabhaSessionNo());
@@ -126,7 +122,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 entity.setLokSabhaNo(null);
                 entity.setPendingAt("Table Office");
                 serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
-
             } else if (houseId == 2) {
                 if (entity.getLokSabhaSessionNo() == null) {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
@@ -146,11 +141,9 @@ public class PlotInputServiceImpl implements PlotInputService {
                 entity.setPendingAt("Table Office A");
                 serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             }
-            System.out.println("apppppppppppppppppppp");
-            System.out.println(serialNumberRequest);
+          
             if (StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
                 SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
-                System.out.println(applicationNo.getId());
                 entity.setApplicationNo(applicationNo.getId());
                 entity.setRefNo(applicationNo.getId());
             }
@@ -169,31 +162,25 @@ public class PlotInputServiceImpl implements PlotInputService {
             throw e;
         }
     }
+    @Override
+    public List<RequestDTO> getAllRequestsByPlotId(Long plotId) {
+        List<RequestDTO> dtoList = new ArrayList<>();
 
-    // public String generateApplicationNo(Long id, Long session, Boolean saveAsDraft) {
-    //     if (saveAsDraft) {
-    //         return "Ref-DPLOT" + id;
-    //     } else {
-    //         return "Ref-PLOT" + id;
-    //     }
-    // }
+        try {
+            dtoList = requestRepository.findByPlotInputId(plotId)
+            .stream().map(RequestMapper::toDTO)
+            .collect(Collectors.toList());
+            return dtoList;
+        } catch (Exception e) {
+            log.error("Error in fetching requests", e);
+        }
+        return dtoList;
+    }
     @Override
     public List<RequestDTO> getAllRequests() {
         List<RequestDTO> dtoList = new ArrayList<>();
         try {
             List<Request> entities = requestRepository.findAll();
-            for (Request dbEntity : entities) {
-                PlotInput input = plotinputRepository.findById(dbEntity.getPlotInputId()).orElse(null);
-                if (input != null) {
-                    PlotInputDTO plotDto = PlotInputMapper.toDTO(input);
-                    RequestDTO dto = RequestMapper.toDTO(dbEntity);
-                    dto.setPlotDetails(plotDto);
-                    dtoList.add(dto);
-                } else {
-                    log.warn("No PlotInput found for PlotInputId: {}", dbEntity.getPlotInputId());
-                }
-
-            }
             log.debug("Returning list of requests: {}", dtoList);
 
             return dtoList;
@@ -266,6 +253,16 @@ public class PlotInputServiceImpl implements PlotInputService {
         return dto;
     }
 
+    @Override
+    public RequestDTO getRequestById(Long id) {
+        log.debug("Entering getById with id: {}", id);
+        Request dBEntity = requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Request not found with id: " + id));
+        log.debug("Fetched Request by id: {}", dBEntity);
+        RequestDTO dto = RequestMapper.toDTO(dBEntity);
+        return dto;
+    }
+
     @Transactional
     @Override
     public PlotInputDTO update(Long id, PlotInputDTO plotinputDTO) {
@@ -276,12 +273,26 @@ public class PlotInputServiceImpl implements PlotInputService {
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
         PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
-        dbEntity.setId(id);
+
+         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true); // Allow access to private fields
+                try {
+                    Object newValue = field.get(dbEntityNew);
+                    if (newValue != null) {
+                        Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
+                        entityField.setAccessible(true);
+                        entityField.set(dbEntity, newValue);
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new RuntimeException("Error updating field: " + field.getName(), e);
+                }
+            }
 
         // Save the updated PlotInput
-        dbEntityNew = plotinputRepository.save(dbEntityNew);
+        dbEntity = plotinputRepository.save(dbEntity);
         // Prepare the response DTO
-        return (PlotInputMapper.toDTO(dbEntityNew));
+        return (PlotInputMapper.toDTO(dbEntity));
     }
 
     @Override
@@ -327,8 +338,6 @@ public class PlotInputServiceImpl implements PlotInputService {
     public PlotDateChartDTO getDateChartById(Long id) {
         // TODO Auto-generated method stub
         PlotDateChart savedEntity = plotDateChartRepository.findById(id).get();
-        System.out.println("@@@@@@@@@@");
-        System.out.println();
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
     }
 

@@ -75,4 +75,9 @@ public class ApplicationInstance extends Auditable{
 	@Column(name = "other_info", columnDefinition = "jsonb")
 	private Map<String, Object> otherInfo;
 
+	@Column(name = "html_content_en", columnDefinition = "text")
+	private String htmlContentEnglish;
+	@Column(name = "html_content_hi", columnDefinition = "text")
+	private String htmlContentHindi;
+
 }

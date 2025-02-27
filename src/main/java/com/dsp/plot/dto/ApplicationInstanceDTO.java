@@ -1,6 +1,7 @@
 package com.dsp.plot.dto;
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +22,7 @@ private LocalDate documentDate;
  private String lokSabhaSession;
     private String lokSabhaSessionNumber;
     private String rajyaSabhaSession;
+    private String htmlContentEnglish;
+	private String htmlContentHindi;
 //  private String processInstanceId;
 }

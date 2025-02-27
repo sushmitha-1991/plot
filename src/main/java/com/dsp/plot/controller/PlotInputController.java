@@ -123,20 +123,6 @@ public class PlotInputController {
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
-        // @Operation(summary = "Generate Application No", description = "Generate Application No.")
-        // @ApiResponses(value = {
-        //                 @ApiResponse(responseCode = "200", description = "ApplicationNo generated successfully"),
-        //                 @ApiResponse(responseCode = "404", description = "Id not found"),
-        //                 @ApiResponse(responseCode = "500", description = "Internal server error") })
-        // @PostMapping("/generateNo")
-        // public String generateApplicationNo(@RequestBody GenerateDTO dto) {
-        //         if (dto.getDraftFlag() == null || (!dto.getDraftFlag())) {
-        //                 return "PLOT" + dto.getId() + "";
-        //         } else {
-        //                 return "DPLOT" + dto.getId() + "";
-        //         }
-        // }
-
         @Operation(summary = "save request", description = "Raise Requests.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "raised request successfully"),
@@ -148,6 +134,17 @@ public class PlotInputController {
                 true,"Request raised successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
+        @GetMapping("/getRequest/{id}")
+        public ResponseEntity<GenericResponse<RequestDTO>> getRequestById(@PathVariable Long id) {
+
+                RequestDTO fetchedEntity = plotinputService.getRequestById(id);
+
+                GenericResponse<RequestDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Retrieved PlotInput By Id", fetchedEntity);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
 
         @Operation(summary = "Save Date Chart ", description = "Adding Date Chart in Plot")
         @ApiResponses(value = {
@@ -178,9 +175,9 @@ public class PlotInputController {
                         @ApiResponse(responseCode = "200", description = "PlotDoc retrieved successfully"),
                         @ApiResponse(responseCode = "404", description = "PlotDoc not found"),
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
-        @GetMapping("/getAllRequests")
-        public ResponseEntity<GenericResponse<List<RequestDTO>>> getAllRequests() {
-                List<RequestDTO> response=plotinputService.getAllRequests();
+        @GetMapping("/getAllRequests/{plotId}")
+        public ResponseEntity<GenericResponse<List<RequestDTO>>> getAllRequests(@PathVariable Long plotId) {
+                List<RequestDTO> response=plotinputService.getAllRequestsByPlotId(plotId);
                 GenericResponse<List<RequestDTO>> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
                 true,"Requests retrieved successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);

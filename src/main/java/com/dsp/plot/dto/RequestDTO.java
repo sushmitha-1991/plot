@@ -19,5 +19,5 @@ public class RequestDTO {
     private Long plotInputId;
     private String request;
 
-    private PlotInputDTO plotDetails;
+    // private PlotInputDTO plotDetails;
 }

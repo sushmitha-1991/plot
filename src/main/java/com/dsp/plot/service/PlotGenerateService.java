@@ -23,13 +23,16 @@ public interface PlotGenerateService {
     
     PlotGenerateDTO update(Long id, PlotGenerateDTO plotDTO);
 
+
     void delete(Long id);
     
 	DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
 
-    List<PlotIndexDTO> getIndexes();
+    List<PlotIndexDTO> getIndexes(Long lokSabhaNo,Long lokSabhaSessionNo,Long rajyaSabhaSessionNo,
+    LocalDate startDate,LocalDate endDate,String status,String reportName,Long createdBy);
 
     PlotIndexDTO saveIndex(PlotIndexDTO dto);
 
     PlotIndexDTO getIndexById(Long id);
+
 }

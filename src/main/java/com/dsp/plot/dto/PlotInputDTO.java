@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.entity.Ministries;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,6 +41,7 @@ public class PlotInputDTO {
     private String nodalOfficerPhoneNo;
     private String nodalOfficerMobileNo;
     private LocalDate prevPaperLaidDate;
+    private String content;
     //Input Instances DTO
 	private Long applicationId; // Reference to Application ID
 	private String applicationNo;
@@ -50,7 +53,7 @@ public class PlotInputDTO {
     private InputInstanceDTO inputInstanceDTO;
     private ApproverDTO nodalOfficerDTO;
     private ApproverDTO authenticatorDTO;
-
+    private Ministries ministies;
     // requests
     private List<RequestDTO> requests;
 

@@ -1,8 +1,14 @@
 package com.dsp.plot.entity;
 
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.envers.Audited;
 
+import com.dsp.plot.util.JsonMapConverter;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,10 +48,19 @@ public class PlotIndex extends Auditable {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "application_id", nullable = false)
+    private Long applicationId;
+    @Column(name = "report_name", nullable = false)
+    private String reportName;
+
     @Column(name = "ref_no")
     private String refNo;
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
+@Convert(converter = JsonMapConverter.class)
+    @Column(name = "index_details", columnDefinition = "JSONB")
+    private List<Map<String,Object>> indexDetails;
+
 
 }

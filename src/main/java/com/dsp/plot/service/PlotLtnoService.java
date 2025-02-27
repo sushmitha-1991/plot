@@ -1,0 +1,32 @@
+package com.dsp.plot.service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.dsp.plot.dto.DocumentDTO;
+import com.dsp.plot.dto.PlotDateChartDTO;
+import com.dsp.plot.dto.PlotInputDTO;
+import com.dsp.plot.dto.PlotLtnoDto;
+import com.dsp.plot.dto.RequestDTO;
+import com.dsp.plot.entity.PlotDateChart;
+
+@Service
+public interface PlotLtnoService {
+
+    PlotLtnoDto save(PlotLtnoDto plotLtnoDto);
+
+    List<PlotLtnoDto> getAll();
+
+    List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo,
+            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+            String status);
+
+    PlotLtnoDto getById(Long id);
+
+    PlotLtnoDto update(Long id, PlotLtnoDto plotLtnoDto);
+
+    void delete(Long id);
+
+}

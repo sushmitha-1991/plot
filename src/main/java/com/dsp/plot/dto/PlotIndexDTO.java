@@ -1,6 +1,9 @@
 package com.dsp.plot.dto;
 
 
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.envers.Audited;
 
 import jakarta.persistence.Column;
@@ -15,7 +18,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-
 @Data
 @Audited
 @NoArgsConstructor
@@ -27,8 +29,11 @@ public class PlotIndexDTO {
     private Long lokSabhaSessionNo;
     private Long rajyaSabhaSessionNo;
     private Boolean draftFlag;
+    private String reportName;
+    private Long applicationId;
     private String status;
     private String refNo;
     private String content;
+    private List<Map<String,Object>> indexDetails;
 
 }
