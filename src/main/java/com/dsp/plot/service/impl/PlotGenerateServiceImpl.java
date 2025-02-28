@@ -87,10 +87,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             Specification<PlotGenerate> spec = Specification.where(null);
             spec = spec.and(PlotGenerateSpec.isActive(true));
             spec = spec.and(PlotGenerateSpec.hasDraftStatus(false));
+            System.out.println("@@@@@@@@");
+            System.out.println(dateOfDoc);
             if (dateOfDoc == null) {
                 dateOfDoc = LocalDate.now();
             }
-            if (doc.equalsIgnoreCase("PLOT") || doc == "2") {
+            if (doc.equalsIgnoreCase("PLOT") ) {
                 entitys = plotRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
                 log.info(" Doc Found on Specified Date:{}", entitys);
             }
@@ -98,7 +100,10 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 log.info("No Doc Found on Specified Date");
                 throw new NoDataFoundException("No Doc Found On Specified Date");
             }
+            System.out.println("&&&&&&&&&&&&");
+            System.out.println(entitys);
             PlotGenerate entity = entitys.get(0);
+            System.out.println(entity);
             log.info("Doc Found on Specified Date:{}", entity);
             return DocumentDTO.builder()
                     .id(entity.getId())

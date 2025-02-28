@@ -71,6 +71,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private MyUserRepository userRepository;
     @Autowired
     private RestTemplate restTemplate;
+    @Value("${feign.client.bearer.url}")
+    private String sansadUrl;
     // @Autowired
     // private BearerClient bearerClient;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
@@ -110,13 +112,13 @@ public class PlotInputServiceImpl implements PlotInputService {
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
                     entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
                 }
-                Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository.findById(entity.getRajyaSabhaSessionNo());
-                if(optionalSession==null)
-                {
+                Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
+                        .findById(entity.getRajyaSabhaSessionNo());
+                if (optionalSession == null) {
                     throw new RuntimeException(
-                        "Session No is not present in Session List");
+                            "Session No is not present in Session List");
                 }
-                MastersRajyaSabha session=optionalSession.get();
+                MastersRajyaSabha session = optionalSession.get();
                 entity.setRajyaSabhaSession(session.getSessionNumber());
                 entity.setLokSabhaSessionNo(null);
                 entity.setLokSabhaNo(null);
@@ -127,13 +129,13 @@ public class PlotInputServiceImpl implements PlotInputService {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
                     entity.setLokSabhaSessionNo(lokSabhaSession);
                 }
-                Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository.findById(entity.getLokSabhaSessionNo());
-                if(optionalSession==null)
-                {
+                Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
+                        .findById(entity.getLokSabhaSessionNo());
+                if (optionalSession == null) {
                     throw new RuntimeException(
-                        "Session No is not present in Session List");
+                            "Session No is not present in Session List");
                 }
-                MastersLokSabhaSession session=optionalSession.get();
+                MastersLokSabhaSession session = optionalSession.get();
                 entity.setLokSabhaSessionNumber(session.getSessionNumber());
                 entity.setLokSabhaNo(session.getLokSabha().getId());
                 entity.setLokSabhaSession(session.getLokSabha().getLokSabhaNumber());
@@ -141,7 +143,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 entity.setPendingAt("Table Office A");
                 serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             }
-          
+
             if (StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
                 SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
                 entity.setApplicationNo(applicationNo.getId());
@@ -162,20 +164,22 @@ public class PlotInputServiceImpl implements PlotInputService {
             throw e;
         }
     }
+
     @Override
     public List<RequestDTO> getAllRequestsByPlotId(Long plotId) {
         List<RequestDTO> dtoList = new ArrayList<>();
 
         try {
             dtoList = requestRepository.findByPlotInputId(plotId)
-            .stream().map(RequestMapper::toDTO)
-            .collect(Collectors.toList());
+                    .stream().map(RequestMapper::toDTO)
+                    .collect(Collectors.toList());
             return dtoList;
         } catch (Exception e) {
             log.error("Error in fetching requests", e);
         }
         return dtoList;
     }
+
     @Override
     public List<RequestDTO> getAllRequests() {
         List<RequestDTO> dtoList = new ArrayList<>();
@@ -200,7 +204,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         List<PlotInputDTO> dtoList = new ArrayList<>();
         List<PlotInput> entitys;
         // if (draftStatus == null) {
-        //     draftStatus = false;
+        // draftStatus = false;
         // }
         if (isActive == null) {
             isActive = true;
@@ -230,8 +234,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     dtoList.add(dto);
                 }
-            } else if (houseId == 2) 
-            {
+            } else if (houseId == 2) {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     dtoList.add(dto);
@@ -243,6 +246,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
     }
+
     @Override
     public PlotInputDTO getById(Long id) {
         log.debug("Entering getById with id: {}", id);
@@ -274,20 +278,20 @@ public class PlotInputServiceImpl implements PlotInputService {
         // are updated
         PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
 
-         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
-            for (Field field : fields) {
-                field.setAccessible(true); // Allow access to private fields
-                try {
-                    Object newValue = field.get(dbEntityNew);
-                    if (newValue != null) {
-                        Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
-                        entityField.setAccessible(true);
-                        entityField.set(dbEntity, newValue);
-                    }
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new RuntimeException("Error updating field: " + field.getName(), e);
+        Field[] fields = dbEntityNew.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true); // Allow access to private fields
+            try {
+                Object newValue = field.get(dbEntityNew);
+                if (newValue != null) {
+                    Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
+                    entityField.setAccessible(true);
+                    entityField.set(dbEntity, newValue);
                 }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException("Error updating field: " + field.getName(), e);
             }
+        }
 
         // Save the updated PlotInput
         dbEntity = plotinputRepository.save(dbEntity);
@@ -339,6 +343,14 @@ public class PlotInputServiceImpl implements PlotInputService {
         // TODO Auto-generated method stub
         PlotDateChart savedEntity = plotDateChartRepository.findById(id).get();
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
+    }
+
+    @Override
+    public List<PlotDateChartDTO> getAllDateCharts() {
+        List<PlotDateChartDTO> dtos = new ArrayList<>();
+        String url=sansadUrl+"/integration-gateway/question-branch-api/get-question-chart?lsNo=18&sesNo=2";
+        
+        return dtos;
     }
 
     // Generate Application No Functionality

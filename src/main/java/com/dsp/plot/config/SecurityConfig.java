@@ -67,16 +67,13 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		log.debug("Configuring SecurityFilterChain");
-
-		http.authorizeHttpRequests((authz) -> authz.requestMatchers("/v3/api-docs/**", "/swagger-ui/**",
+		http.authorizeHttpRequests((authz) -> authz.requestMatchers("plot-input/**","/v3/api-docs/**", "/swagger-ui/**",
 						"/swagger-ui.html"
 				).permitAll().anyRequest().authenticated())
 				.csrf(AbstractHttpConfigurer::disable).authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
 		http.exceptionHandling((ex) -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
 				.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
 		log.debug("SecurityFilterChain configured successfully");
 		return http.build();
 	}
