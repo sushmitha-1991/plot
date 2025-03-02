@@ -36,7 +36,9 @@ public interface PlotInputService {
     RequestDTO getRequestById(Long id);
         // DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
      PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
-
+     List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
+     Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+     String status);
      PlotDateChartDTO getDateChartById(Long id);
      List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo,String lokSabhaSessionNo,String rajyaSabhaNo);
      }

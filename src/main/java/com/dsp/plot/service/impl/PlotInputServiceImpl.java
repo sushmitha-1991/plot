@@ -41,6 +41,7 @@ import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
 import com.dsp.plot.entity.PlotDateChart;
+import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.specification.PlotInputSpec;
@@ -52,6 +53,7 @@ import com.dsp.plot.repository.MinistriesRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MyUserRepository;
 import com.dsp.plot.repository.PlotDateChartRepository;
+import com.dsp.plot.repository.PlotHistoryRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
@@ -72,6 +74,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     private HttpServletRequest httpRequest;
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
+
     @Autowired
     private MinistriesRepository ministriesRepository;
     @Autowired
@@ -79,6 +82,9 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     @Autowired
     private PlotDateChartRepository plotDateChartRepository;
+        @Autowired
+    private PlotHistoryRepository plotHistoryRepository;
+
     @Autowired
     private MyUserRepository userRepository;
     @Autowired
@@ -104,9 +110,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             plotinputDTO.setStatus("In Progress");
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
+        System.out.println("SSSSSSSSS");
         if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
                     plotinputDTO.getProposedDateOfLaying());
+                    System.out.println("@@@@@@@@");
             if (daysDifference < 2) {
                 log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
                 log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
@@ -121,7 +129,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             // Save PlotInput entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
-
             Long houseId = getHouseId();
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
@@ -263,6 +270,64 @@ public class PlotInputServiceImpl implements PlotInputService {
         return dtoList;
     }
 
+    @Override
+    public List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
+            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
+            String status) {
+        log.debug("Entering getAll Plots");
+        List<PlotInputDTO> dtoList = new ArrayList<>();
+        List<PlotInput> entitys;
+        // if (draftStatus == null) {
+        // draftStatus = false;
+        // }
+        if (isActive == null) {
+            isActive = true;
+        }
+        Specification<PlotInput> spec = Specification.where(null);
+        spec = spec.and(PlotInputSpec.isActive(isActive));
+        if (draftStatus != null) {
+            spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
+        }
+        if (lokSabhaSessionNo != null) {
+            spec = spec.and(PlotInputSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
+        }
+        if (rajyaSabhaSessionNo != null) {
+            spec = spec.and(PlotInputSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
+        }
+        if (startDate != null || endDate != null) {
+            spec = spec.and(PlotInputSpec.hasDateBetween(startDate, endDate));
+        }
+        if (status != null) {
+            spec = spec.and(PlotInputSpec.hasStatus(status));
+        }
+        entitys = plotinputRepository.findAll(spec);
+        Long houseId = getHouseId();
+        for (PlotInput entity : entitys) {
+
+            if (houseId == 1) {
+                if (entity.getRajyaSabhaSessionNo() != null) {
+                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
+                    if(history.isPresent())
+                    {
+                        dto.setContent(history.get().getAddedText());
+                    }
+                    dtoList.add(dto);
+                }
+            } else if (houseId == 2) {
+                if (entity.getLokSabhaSessionNo() != null) {
+                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
+                    if(history.isPresent())
+                    {
+                        dto.setContent(history.get().getAddedText());
+                    }
+                    dtoList.add(dto);
+                }
+            }
+        }
+        return dtoList;
+    }
     @Override
     public PlotInputDTO getById(Long id) {
         log.debug("Entering getById with id: {}", id);

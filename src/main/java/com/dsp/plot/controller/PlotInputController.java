@@ -73,6 +73,29 @@ public class PlotInputController {
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        @Operation(summary = "Get all PlotInputs", description = "Retrieves a list of all PlotInputs.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "PlotInputs retrieved successfully"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @GetMapping("/get-plot-inputs")
+        public ResponseEntity<GenericResponse<List<PlotInputDTO>>> getAllPlotInputsHistories(
+                @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Boolean draftStatus,
+            @RequestParam(required = false) Long lokSabhaNo,
+            @RequestParam(required = false) Long lokSabhaSessionNo,
+            @RequestParam(required = false) Long rajyaSabhaSessionNo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String status) {
+
+                List<PlotInputDTO> fectchedEntities = plotinputService.getHistories(isActive,draftStatus,lokSabhaNo,lokSabhaSessionNo,
+                rajyaSabhaSessionNo,startDate,endDate,status);
+
+                GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "PlotInputs retrieved successfully", fectchedEntities);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
         @Operation(summary = "Get PlotInput By Id", description = "Retrieve PlotInput by its Id.")
         @ApiResponses(value = {
@@ -106,6 +129,35 @@ public class PlotInputController {
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+
+        @Operation(summary = "Update PlotInput", description = "Updates a PlotInput by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "PlotInput updated successfully"),
+                        @ApiResponse(responseCode = "404", description = "PlotInput not found"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @PutMapping("/updatedAtCreator/{id}")
+        public ResponseEntity<GenericResponse<PlotInputDTO>> updateAtCreator(@PathVariable Long id,
+                        @RequestBody PlotInputDTO plotinputDTO) {
+if(plotinputDTO.getStatus().equalsIgnoreCase("returned"))
+               {
+        
+                PlotInputDTO updatedEntity = plotinputService.update(id, plotinputDTO);
+
+                GenericResponse<PlotInputDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "PlotInput updated successfully", updatedEntity);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+               }
+               else
+               {
+                PlotInputDTO updatedEntity = plotinputService.update(id, plotinputDTO);
+                GenericResponse<PlotInputDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "PlotInput updated successfully", updatedEntity);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+               }
+
+        }
+
 
         @Operation(summary = "Delete a PlotInput by ID", description = "Deletes a specific PlotInput by its ID.")
         @ApiResponses(value = {
