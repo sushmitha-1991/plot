@@ -38,5 +38,5 @@ public interface PlotInputService {
      PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
 
      PlotDateChartDTO getDateChartById(Long id);
-     List<PlotDateChartDTO> getAllDateCharts();
+     List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo,String lokSabhaSessionNo,String rajyaSabhaNo);
      }

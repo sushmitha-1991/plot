@@ -66,8 +66,11 @@ public class PlotDateChart extends Auditable {
     @Column(name = "dates", columnDefinition = "JSONB")
     private List<Map<String, Object>> dates;
     @ManyToOne
+    @JoinColumn(name = "lok_sabha_no", referencedColumnName = "id",insertable=false,updatable=false)
+    private MastersLokSabha lokSabhaDetails;
+    @ManyToOne
     @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id", insertable = false, updatable = false)
-    private MastersLokSabhaSession lokSabhSessionDetails;
+    private MastersLokSabhaSession lokSabhaSessionDetails;
     @ManyToOne
     @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id", insertable = false, updatable = false)
     private MastersRajyaSabha rajyaSabhaSessionDetails;

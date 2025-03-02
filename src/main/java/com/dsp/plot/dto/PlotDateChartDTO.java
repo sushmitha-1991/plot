@@ -1,8 +1,8 @@
 package com.dsp.plot.dto;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+
+import com.dsp.plot.entity.Ministries;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,5 +22,9 @@ public class PlotDateChartDTO {
     private Long inputId;
     private String groupName;
     private List<Map<String, Object>> dates;
+    private Ministries ministies;
+    private MastersLokSabhaDTO lokSabhaDTO;
+    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO  rajyaSabhaSessionDTO;
 
 }

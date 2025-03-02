@@ -122,8 +122,11 @@ public class PlotInput extends InputInstance {
     @JoinColumn(name = "nodal_officer_id", referencedColumnName = "id",insertable=false,updatable=false)
     private BaseUser nodalOfficerDetails;
     @ManyToOne
+    @JoinColumn(name = "lok_sabha_no", referencedColumnName = "id",insertable=false,updatable=false)
+    private MastersLokSabha lokSabhaDetails;
+    @ManyToOne
     @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
-    private MastersLokSabhaSession lokSabhSessionDetails;
+    private MastersLokSabhaSession lokSabhaSessionDetails;
     @ManyToOne
     @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
     private MastersRajyaSabha rajyaSabhaSessionDetails;

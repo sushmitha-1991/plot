@@ -2,49 +2,60 @@ package com.dsp.plot.service.impl;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
+import com.dsp.plot.dto.QuesBranchApiDto;
 import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
+import com.dsp.plot.entity.Ministries;
 import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
-// import com.dsp.plot.entity.feignclient.BearerClient;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
-import com.dsp.plot.repository.MasterLSSRepository; // TODO: Correct package may need to be set
+import com.dsp.plot.repository.MasterLSSRepository;
+import com.dsp.plot.repository.MinistriesRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MyUserRepository;
 import com.dsp.plot.repository.PlotDateChartRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
+import com.dsp.plot.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -61,7 +72,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private HttpServletRequest httpRequest;
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
-
+    @Autowired
+    private MinistriesRepository ministriesRepository;
     @Autowired
     private MasterLSSRepository masterLSSRepository;
 
@@ -77,6 +89,9 @@ public class PlotInputServiceImpl implements PlotInputService {
     // private BearerClient bearerClient;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
     // private final PlotInputMapper mapper;
+
+    @Autowired
+    private JwtUtil jwtutil;
     @Autowired
     private PlotInputRepository plotinputRepository;
     @Autowired
@@ -106,6 +121,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // Save PlotInput entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
+
             Long houseId = getHouseId();
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
@@ -330,12 +346,9 @@ public class PlotInputServiceImpl implements PlotInputService {
     // date chart Services
     @Override
     public PlotDateChartDTO addDateChart(PlotDateChartDTO dto) {
-
         PlotDateChart savedEntity = plotDateChartRepository.save(PlotInputMapper.dateChartMapToEntity(dto));
         PlotInputMapper.dateChartMapToDTO(savedEntity);
-
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
-
     }
 
     @Override
@@ -345,12 +358,220 @@ public class PlotInputServiceImpl implements PlotInputService {
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
     }
 
+    // @Override
+    // public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String
+    // lokSabhaSessionNo, String rajyaSabhaNo) {
+    // String url = sansadUrl +
+    // "/integration-gateway/question-branch-api/get-question-chart?lsNo="
+    // + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
+
+    // //System.out.println("Requesting URL: " + url);
+
+    // String token = getTokenFromRequest();
+    // if (token == null || token.isEmpty()) {
+    // throw new RuntimeException("JWT Token is missing. Cannot proceed with the API
+    // request.");
+    // }
+
+    // HttpHeaders headers = new HttpHeaders();
+    // headers.setContentType(MediaType.APPLICATION_JSON);
+    // headers.set("Authorization", "Bearer " + token);
+
+    // HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+    // //System.out.println("Request Headers: " + headers);
+
+    // try {
+    // ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
+    // url, HttpMethod.GET, requestEntity, new
+    // ParameterizedTypeReference<List<QuesBranchApiDto>>() {});
+
+    // List<QuesBranchApiDto> quesDtoList = response.getBody();
+    // if (quesDtoList == null || quesDtoList.isEmpty()) {
+    // return Collections.emptyList();
+    // }
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+    // return quesDtoList.stream()
+    // .flatMap(quesDto -> {
+    // // Process Date List
+    // List<Map<String, Object>> datesList =
+    // Arrays.stream(quesDto.getDateOfAnsweringQuestions().split(","))
+    // .map(String::trim)
+    // .filter(date -> !date.isEmpty())
+    // .map(date -> {
+    // try {
+    // LocalDate proposedDate = LocalDate.parse(date, formatter);
+    // return Map.of(
+    // "proposedDateOfLying", proposedDate.toString(),
+    // "dateofSubmissionOfPapers", proposedDate.minusDays(2).toString(),
+    // "actualDateOfLying", proposedDate.toString()
+    // );
+    // } catch (Exception e) {
+    // System.err.println("Error parsing date: " + date + " - " + e.getMessage());
+    // return null;
+    // }
+    // })
+    // .filter(Objects::nonNull)
+    // .collect(Collectors.toList());
+
+    // return Arrays.stream(quesDto.getMinistriesDepartments().split(";"))
+    // .map(String::trim)
+    // .map(String::toUpperCase)
+    // .flatMap(ministry -> {
+    // PlotDateChartDTO dto = PlotDateChartDTO.builder()
+    // .groupName(quesDto.getGroup())
+    // .dates(datesList)
+    // .build();
+
+    // if (lokSabhaSessionNo != null) {
+    // masterLSSRepository.findById(Long.parseLong(lokSabhaSessionNo))
+    // .ifPresent(session -> {
+    // dto.setLokSabhaNo(session.getLokSabha().getId());
+    // dto.setLokSabhaSessionNo(session.getId());
+    // });
+    // } else if (rajyaSabhaNo != null) {
+    // mastersRSSRepository.findBySessionNumber(rajyaSabhaNo)
+    // .ifPresent(session -> dto.setRajyaSabhaSessionNo(session.getId()));
+    // }
+
+    // return ministriesRepository.findByMinistryName(ministry)
+    // .map(ministries -> {
+    // dto.setMinistryId(ministries.getId());
+    // PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+    // return Stream.of(plotDateChartRepository.save(entity));
+    // })
+    // .orElseGet(Stream::empty);
+    // });
+    // })
+    // .collect(Collectors.toList());
+    // } catch (HttpClientErrorException e) {
+    // System.err.println("API Error: " + e.getStatusCode() + " - " +
+    // e.getResponseBodyAsString());
+    // throw new RuntimeException("Failed to call external API", e);
+    // } catch (Exception e) {
+    // System.err.println("Unexpected Error: " + e.getMessage());
+    // throw new RuntimeException("An error occurred while processing data", e);
+    // }
+    // }
     @Override
-    public List<PlotDateChartDTO> getAllDateCharts() {
-        List<PlotDateChartDTO> dtos = new ArrayList<>();
-        String url=sansadUrl+"/integration-gateway/question-branch-api/get-question-chart?lsNo=18&sesNo=2";
-        
-        return dtos;
+    public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo) {
+        List<PlotDateChartDTO> listOfDateCharts = plotDateChartRepository.findAll()
+                .stream()
+                .map(PlotInputMapper::dateChartMapToDTO)
+                .collect(Collectors.toList());
+        if (listOfDateCharts == null || listOfDateCharts.isEmpty()) {
+            String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo);
+            listOfDateCharts = plotDateChartRepository.findAll()
+                    .stream()
+                    .map(PlotInputMapper::dateChartMapToDTO)
+                    .collect(Collectors.toList());
+            //System.out.println(":::::  After");
+            //System.out.println(listOfDateCharts);
+            return listOfDateCharts;
+        }
+        // questionBranchApi
+        return listOfDateCharts;
+    }
+
+    // question api
+    public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo) {
+        String url = sansadUrl + "/integration-gateway/question-branch-api/get-question-chart?lsNo="
+                + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
+        List<PlotDateChartDTO> responseDtos = new ArrayList<>();
+
+        //System.out.println("Requesting URL: " + url);
+        // Get the JWT token from request/session (implement this method as per your app
+        // logic)
+        String token = getTokenFromRequest();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // Add the Authorization token if available
+        if (token != null && !token.isEmpty()) {
+            headers.set("Authorization", "Bearer " + token);
+        } else {
+            throw new RuntimeException("JWT Token is missing. Cannot proceed with the API request.");
+        }
+        // Create request entity with headers
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        //System.out.println("Request Headers: " + headers);
+        try {
+            ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    new ParameterizedTypeReference<List<QuesBranchApiDto>>() {
+                    });
+            //System.out.println("API Response: " + response.getBody());
+            List<QuesBranchApiDto> quesDtoList = response.getBody();
+            for (QuesBranchApiDto quesDto : quesDtoList) {
+                // Define date format
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+                // Convert to List<Map<String, Object>>
+                List<Map<String, Object>> datesList = Arrays
+                        .stream(quesDto.getDateOfAnsweringQuestions().split(","))
+                        .map(String::trim)
+                        .map(date -> {
+                            LocalDate proposedDate = LocalDate.parse(date, formatter);
+                            LocalDate submissionDate = proposedDate.minusDays(2);
+                            // Create the JSON-like structure
+                            Map<String, Object> dateMap = new HashMap<>();
+                            dateMap.put("proposedDateOfLying", proposedDate.toString());
+                            dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
+                            dateMap.put("actualDateOfLying", "");
+                            return dateMap;
+                        })
+                        .collect(Collectors.toList());
+                String[] ministries = quesDto.getMinistriesDepartments().split(";");
+                for (String ministry : ministries) {
+                    PlotDateChartDTO dto = PlotDateChartDTO.builder()
+                            .build();
+                    dto.setDates(datesList);
+                    dto.setGroupName(quesDto.getGroup());
+                    //System.out.println("@@@@@@@@@  ministry before   " + ministry);
+                    //System.out.println(dto);
+                    if (lokSabhaSessionNo != null) {
+                        Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
+                                .findById(Long.parseLong(lokSabhaSessionNo));
+                        if (optionalSession.isPresent()) {
+                            MastersLokSabhaSession session = optionalSession.get();
+                            dto.setLokSabhaNo(session.getLokSabha().getId());
+                            dto.setLokSabhaSessionNo(session.getId());
+                        }
+                    } else if (rajyaSabhaNo != null) {
+                        Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
+                                .findBySessionNumber(rajyaSabhaNo);
+                        if (optionalSession.isPresent()) {
+                            MastersRajyaSabha session = optionalSession.get();
+                            dto.setRajyaSabhaSessionNo(session.getId());
+                        }
+                    }
+                    //System.out.println("@@@@@@@@@  ministry after ls adding   " + ministry);
+                    //System.out.println(dto);
+                    ministry = ministry.toUpperCase();
+                    ministry = ministry.trim();
+                    //System.out.println("ministry    " + ministry);
+                    Optional<Ministries> optionalMinistries = ministriesRepository
+                            .findByMinistryName(ministry);
+                    //System.out.println("optionalMinistries    " + optionalMinistries);
+                    if (optionalMinistries.isPresent()) {
+                        dto.setMinistryId(optionalMinistries.get().getId());
+                        //System.out.println("@@@@@@@@@  dto  " + optionalMinistries);
+                        //System.out.println(dto);
+                        PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+                        //System.out.println("@@@@@@@@ dto to entity " + optionalMinistries);
+                        //System.out.println(entity);
+                        entity = plotDateChartRepository.save(entity);
+                        //System.out.println("after saving");
+                        //System.out.println(entity);
+                        //System.out.println("saved Successfully");
+                    }
+
+                }
+            }
+            return "saved";
+        } catch (HttpClientErrorException e) {
+            System.err.println("API Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            throw new RuntimeException("Failed to call external API", e);
+        }
     }
 
     // Generate Application No Functionality

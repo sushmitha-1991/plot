@@ -183,10 +183,11 @@ public class PlotInputController {
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
         @GetMapping("/getDateCharts")
-        public ResponseEntity<GenericResponse<List<PlotDateChartDTO>>> getAllDateCharts() {
-                List<PlotDateChartDTO> response=plotinputService.getAllDateCharts();
-                GenericResponse<List<PlotDateChartDTO>> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
-                true,"Requests retrieved successfully.", response);
+        public ResponseEntity<GenericResponse<List<PlotDateChartDTO>>> getAllDateCharts(@RequestParam(required=false) String lokSabhaNo,
+        @RequestParam(required=false) String lokSabhaSessionNo,@RequestParam(required=false) String rajyaSabhaNo) {
+                List<PlotDateChartDTO> response=plotinputService.getAllDateCharts( lokSabhaNo, lokSabhaSessionNo,rajyaSabhaNo);
+                GenericResponse<List<PlotDateChartDTO>> responseDTO = new GenericResponse<>(HttpStatus.OK.value(),
+                true,"dateCharts retrieved successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
 }

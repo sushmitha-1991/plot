@@ -4,8 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.entity.MastersLokSabhaSession;
+import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -54,6 +58,9 @@ public class PlotInputDTO {
     private ApproverDTO nodalOfficerDTO;
     private ApproverDTO authenticatorDTO;
     private Ministries ministies;
+    private MastersLokSabhaDTO lokSabhaDTO;
+    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO  rajyaSabhaSessionDTO;
     // requests
     private List<RequestDTO> requests;
 
