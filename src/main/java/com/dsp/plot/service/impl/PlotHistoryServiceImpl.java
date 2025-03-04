@@ -21,10 +21,19 @@ public class PlotHistoryServiceImpl implements PlotHistoryService {
     private final PlotHistoryMapper mapper = PlotHistoryMapper.INSTANCE;
 
     @Override
-    public PlotHistoryDTO createPlotHistory(PlotHistoryDTO plotHistoryDTO) {
-        PlotHistory entity = mapper.dtoToEntity(plotHistoryDTO);
-        PlotHistory savedEntity = plotHistoryRepository.save(entity);
-        return mapper.entityToDto(savedEntity);
+    public List<PlotHistoryDTO> createPlotHistory(List<PlotHistoryDTO> plotHistoryDTO) {
+        List<PlotHistory> entities = plotHistoryDTO.stream()
+                .map(mapper::dtoToEntity)
+                .collect(Collectors.toList());
+        // Save all entities
+        List<PlotHistory> savedEntities = plotHistoryRepository.saveAll(entities);
+        // Convert List of saved entities back to List of DTOs
+        return savedEntities.stream()
+                .map(mapper::entityToDto)
+                .collect(Collectors.toList());
+        // PlotHistory entity = mapper.dtoToEntity(plotHistoryDTO);
+        // PlotHistory savedEntity = plotHistoryRepository.save(entity);
+        // return mapper.entityToDto(savedEntity);
     }
 
     @Override
@@ -34,6 +43,7 @@ public class PlotHistoryServiceImpl implements PlotHistoryService {
                 .map(mapper::entityToDto)
                 .collect(Collectors.toList());
     }
+
     @Override
     public List<PlotHistoryDTO> getHistories(Long plotInputId) {
         return plotHistoryRepository.findAllByPlotInputId(plotInputId)
@@ -49,21 +59,22 @@ public class PlotHistoryServiceImpl implements PlotHistoryService {
     }
 
     // @Override
-    // public PlotHistoryDTO updatePlotHistory(Long id, PlotHistoryDTO plotHistoryDTO) {
-    //     Optional<PlotHistory> optional = plotHistoryRepository.findById(id);
-    //     if (optional.isPresent()) {
-    //         PlotHistory existingEntity = optional.get();
-    //         existingEntity.setAddedText(plotHistoryDTO.getAddedText());
-    //         existingEntity.setUpdatedBy(plotHistoryDTO.getUpdatedBy());
-    //         existingEntity.setUpdatedAt(plotHistoryDTO.getUpdatedAt());
-    //         PlotHistory updatedEntity = plotHistoryRepository.save(existingEntity);
-    //         return mapper.entityToDto(updatedEntity);
-    //     }
-    //     return null;
+    // public PlotHistoryDTO updatePlotHistory(Long id, PlotHistoryDTO
+    // plotHistoryDTO) {
+    // Optional<PlotHistory> optional = plotHistoryRepository.findById(id);
+    // if (optional.isPresent()) {
+    // PlotHistory existingEntity = optional.get();
+    // existingEntity.setAddedText(plotHistoryDTO.getAddedText());
+    // existingEntity.setUpdatedBy(plotHistoryDTO.getUpdatedBy());
+    // existingEntity.setUpdatedAt(plotHistoryDTO.getUpdatedAt());
+    // PlotHistory updatedEntity = plotHistoryRepository.save(existingEntity);
+    // return mapper.entityToDto(updatedEntity);
+    // }
+    // return null;
     // }
 
     // @Override
     // public void deletePlotHistory(Long id) {
-    //     plotHistoryRepository.deleteById(id);
+    // plotHistoryRepository.deleteById(id);
     // }
 }

@@ -4,7 +4,7 @@ import com.dsp.plot.dto.PlotHistoryDTO;
 import java.util.List;
 
 public interface PlotHistoryService {
-    PlotHistoryDTO createPlotHistory(PlotHistoryDTO plotHistoryDTO);
+    List<PlotHistoryDTO> createPlotHistory(List<PlotHistoryDTO> plotHistoryDTO);
     List<PlotHistoryDTO> getAllPlotHistories();
     List<PlotHistoryDTO> getHistories(Long plotInputId);
     PlotHistoryDTO getPlotHistoryById(Long id);
