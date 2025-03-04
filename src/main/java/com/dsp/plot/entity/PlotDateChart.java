@@ -61,6 +61,9 @@ public class PlotDateChart extends Auditable {
 
     @Column(name = "input_id")
     private Long inputId;
+    
+    @Column(name="actual_date_laying")
+    private LocalDate actualDateOfLying;
 
     @Convert(converter = JsonMapConverter.class)
     @Column(name = "dates", columnDefinition = "JSONB")

@@ -63,11 +63,11 @@ public class PlotInput extends InputInstance {
     @Column(name = "ministry_id")
     private Long ministryId;
 
+
     @Column(name = "generated_plot_id")
     private Long generatedPlotId;
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
-
 
     @Convert(converter = JsonMapConverter.class)
     @Column(name = "paper_details", columnDefinition = "JSONB")
