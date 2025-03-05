@@ -97,6 +97,8 @@ public class PlotInput extends InputInstance {
 
     @Column(name = "proposed_date_of_laying")
     private LocalDate proposedDateOfLaying;
+    @Column(name = "actual_date_of_laying")
+    private LocalDate actualDateOfLaying;
 
     @Column(name = "prev_paper_laid_date")
     private LocalDate prevPaperLaidDate;
@@ -133,4 +135,11 @@ public class PlotInput extends InputInstance {
     @ManyToOne
     @JoinColumn(name = "ministry_id", referencedColumnName = "id",insertable=false,updatable=false)
     private Ministries ministries;
+    @ManyToOne
+    @JoinColumn(name = "paper_type_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private MasterCode PaperTypes;
+    @ManyToOne
+    @JoinColumn(name = "department_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private Departments departments;
+
    }

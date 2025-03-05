@@ -1,9 +1,12 @@
 package com.dsp.plot.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.entity.Departments;
+import com.dsp.plot.entity.MasterCode;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
@@ -37,30 +40,34 @@ public class PlotInputDTO {
     private String remarks;
     private String refNo;
     private Long generatePlotId;
-    private List<Map<String,Object>> paperDetails;
-    private List<Map<String,Object>> documents;
+    private List<Map<String, Object>> paperDetails;
+    private List<Map<String, Object>> documents;
     private LocalDate proposedDateOfLaying;
+    private LocalDate actualDateOfLaying;
     private Long nodalOfficerId;
     private String nodalOfficerDesignation;
     private String nodalOfficerPhoneNo;
     private String nodalOfficerMobileNo;
     private LocalDate prevPaperLaidDate;
     private String content;
-    //Input Instances DTO
-	private Long applicationId; // Reference to Application ID
-	private String applicationNo;
-	private String currentStatus;
-	// private String publishedDocumentUrl;
-	private Long refId;
-	// private String processInstanceId;
-	private LocalDate documentDate;
+    // Input Instances DTO
+    private Long applicationId; // Reference to Application ID
+    private String applicationNo;
+    private String currentStatus;
+    // private String publishedDocumentUrl;
+    private Long refId;
+    // private String processInstanceId;
+    private LocalDate documentDate;
     private InputInstanceDTO inputInstanceDTO;
     private ApproverDTO nodalOfficerDTO;
     private ApproverDTO authenticatorDTO;
     private Ministries ministies;
+    private MasterCode PaperTypes;
+    private Departments departments;
+
     private MastersLokSabhaDTO lokSabhaDTO;
     private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
-    private MastersRajyaSabhaSessionDTO  rajyaSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
     // requests
     private List<RequestDTO> requests;
 

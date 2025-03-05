@@ -215,23 +215,21 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     @Override
-    public List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
-            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status, LocalDate dateOfSubmission, Long department, Long paperType, String paperName) {
+    public List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo, Long lokSabhaSessionNo,
+            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, LocalDate dateOfSubmission,
+            Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
+            LocalDate actualDateOfLaying, Long ministry) {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         List<PlotInput> entitys;
-        // if (draftStatus == null) {
-        // draftStatus = false;
-        // }
         if (isActive == null) {
             isActive = true;
         }
         Specification<PlotInput> spec = Specification.where(null);
         spec = spec.and(PlotInputSpec.isActive(isActive));
-        if (draftStatus != null) {
-            spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
-        }
+        // if (draftStatus != null) {
+        //     spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
+        // }
         if (lokSabhaSessionNo != null) {
             spec = spec.and(PlotInputSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
         }
@@ -243,6 +241,27 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         if (status != null) {
             spec = spec.and(PlotInputSpec.hasStatus(status));
+        }
+        if (department != null) {
+            spec = spec.and(PlotInputSpec.hasDepartmentId(department));
+        }
+        if (ministry != null) {
+            spec = spec.and(PlotInputSpec.hasMinistryId(ministry));
+        }
+        if (proposedDateOfLaying != null) {
+            spec = spec.and(PlotInputSpec.hasProposedDateOfLaying(proposedDateOfLaying));
+        }
+        if (actualDateOfLaying != null) {
+            spec = spec.and(PlotInputSpec.hasActualDateOfLaying(actualDateOfLaying));
+        }
+        if (dateOfSubmission != null) {
+            spec = spec.and(PlotInputSpec.hasSubmissionDate(dateOfSubmission));
+        }
+        if (paperType != null) {
+            spec = spec.and(PlotInputSpec.hasPaperTypeId(paperType));
+        }
+        if (paperName != null) {
+            spec = spec.and(PlotInputSpec.hasPaperName(paperName));
         }
         entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
@@ -267,22 +286,17 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     @Override
     public List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
-            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status, LocalDate dateOfSubmission, Long department, Long paperType, String paperName) {
+            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
+            LocalDate dateOfSubmission, Long department, Long paperType, String paperName,
+            LocalDate proposedDateOfLaying, LocalDate actualDateOfLaying, Long ministry) {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         List<PlotInput> entitys;
-        // if (draftStatus == null) {
-        // draftStatus = false;
-        // }
         if (isActive == null) {
             isActive = true;
         }
         Specification<PlotInput> spec = Specification.where(null);
         spec = spec.and(PlotInputSpec.isActive(isActive));
-        if (draftStatus != null) {
-            spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
-        }
         if (lokSabhaSessionNo != null) {
             spec = spec.and(PlotInputSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
         }
@@ -295,10 +309,30 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (status != null) {
             spec = spec.and(PlotInputSpec.hasStatus(status));
         }
+        if (department != null) {
+            spec = spec.and(PlotInputSpec.hasDepartmentId(department));
+        }
+        if (ministry != null) {
+            spec = spec.and(PlotInputSpec.hasMinistryId(ministry));
+        }
+        if (proposedDateOfLaying != null) {
+            spec = spec.and(PlotInputSpec.hasProposedDateOfLaying(proposedDateOfLaying));
+        }
+        if (actualDateOfLaying != null) {
+            spec = spec.and(PlotInputSpec.hasActualDateOfLaying(actualDateOfLaying));
+        }
+        if (dateOfSubmission != null) {
+            spec = spec.and(PlotInputSpec.hasSubmissionDate(dateOfSubmission));
+        }
+        if (paperType != null) {
+            spec = spec.and(PlotInputSpec.hasPaperTypeId(paperType));
+        }
+        if (paperName != null) {
+            spec = spec.and(PlotInputSpec.hasPaperName(paperName));
+        }
         entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
-
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
@@ -445,61 +479,55 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     @Override
     public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
-    Boolean isActive, LocalDate startDate, LocalDate endDate, String status,Long ministryId,String groupName,
-    LocalDate dateofSubmissionOfPapers,LocalDate actualDateOfLaying) {
+            Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId, String groupName,
+            LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying) {
         if (isActive == null) {
             isActive = true;
         }
         Specification<PlotDateChart> spec = Specification.where(null);
         spec = spec.and(DateChartSpec.isActive(isActive));
         // if (lokSabhaSessionNo != null) {
-        //     spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(Long.parseLong(lokSabhaSessionNo)));
+        // spec =
+        // spec.and(DateChartSpec.hasLokSabhaSessionNo(Long.parseLong(lokSabhaSessionNo)));
         // }
         // if (rajyaSabhaNo != null) {
-        //     spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(Long.parseLong(rajyaSabhaNo)));
+        // spec =
+        // spec.and(DateChartSpec.hasRajyaSabhaSessionNo(Long.parseLong(rajyaSabhaNo)));
         // }
         // if (startDate != null || endDate != null) {
-        //     spec = spec.and(DateChartSpec.hasDateBetween(startDate, endDate));
+        // spec = spec.and(DateChartSpec.hasDateBetween(startDate, endDate));
         // }
-        if(ministryId!=null)
-        {
-            spec=spec.and(DateChartSpec.hasMinistryId(ministryId));
+        if (ministryId != null) {
+            spec = spec.and(DateChartSpec.hasMinistryId(ministryId));
         }
-        if(groupName!=null)
-        {
-            spec=spec.and(DateChartSpec.hasGroupName(groupName));
+        if (groupName != null) {
+            spec = spec.and(DateChartSpec.hasGroupName(groupName));
         }
 
-        List<PlotDateChartDTO> dtoList=new ArrayList<>();
         List<PlotDateChart> listOfDateCharts = plotDateChartRepository.findAll(spec);
-        List<Long> existingMinistries=listOfDateCharts.stream()
+        List<Long> existingMinistries = listOfDateCharts.stream()
                 .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
         String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries);
         listOfDateCharts = plotDateChartRepository.findAll();
-        for(PlotDateChart entity:listOfDateCharts)
-        {
-            System.out.println("dates");
-            System.out.println(entity.getDates());
-            if(dateofSubmissionOfPapers==null && actualDateOfLaying==null)
-            {
-                dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
-            }
+        List<PlotDateChartDTO> dtoList = new ArrayList<>();
+        for (PlotDateChart entity : listOfDateCharts) {
+            boolean shouldAdd = true;
+            List<Map<String, Object>> dateList = entity.getDates(); // Extracts list of date mappings
+            for (Map<String, Object> dateEntry : dateList) {
+                String existingdateofSubmissionOfPapers = (String) dateEntry.get("dateofSubmissionOfPapers");
+                String existingactualDateOfLaying = (String) dateEntry.get("actualDateOfLaying");
 
-            if(entity.getDates().contains("dateofSubmissionOfPapers"))
-            {
-                System.out.println("@@@@");
-                if(dateofSubmissionOfPapers!=null)
-                {
-            dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
+                if (dateofSubmissionOfPapers != null
+                        && !dateofSubmissionOfPapers.equals(existingdateofSubmissionOfPapers)) {
+                    shouldAdd = false;
                 }
-            }
-            if(entity.getDates().contains("actualDateOfLaying"))
-            {
-                System.out.println("####");
-                if(actualDateOfLaying!=null)
-                {
+                if (actualDateOfLaying != null && !actualDateOfLaying.equals(existingactualDateOfLaying)) {
+                    shouldAdd = false;
+                }
+                if (shouldAdd) {
                     dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
+                    break; // Stop checking further dates for this entity once added
                 }
             }
         }

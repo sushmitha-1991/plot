@@ -18,19 +18,16 @@ public class PlotHistoryServiceImpl implements PlotHistoryService {
 
     @Autowired
     private PlotHistoryRepository plotHistoryRepository;
-
-    private final PlotHistoryMapper mapper = PlotHistoryMapper.INSTANCE;
-
     @Override
     public List<PlotHistoryDTO> createPlotHistory(List<PlotHistoryDTO> plotHistoryDTO) {
         List<PlotHistory> entities = plotHistoryDTO.stream()
-                .map(mapper::dtoToEntity)
+                .map(PlotHistoryMapper::toEntity)
                 .collect(Collectors.toList());
         // Save all entities
         List<PlotHistory> savedEntities = plotHistoryRepository.saveAll(entities);
         // Convert List of saved entities back to List of DTOs
         return savedEntities.stream()
-                .map(mapper::entityToDto)
+                .map(PlotHistoryMapper::toDTO)
                 .collect(Collectors.toList());
         // PlotHistory entity = mapper.dtoToEntity(plotHistoryDTO);
         // PlotHistory savedEntity = plotHistoryRepository.save(entity);
@@ -41,7 +38,7 @@ public class PlotHistoryServiceImpl implements PlotHistoryService {
     public List<PlotHistoryDTO> getAllPlotHistories() {
         return plotHistoryRepository.findAll()
                 .stream()
-                .map(mapper::entityToDto)
+                .map(PlotHistoryMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -49,14 +46,14 @@ public class PlotHistoryServiceImpl implements PlotHistoryService {
     public List<PlotHistoryDTO> getHistories(Long plotInputId) {
         return plotHistoryRepository.findAllByPlotInputId(plotInputId)
                 .stream()
-                .map(mapper::entityToDto)
+                .map(PlotHistoryMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public PlotHistoryDTO getPlotHistoryById(Long id) {
         Optional<PlotHistory> optional = plotHistoryRepository.findById(id);
-        return optional.map(mapper::entityToDto).orElse(null);
+        return optional.map(PlotHistoryMapper::toDTO).orElse(null);
     }
 
     // @Override

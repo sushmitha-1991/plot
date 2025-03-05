@@ -96,9 +96,11 @@ public class PlotInputMapper {
                                 .refId(entity.getRefId())
                                 .documentDate(entity.getDocumentDate())
                                 .ministies(entity.getMinistries())
-
+                                .departments(entity.getDepartments())
+                                .PaperTypes(entity.getPaperTypes())
                                 .inputInstanceDTO(InputInstanceDTO.builder()
                                                 .id(entity.getId())
+                                                .createdAt(entity.getCreatedAt())
                                                 .applicationId(entity.getApplicationId())
                                                 .applicationNo(entity.getApplicationNo())
                                                 .currentStatus(entity.getCurrentStatus())
