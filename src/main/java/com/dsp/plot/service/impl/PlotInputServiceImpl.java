@@ -6,12 +6,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,13 +44,14 @@ import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
+import com.dsp.plot.entity.specification.DateChartSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
 import com.dsp.plot.repository.MasterLSSRepository;
-import com.dsp.plot.repository.MinistriesRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
+import com.dsp.plot.repository.MinistriesRepository;
 import com.dsp.plot.repository.MyUserRepository;
 import com.dsp.plot.repository.PlotDateChartRepository;
 import com.dsp.plot.repository.PlotHistoryRepository;
@@ -60,12 +61,8 @@ import com.dsp.plot.service.PlotInputService;
 import com.dsp.plot.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 @Service
-@AllArgsConstructor
-@NoArgsConstructor
 public class PlotInputServiceImpl implements PlotInputService {
 
     @Value("${master.service.url}")
@@ -220,7 +217,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Override
     public List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status) {
+            String status, LocalDate dateOfSubmission, Long department, Long paperType, String paperName) {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         List<PlotInput> entitys;
@@ -271,7 +268,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Override
     public List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status) {
+            String status, LocalDate dateOfSubmission, Long department, Long paperType, String paperName) {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         List<PlotInput> entitys;
@@ -408,35 +405,32 @@ public class PlotInputServiceImpl implements PlotInputService {
     // date chart Services
     @Override
     public PlotDateChartDTO addDateChart(PlotDateChartDTO dto) {
-        PlotDateChart entity=PlotInputMapper.dateChartMapToEntity(dto);
-        Optional<PlotDateChart> optionalEntity= plotDateChartRepository.findByMinistryId(entity.getMinistryId());
+        PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+        Optional<PlotDateChart> optionalEntity = plotDateChartRepository.findByMinistryId(entity.getMinistryId());
 
-        if(optionalEntity.isPresent())
-        {
-        
-        PlotDateChart existingEntity=optionalEntity.get();
-      
-        Field[] fields = entity.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true); // Allow access to private fields
-            try {
-                Object newValue = field.get(entity);
-                if (newValue != null) {
-                    Field entityField = existingEntity.getClass().getDeclaredField(field.getName());
-                    entityField.setAccessible(true);
-                    entityField.set(existingEntity, newValue);
+        if (optionalEntity.isPresent()) {
+
+            PlotDateChart existingEntity = optionalEntity.get();
+
+            Field[] fields = entity.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true); // Allow access to private fields
+                try {
+                    Object newValue = field.get(entity);
+                    if (newValue != null) {
+                        Field entityField = existingEntity.getClass().getDeclaredField(field.getName());
+                        entityField.setAccessible(true);
+                        entityField.set(existingEntity, newValue);
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new RuntimeException("Error updating field: " + field.getName(), e);
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException("Error updating field: " + field.getName(), e);
             }
-        }
-        
-        existingEntity = plotDateChartRepository.save(existingEntity);
-        return PlotInputMapper.dateChartMapToDTO(existingEntity);
-        }
-        else
-        {
-            
+
+            existingEntity = plotDateChartRepository.save(existingEntity);
+            return PlotInputMapper.dateChartMapToDTO(existingEntity);
+        } else {
+
             entity = plotDateChartRepository.save(entity);
             return PlotInputMapper.dateChartMapToDTO(entity);
         }
@@ -449,21 +443,67 @@ public class PlotInputServiceImpl implements PlotInputService {
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
     }
 
-       @Override
-    public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo) {
-        List<PlotDateChartDTO> listOfDateCharts = plotDateChartRepository.findAll()
-                .stream()
-                .map(PlotInputMapper::dateChartMapToDTO)
-                .collect(Collectors.toList());
-                List<Long> existingMinistries=listOfDateCharts.stream()
-                .map(PlotDateChartDTO::getMinistryId)
+    @Override
+    public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
+    Boolean isActive, LocalDate startDate, LocalDate endDate, String status,Long ministryId,String groupName,
+    LocalDate dateofSubmissionOfPapers,LocalDate actualDateOfLaying) {
+        if (isActive == null) {
+            isActive = true;
+        }
+        Specification<PlotDateChart> spec = Specification.where(null);
+        spec = spec.and(DateChartSpec.isActive(isActive));
+        // if (lokSabhaSessionNo != null) {
+        //     spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(Long.parseLong(lokSabhaSessionNo)));
+        // }
+        // if (rajyaSabhaNo != null) {
+        //     spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(Long.parseLong(rajyaSabhaNo)));
+        // }
+        // if (startDate != null || endDate != null) {
+        //     spec = spec.and(DateChartSpec.hasDateBetween(startDate, endDate));
+        // }
+        if(ministryId!=null)
+        {
+            spec=spec.and(DateChartSpec.hasMinistryId(ministryId));
+        }
+        if(groupName!=null)
+        {
+            spec=spec.and(DateChartSpec.hasGroupName(groupName));
+        }
+
+        List<PlotDateChartDTO> dtoList=new ArrayList<>();
+        List<PlotDateChart> listOfDateCharts = plotDateChartRepository.findAll(spec);
+        List<Long> existingMinistries=listOfDateCharts.stream()
+                .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
         String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries);
-        listOfDateCharts = plotDateChartRepository.findAll()
-                .stream()
-                .map(PlotInputMapper::dateChartMapToDTO)
-                .collect(Collectors.toList());
-        return listOfDateCharts;
+        listOfDateCharts = plotDateChartRepository.findAll();
+        for(PlotDateChart entity:listOfDateCharts)
+        {
+            System.out.println("dates");
+            System.out.println(entity.getDates());
+            if(dateofSubmissionOfPapers==null && actualDateOfLaying==null)
+            {
+                dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
+            }
+
+            if(entity.getDates().contains("dateofSubmissionOfPapers"))
+            {
+                System.out.println("@@@@");
+                if(dateofSubmissionOfPapers!=null)
+                {
+            dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
+                }
+            }
+            if(entity.getDates().contains("actualDateOfLaying"))
+            {
+                System.out.println("####");
+                if(actualDateOfLaying!=null)
+                {
+                    dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
+                }
+            }
+        }
+        return dtoList;
     }
 
     // question api
@@ -504,7 +544,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             // Create the JSON-like structure
                             Map<String, Object> dateMap = new HashMap<>();
                             dateMap.put("proposedDateOfLaying", proposedDate.toString());
-                            dateMap.put("dateofSubmission", submissionDate.toString());
+                            dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
                             dateMap.put("actualDateOfLaying", "");
                             return dateMap;
                         })
@@ -517,15 +557,15 @@ public class PlotInputServiceImpl implements PlotInputService {
                             .findByMinistryName(ministry);
                     if (optionalMinistries.isPresent()) {
                         Long ministryId = optionalMinistries.get().getId();
-                    //  Check if ministryId already exists in the list
-                    if (existingMinistries.contains(ministryId)) {
-                        continue; // Skip adding entry if ministryId is already present
-                    }
-                    PlotDateChartDTO dto = PlotDateChartDTO.builder()
-                            .dates(datesList)
-                            .groupName(quesDto.getGroup())
-                            .ministryId(ministryId)
-                            .build();
+                        // Check if ministryId already exists in the list
+                        if (existingMinistries.contains(ministryId)) {
+                            continue; // Skip adding entry if ministryId is already present
+                        }
+                        PlotDateChartDTO dto = PlotDateChartDTO.builder()
+                                .dates(datesList)
+                                .groupName(quesDto.getGroup())
+                                .ministryId(ministryId)
+                                .build();
                         if (lokSabhaSessionNo != null) {
                             Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
                                     .findById(Long.parseLong(lokSabhaSessionNo));
@@ -548,7 +588,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                 }
             }
-            entityList=plotDateChartRepository.saveAll(entityList);
+            entityList = plotDateChartRepository.saveAll(entityList);
             return "saved";
         } catch (HttpClientErrorException e) {
             System.err.println("API Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());

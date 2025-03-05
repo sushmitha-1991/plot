@@ -5,11 +5,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.RequestDTO;
-import com.dsp.plot.entity.PlotDateChart;
 @Service
 public interface PlotInputService {
 
@@ -19,7 +17,7 @@ public interface PlotInputService {
 
     List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
     Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-    String status);
+    String status,LocalDate dateOfSubmission,Long department, Long paperType,String paperName);
 
     PlotInputDTO getById(Long id);
     
@@ -38,7 +36,9 @@ public interface PlotInputService {
      PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
      List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
      Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-     String status);
+     String status,LocalDate dateOfSubmission,Long department, Long paperType,String paperName);
      PlotDateChartDTO getDateChartById(Long id);
-     List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo,String lokSabhaSessionNo,String rajyaSabhaNo);
+     List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
+     Boolean isActive, LocalDate startDate, LocalDate endDate, String status,Long ministryId,String groupName,
+     LocalDate dateofSubmissionOfPapers,LocalDate actualDateOfLaying);
      }
