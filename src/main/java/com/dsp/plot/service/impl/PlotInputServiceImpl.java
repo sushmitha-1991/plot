@@ -330,6 +330,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (paperName != null) {
             spec = spec.and(PlotInputSpec.hasPaperName(paperName));
         }
+        
         entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
