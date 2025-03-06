@@ -192,100 +192,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
 
-    // private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO) {
-    //     if (authenticatorDTO == null) {
-    //         throw new IllegalArgumentException("Authenticator details cannot be null.");
-    //     }
-
-    //     // String Builder for the response
-    //     StringBuilder contentBuilder = new StringBuilder();
-    //     contentBuilder.append("<html><body>");
-    //     // Authenticator details (always included)
-    //     contentBuilder.append("<b>")
-    //             .append(escapeHtml(authenticatorDTO.getUsername()))
-    //             .append(" (")
-    //             .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
-    //             .append(")</b> to lay on the Table:<br/><br/>");
-
-    //     // Check if there are paper details
-    //     if (paperDetails == null || paperDetails.isEmpty()) {
-    //         contentBuilder.append("<b>No paper details available.</b>");
-    //     } else {
-    //         int i = 1; // Initialize numbering for paper details
-    //         for (Map<String, Object> paper : paperDetails) {
-    //             if (paper == null || paper.isEmpty())
-    //                 continue; // Skip null/empty entries
-
-    //             // Append numbered label before each entry
-    //             contentBuilder.append("<label>").append(i).append(")</label> ");
-
-    //             // Paper content formatting
-    //             // String template = "A copy of the {0})({1}) (Hindi and English versions) of
-    //             // the {2})({3}),({4}), for the year {5})({6})";
-
-    //             String template = "A copy of the \"{1}\" (Hindi and English versions) of the \"{3}\", \"{4}\", for the year \"{6}\"";
-    //             String formattedString = "";
-
-    //             Integer paperNameId = (paper.get("paperNameId") instanceof Integer) ? (Integer) paper.get("paperNameId")
-    //                     : null;
-    //             if (paperNameId != null) {
-    //                 switch (paperNameId) {
-    //                     case 1:
-    //                         formattedString = MessageFormat.format(template,
-    //                                 1, escapeHtml(paper.get("titleOfReport")),
-    //                                 2, escapeHtml(paper.get("constitutionalBody")),
-    //                                 escapeHtml(paper.get("headquarters")),
-    //                                 3, escapeHtml(paper.get("year")));
-    //                         break;
-
-    //                     case 2:
-    //                         Map<String, Object> ministry = (Map<String, Object>) paper.get("ministryDepartmentPSU");
-    //                         formattedString = MessageFormat.format(template,
-    //                                 1, escapeHtml(paper.get("reportType")),
-    //                                 2, escapeHtml(ministry.get("name")), escapeHtml(ministry.get("headquarters")),
-    //                                 3, escapeHtml(paper.get("yearOrTimePeriod")));
-    //                         break;
-
-    //                     case 3:
-    //                         formattedString = MessageFormat.format(template,
-    //                                 1, escapeHtml(paper.get("titleOfReport")),
-    //                                 2, escapeHtml(paper.get("companyHeadquarters")),
-    //                                 3, escapeHtml(paper.get("financialYear")));
-    //                         break;
-
-    //                     case 4:
-    //                         formattedString = MessageFormat.format(template,
-    //                                 1, escapeHtml(paper.get("titleOfReport")),
-    //                                 2, escapeHtml(paper.get("bankHeadquarters")),
-    //                                 3, escapeHtml(paper.get("financialYear")));
-    //                         break;
-
-    //                     case 5:
-    //                         formattedString = MessageFormat.format(template,
-    //                                 1, escapeHtml(paper.get("titleOfReport")),
-    //                                 2, escapeHtml(paper.get("headquarters")),
-    //                                 3, escapeHtml(paper.get("financialYear")));
-    //                         break;
-
-    //                     default:
-    //                         formattedString = ""; // If no valid case, keep it empty
-    //                         break;
-    //                 }
-    //             }
-
-    //             // Append formatted string (if exists) and a separator
-    //             if (!formattedString.isEmpty()) {
-    //                 contentBuilder.append(formattedString).append("<br/>");
-    //                 contentBuilder.append("<hr style='border: 1px solid #ddd;'/>"); // Separator
-    //             }
-
-    //             i++; // Increment numbering
-    //         }
-    //     }
-
-    //     contentBuilder.append("</body></html>");
-    //     return contentBuilder.toString();
-    // }
+    
     private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO) {
         if (authenticatorDTO == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
@@ -299,7 +206,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 .append(escapeHtml(authenticatorDTO.getUsername()))
                 .append(" (")
                 .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
-                .append(")</b> to lay on the Table:<br/><br/>");
+                .append(")</b> to lay on the Table:<br/>");
     
         // Check if paper details exist
         if (paperDetails == null || paperDetails.isEmpty()) {
@@ -313,7 +220,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 String formattedString = getFormattedPaperDetails(paper);
                 
                 // Append numbered list item
-                contentBuilder.append(i++).append(") ").append(formattedString).append("<br/><br/>");
+                contentBuilder.append(i++).append(") ").append(formattedString).append("<br/>");
             }
         }
     
