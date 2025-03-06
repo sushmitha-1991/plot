@@ -1,6 +1,7 @@
 package com.dsp.plot.service.impl;
 
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,7 @@ import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
+import com.dsp.plot.entity.BaseUser;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
@@ -169,6 +172,12 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
             entity.setCurrentStatus(entity.getStatus());
             entity.setDocumentDate(entity.getSubmissionDate());
+            // set content
+            Optional<BaseUser> optionalUser = userRepository.findById(entity.getAuthenticatedById());
+            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalUser.get());
+            System.out.println("contentText");
+            System.out.println(contentText);
+            entity.setContent(contentText);
             entity = plotinputRepository.save(entity);
             entity.setRefId(entity.getId());
             log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
@@ -181,6 +190,193 @@ public class PlotInputServiceImpl implements PlotInputService {
             log.error("Error in savePlotInput: ", e);
             throw e;
         }
+    }
+
+    // private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO) {
+    //     if (authenticatorDTO == null) {
+    //         throw new IllegalArgumentException("Authenticator details cannot be null.");
+    //     }
+
+    //     // String Builder for the response
+    //     StringBuilder contentBuilder = new StringBuilder();
+    //     contentBuilder.append("<html><body>");
+    //     // Authenticator details (always included)
+    //     contentBuilder.append("<b>")
+    //             .append(escapeHtml(authenticatorDTO.getUsername()))
+    //             .append(" (")
+    //             .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
+    //             .append(")</b> to lay on the Table:<br/><br/>");
+
+    //     // Check if there are paper details
+    //     if (paperDetails == null || paperDetails.isEmpty()) {
+    //         contentBuilder.append("<b>No paper details available.</b>");
+    //     } else {
+    //         int i = 1; // Initialize numbering for paper details
+    //         for (Map<String, Object> paper : paperDetails) {
+    //             if (paper == null || paper.isEmpty())
+    //                 continue; // Skip null/empty entries
+
+    //             // Append numbered label before each entry
+    //             contentBuilder.append("<label>").append(i).append(")</label> ");
+
+    //             // Paper content formatting
+    //             // String template = "A copy of the {0})({1}) (Hindi and English versions) of
+    //             // the {2})({3}),({4}), for the year {5})({6})";
+
+    //             String template = "A copy of the \"{1}\" (Hindi and English versions) of the \"{3}\", \"{4}\", for the year \"{6}\"";
+    //             String formattedString = "";
+
+    //             Integer paperNameId = (paper.get("paperNameId") instanceof Integer) ? (Integer) paper.get("paperNameId")
+    //                     : null;
+    //             if (paperNameId != null) {
+    //                 switch (paperNameId) {
+    //                     case 1:
+    //                         formattedString = MessageFormat.format(template,
+    //                                 1, escapeHtml(paper.get("titleOfReport")),
+    //                                 2, escapeHtml(paper.get("constitutionalBody")),
+    //                                 escapeHtml(paper.get("headquarters")),
+    //                                 3, escapeHtml(paper.get("year")));
+    //                         break;
+
+    //                     case 2:
+    //                         Map<String, Object> ministry = (Map<String, Object>) paper.get("ministryDepartmentPSU");
+    //                         formattedString = MessageFormat.format(template,
+    //                                 1, escapeHtml(paper.get("reportType")),
+    //                                 2, escapeHtml(ministry.get("name")), escapeHtml(ministry.get("headquarters")),
+    //                                 3, escapeHtml(paper.get("yearOrTimePeriod")));
+    //                         break;
+
+    //                     case 3:
+    //                         formattedString = MessageFormat.format(template,
+    //                                 1, escapeHtml(paper.get("titleOfReport")),
+    //                                 2, escapeHtml(paper.get("companyHeadquarters")),
+    //                                 3, escapeHtml(paper.get("financialYear")));
+    //                         break;
+
+    //                     case 4:
+    //                         formattedString = MessageFormat.format(template,
+    //                                 1, escapeHtml(paper.get("titleOfReport")),
+    //                                 2, escapeHtml(paper.get("bankHeadquarters")),
+    //                                 3, escapeHtml(paper.get("financialYear")));
+    //                         break;
+
+    //                     case 5:
+    //                         formattedString = MessageFormat.format(template,
+    //                                 1, escapeHtml(paper.get("titleOfReport")),
+    //                                 2, escapeHtml(paper.get("headquarters")),
+    //                                 3, escapeHtml(paper.get("financialYear")));
+    //                         break;
+
+    //                     default:
+    //                         formattedString = ""; // If no valid case, keep it empty
+    //                         break;
+    //                 }
+    //             }
+
+    //             // Append formatted string (if exists) and a separator
+    //             if (!formattedString.isEmpty()) {
+    //                 contentBuilder.append(formattedString).append("<br/>");
+    //                 contentBuilder.append("<hr style='border: 1px solid #ddd;'/>"); // Separator
+    //             }
+
+    //             i++; // Increment numbering
+    //         }
+    //     }
+
+    //     contentBuilder.append("</body></html>");
+    //     return contentBuilder.toString();
+    // }
+    private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO) {
+        if (authenticatorDTO == null) {
+            throw new IllegalArgumentException("Authenticator details cannot be null.");
+        }
+    
+        StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder.append("<html><body>");
+    
+        // Authenticator details (always included)
+        contentBuilder.append("<b>")
+                .append(escapeHtml(authenticatorDTO.getUsername()))
+                .append(" (")
+                .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
+                .append(")</b> to lay on the Table:<br/><br/>");
+    
+        // Check if paper details exist
+        if (paperDetails == null || paperDetails.isEmpty()) {
+            contentBuilder.append("<b>No paper details available.</b>");
+        } else {
+            int i = 1; // Initialize numbering for list items
+            for (Map<String, Object> paper : paperDetails) {
+                if (paper == null || paper.isEmpty()) continue; // Skip null/empty entries
+    
+                // Create formatted output for each paper
+                String formattedString = getFormattedPaperDetails(paper);
+                
+                // Append numbered list item
+                contentBuilder.append(i++).append(") ").append(formattedString).append("<br/><br/>");
+            }
+        }
+    
+        contentBuilder.append("</body></html>");
+        return contentBuilder.toString();
+    }
+    
+    private String getFormattedPaperDetails(Map<String, Object> paper) {
+        String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
+    
+        Integer paperType = (paper.get("paperNameId") instanceof Integer) ? (Integer) paper.get("paperNameId") : -1;
+        String formattedString = "";
+    
+        switch (paperType) {
+            case 1:
+                String nameAndPlace=escapeHtml(paper.get("constitutionalBody"))+", "+escapeHtml(paper.get("headquarters"));
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("titleOfReport")),
+                        nameAndPlace,
+                        escapeHtml(paper.get("year")));
+                break;
+            case 2:
+                Map<String, Object> ministry = (Map<String, Object>) paper.get("ministryDepartmentPSU");
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("reportType")),
+                        escapeHtml(ministry.get("name"))+", "+escapeHtml(ministry.get("headquarters")),
+                    
+                        escapeHtml(paper.get("yearOrTimePeriod")));
+                break;
+            case 3:
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("companyHeadquarters")),
+                        escapeHtml(paper.get("financialYear")));
+                break;
+            case 4:
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("bankHeadquarters")),
+                        escapeHtml(paper.get("financialYear")));
+                break;
+            case 5:
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("headquarters")),
+                        escapeHtml(paper.get("financialYear")));
+                break;
+            default:
+                formattedString = ""; // Default empty value if paper type is not recognized
+                break;
+        }
+        return formattedString;
+    }
+    
+    // Helper method to escape HTML
+    private String escapeHtml(Object input) {
+        return (input == null) ? ""
+                : String.valueOf(input)
+                        .replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                        .replace("\"", "&quot;")
+                        .replace("'", "&#39;");
     }
 
     @Override
@@ -228,7 +424,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         Specification<PlotInput> spec = Specification.where(null);
         spec = spec.and(PlotInputSpec.isActive(isActive));
         // if (draftStatus != null) {
-        //     spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
+        // spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
         // }
         if (lokSabhaSessionNo != null) {
             spec = spec.and(PlotInputSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
@@ -330,7 +526,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (paperName != null) {
             spec = spec.and(PlotInputSpec.hasPaperName(paperName));
         }
-        
+
         entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
