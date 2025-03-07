@@ -79,5 +79,8 @@ public class ApplicationInstance extends Auditable{
 	private String htmlContentEnglish;
 	@Column(name = "html_content_hi", columnDefinition = "text")
 	private String htmlContentHindi;
+	@Column(name = "parent_instance_id")
+	private Long parentInstanceId;
+	
 
 }

@@ -135,6 +135,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             PlotGenerate entity = PlotGenerateMapper.toEntity(plotDTO);
             entity.setDocumentDate(entity.getPlotDate());
             entity.setCurrentStatus(entity.getStatus());
+            entity.setHtmlContentEnglish(entity.getContent());
             log.debug("Converted PlotGenerateDTO to entity: {}", entity);
             // Save PlotGenerate entity
             // generating application no
@@ -143,9 +144,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             Long houseId = getHouseId();
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
-
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
-
                     entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
                 }
                 Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
@@ -210,6 +209,29 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
             } else {
                 log.info("plot input need to be provided");
+            }
+            if (plotDTO.getPlots() != null) {
+                for (Long id : plotDTO.getPlots()) {
+                    if (!plotRepository.existsById(id)) {
+                        log.error("plot  not found with ID: ", id);
+                        // throw new UserNotFoundException(" not found with ID: " + id);
+                    } else {
+                        log.info("plot  found with ID: ", id);
+                        log.info("Attempting to fetch and update with ID: {}", id);
+                        PlotGenerate existingEntity = plotRepository.findById(id).get();
+                        log.info("Successfully fetched List Of Business with ID: {}", id);
+                        existingEntity.setId(id);
+                        existingEntity.setPlotParentId(entity.getId());
+                        existingEntity.setParentInstanceId(entity.getId());
+                        try {
+                            plotRepository.save(existingEntity);
+                        } catch (Exception e) {
+                            log.error("Error in updating plot id in ", existingEntity);
+
+                        }
+                    }
+                }
+
             }
             if (!StringUtils.isBlank(plotDTO.getApplicationNo())) {
                 // Get the Draft ID from draft table using appNo

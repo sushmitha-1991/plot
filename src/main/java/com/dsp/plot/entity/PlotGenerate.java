@@ -50,6 +50,8 @@ public class PlotGenerate extends ApplicationInstance {
 
     @Column(name = "designation")
     private Long designation;
+    @Column(name = "plot_parent_id")
+    private Long plotParentId;
     @Column(name = "location")
     private String location;
     @Column(name = "draft_flag", columnDefinition = "boolean default false")
@@ -60,7 +62,6 @@ public class PlotGenerate extends ApplicationInstance {
     private String content;
     @Column(name = "foot_note", columnDefinition = "text")
     private String footNote;
-    
     @Convert(converter = JsonMapConverter.class)
     @Column(name = "reference_files", columnDefinition="jsonb")
     private List<Map<String, Object>> referenceFiles;

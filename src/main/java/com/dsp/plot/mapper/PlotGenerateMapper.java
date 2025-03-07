@@ -30,6 +30,7 @@ public class PlotGenerateMapper {
                 .paperName(dto.getPaperName())
                 .remarks(dto.getRemarks())
                 .referenceFiles(dto.getReferenceFiles())
+                .plotParentId(dto.getPlotParentId())
                 // ApplicationInstanceDTO
                 .id((dto.getId()))
                 .applicationId(dto.getApplicationId())
@@ -59,6 +60,7 @@ public class PlotGenerateMapper {
                 .remarks(entity.getRemarks())
                 // ApplicationInstance
                 .id((entity.getId()))
+                .plotParentId(entity.getPlotParentId())
                 .applicationId(entity.getApplicationId())
                 .applicationNo(entity.getApplicationNo())
                 .currentStatus(entity.getCurrentStatus())
@@ -73,6 +75,9 @@ public class PlotGenerateMapper {
                         .lokSabhaSession(entity.getLokSabhaSession())
                         .lokSabhaSessionNumber(entity.getLokSabhaSessionNumber())
                         .rajyaSabhaSession(entity.getRajyaSabhaSession())
+                        .htmlContentEnglish(entity.getHtmlContentEnglish())
+                        .htmlContentHindi(entity.getHtmlContentHindi())
+                        .parentInstanceId(entity.getParentInstanceId())
                         .build())
                 .build();
         if (entity.getApproverDetails() != null) {

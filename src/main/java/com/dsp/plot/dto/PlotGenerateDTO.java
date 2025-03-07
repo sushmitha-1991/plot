@@ -28,9 +28,11 @@ public class PlotGenerateDTO {
     private List<Map<String, Object>> referenceFiles;
     private String paperType;
     private String paperName;
+    private Long plotParentId;
     private String remarks;
     //PlotGenerate
     private List<Long> plotInputs;
+    private List<Long> plots;
     //Application Instance DTO
     private Long id;
 	private Long applicationId;

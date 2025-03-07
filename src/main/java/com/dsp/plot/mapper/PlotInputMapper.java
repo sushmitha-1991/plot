@@ -41,6 +41,7 @@ public class PlotInputMapper {
                                 .applicationId(dto.getApplicationId())
                                 .applicationNo(dto.getApplicationNo())
                                 .currentStatus(dto.getCurrentStatus())
+                                
                                 .refId(dto.getRefId())
                                 .documentDate(dto.getDocumentDate())
                                 .paperName(dto.getPaperName()).build();
@@ -110,6 +111,8 @@ public class PlotInputMapper {
                                                 .lokSabhaSession(entity.getLokSabhaSession())
                                                 .lokSabhaSessionNumber(entity.getLokSabhaSessionNumber())
                                                 .rajyaSabhaSession(entity.getRajyaSabhaSession())
+                                                .htmlContentEnglish(entity.getHtmlContentEnglish())
+                                                .htmlContentHindi(entity.getHtmlContentHindi())
                                                 .applicationInstanceId(entity.getApplicationInstanceId())
                                                 .build())
                                 .build();

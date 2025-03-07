@@ -42,6 +42,7 @@ import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.BaseUser;
+import com.dsp.plot.entity.MasterCode;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
@@ -54,6 +55,7 @@ import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
+import com.dsp.plot.repository.CodeRepository;
 import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MinistriesRepository;
@@ -76,7 +78,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private HttpServletRequest httpRequest;
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
-
+    @Autowired
+    private CodeRepository codeRepository;
     @Autowired
     private MinistriesRepository ministriesRepository;
     @Autowired
@@ -174,10 +177,17 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
             entity.setCurrentStatus(entity.getStatus());
             entity.setDocumentDate(entity.getSubmissionDate());
+            log.debug("entity: {}", entity);
+
             // set content
             Optional<BaseUser> optionalUser = userRepository.findById(entity.getAuthenticatedById());
-            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalUser.get());
+            Optional<MasterCode> paperAbbr = codeRepository.findById(entity.getPaperTypeId());
+            String abbr = "";
+            if (paperAbbr.isPresent())
+                abbr = paperAbbr.get().getAbbr();
+            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalUser.get(), abbr);
             entity.setContent(contentText);
+            entity.setHtmlContentEnglish(contentText);
             entity = plotinputRepository.save(entity);
             entity.setRefId(entity.getId());
             log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
@@ -192,50 +202,108 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
 
-    private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO) {
+    private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO, String abbr) {
         if (authenticatorDTO == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
         }
-
         StringBuilder contentBuilder = new StringBuilder();
         contentBuilder.append("<html><body>");
-
         // Authenticator details (always included)
         contentBuilder.append("<b>")
                 .append(escapeHtml(authenticatorDTO.getUsername()))
                 .append(" (")
                 .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
-                .append(")</b> to lay on the Table:<br/>");
-
+                .append(")</b> to lay on the Table:<br>");
+              
         // Check if paper details exist
         if (paperDetails == null || paperDetails.isEmpty()) {
+            System.out.println("<b>No paper details available.</b> Details");
             contentBuilder.append("<b>No paper details available.</b>");
         } else {
+            System.out.println("paper Details");
+            System.out.println(paperDetails);
             int i = 1; // Initialize numbering for list items
             for (Map<String, Object> paper : paperDetails) {
+                System.out.println("paper");
+
+                System.out.println(paper);
                 if (paper == null || paper.isEmpty())
                     continue; // Skip null/empty entries
-
                 // Create formatted output for each paper
-                String formattedString = getFormattedPaperDetails(paper);
+                System.out.println("$$$$$$$$$$");
+                System.out.println(abbr);
+                // Reports
+                if (abbr.equals("PLOT_REPORT")) {
+                    String formattedString = getFormattedReportDetails(paper);
+                    // Append numbered list item
+                    if(StringUtils.isBlank(formattedString))
+                    {
+                        contentBuilder.append(formattedString);
+                    }
+                    contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
+                }
+                
+                // notifications
+                else if (abbr.equals("PLOT_NOTIFICATION")) {
+                    String formattedString = getFormattedNotificationDetails(paper);
+                    if(StringUtils.isBlank(formattedString))
+                    {
+                        contentBuilder.append(formattedString);
+                    }
+                    // Append numbered list item
+                    contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
+                }
+                // others
+                else if (abbr.equals("PLOT_OTHER")) {
+                    String formattedString = getFormattedOtherPaperDetails(paper);
+                    // Append numbered list item
+                    if(StringUtils.isBlank(formattedString))
+                    {
+                        contentBuilder.append(formattedString);
+                    }
+                    contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
+                }
 
-                // Append numbered list item
-                contentBuilder.append(i++).append(") ").append(formattedString).append("<br/>");
             }
         }
-
         contentBuilder.append("</body></html>");
         return contentBuilder.toString();
     }
 
-    private String getFormattedPaperDetails(Map<String, Object> paper) {
+    private String getFormattedReportDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
-
-        Integer paperType = (paper.get("paperNameId") instanceof Integer) ? (Integer) paper.get("paperNameId") : -1;
+        // Long paperType = (paper.get("paperNameId") instanceof Long)
+        // ? (Long) paper.get("paperNameId")
+        // : null;
+        Object paperNameId = paper.get("paperNameId");
+        System.out.println("paperNameId");
+        System.out.println(paperNameId);
+        Long paperType = null;
+        if (paperNameId instanceof Long) {
+            paperType = (Long) paperNameId;
+        } else if (paperNameId instanceof Integer) {
+            paperType = ((Integer) paperNameId).longValue(); // Convert Integer to Long
+        } else if (paperNameId instanceof String) {
+            try {
+                paperType = Long.parseLong((String) paperNameId); // Convert String to Long
+            } catch (NumberFormatException e) {
+                paperType = null; // Handle invalid string cases
+            }
+        }
+        System.out.println("paperType");
+        System.out.println(paperType);
         String formattedString = "";
-
-        switch (paperType) {
-            case 1:
+        MasterCode codeAbbr;
+        try{
+            codeAbbr = codeRepository.findById(paperType).get();
+        }
+        catch(Exception e)
+        {
+            return "";
+        }
+        String abbr = codeAbbr.getAbbr();
+        switch (abbr) {
+            case "PLOT_RPT_1":
                 String nameAndPlace = escapeHtml(paper.get("constitutionalBody")) + ", "
                         + escapeHtml(paper.get("headquarters"));
                 formattedString = MessageFormat.format(template,
@@ -243,7 +311,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         nameAndPlace,
                         escapeHtml(paper.get("year")));
                 break;
-            case 2:
+            case "PLOT_RPT_2":
                 Map<String, Object> ministry = (Map<String, Object>) paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("reportType")),
@@ -251,23 +319,179 @@ public class PlotInputServiceImpl implements PlotInputService {
 
                         escapeHtml(paper.get("yearOrTimePeriod")));
                 break;
-            case 3:
+            case "PLOT_RPT_3":
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("titleOfReport")),
                         escapeHtml(paper.get("companyHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
-            case 4:
+            case "PLOT_RPT_4":
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("titleOfReport")),
                         escapeHtml(paper.get("bankHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
-            case 5:
+            case "PLOT_RPT_5":
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("titleOfReport")),
                         escapeHtml(paper.get("headquarters")),
                         escapeHtml(paper.get("financialYear")));
+                break;
+            default:
+                formattedString = ""; // Default empty value if paper type is not recognized
+                break;
+        }
+        return formattedString;
+    }
+
+    private String getFormattedNotificationDetails(Map<String, Object> paper) {
+        String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
+        // Long paperType = (paper.get("notificationId") instanceof Long) ? (Long)
+        // paper.get("notificationId") : null;
+        Object paperNameId = paper.get("notificationId");
+        System.out.println("paperNameId");
+        System.out.println(paperNameId);
+        Long paperType = null;
+        if (paperNameId instanceof Long) {
+            paperType = (Long) paperNameId;
+        } else if (paperNameId instanceof Integer) {
+            paperType = ((Integer) paperNameId).longValue(); // Convert Integer to Long
+        } else if (paperNameId instanceof String) {
+            try {
+                paperType = Long.parseLong((String) paperNameId); // Convert String to Long
+            } catch (NumberFormatException e) {
+                paperType = null; // Handle invalid string cases
+            }
+        }
+        System.out.println("paperType");
+        System.out.println(paperType);
+        String formattedString = "";
+        MasterCode codeAbbr; try{
+            codeAbbr = codeRepository.findById(paperType).get();
+        }
+        catch(Exception e)
+        {
+            return "";
+        }
+        String abbr = codeAbbr.getAbbr();
+        switch (abbr) {
+            case "PLOT_NF_GEN":
+                System.out.println("###  " + abbr);
+
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("notificationType")),
+                        escapeHtml(paper.get("publishedIn")),
+                        escapeHtml(paper.get("actUnderWhichLaid")));
+
+                break;
+            case "PLOT_NF_SON":
+                System.out.println("###  " + abbr);
+
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("notificationType")),
+                        escapeHtml(paper.get("publishedIn")),
+                        escapeHtml(paper.get("actUnderWhichLaid")));
+                break;
+            case "PLOT_NF_NO":
+                System.out.println("###  " + abbr);
+
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("notificationType")),
+                        escapeHtml(paper.get("publishedIn")),
+                        escapeHtml(paper.get("actUnderWhichLaid")));
+                break;
+            case "PLOT_NF_ON":
+                System.out.println("###  " + abbr);
+
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("notificationType")),
+                        escapeHtml(paper.get("publishedIn")),
+                        escapeHtml(paper.get("actUnderWhichLaid")));
+                break;
+            default:
+                formattedString = ""; // Default empty value if paper type is not recognized
+                break;
+        }
+        System.out.println(formattedString);
+        return formattedString;
+    }
+
+    private String getFormattedOtherPaperDetails(Map<String, Object> paper) {
+        String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
+
+        // Long paperType = (paper.get("otherPaperId") instanceof Long) ? (Long)
+        // paper.get("otherPaperId") : null;
+        Object paperNameId = paper.get("otherPaperId");
+        Long paperType = null;
+        System.out.println("paperNameId");
+        System.out.println(paperNameId);
+        if (paperNameId instanceof Long) {
+            paperType = (Long) paperNameId;
+        } else if (paperNameId instanceof Integer) {
+            paperType = ((Integer) paperNameId).longValue(); // Convert Integer to Long
+        } else if (paperNameId instanceof String) {
+            try {
+                paperType = Long.parseLong((String) paperNameId); // Convert String to Long
+            } catch (NumberFormatException e) {
+                paperType = null; // Handle invalid string cases
+            }
+        }
+        System.out.println("paperType");
+        System.out.println(paperType);
+        String formattedString = "";
+        MasterCode codeAbbr; try{
+            codeAbbr = codeRepository.findById(paperType).get();
+        }
+        catch(Exception e)
+        {
+            return "";
+        }
+        String abbr = codeAbbr.getAbbr();
+
+        switch (abbr) {
+            case "PLOT_OTH_1":
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("")),
+                        escapeHtml(paper.get("year")));
+                break;
+            case "PLOT_OTH_2":
+                // Map<String, Object> ministry = (Map<String, Object>)
+                // paper.get("ministryDepartmentPSU");
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("departmentName")),
+                        escapeHtml(paper.get("financialYear")));
+                break;
+            case "PLOT_OTH_3":
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("departmentName")),
+                        escapeHtml(paper.get("financialYear")));
+                break;
+            case "PLOT_OTH_4":
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("bankHeadquarters")),
+                        escapeHtml(paper.get("financialYear")));
+                break;
+            case "PLOT_OTH_5":
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("statementNumber")),
+                        escapeHtml(paper.get("year")));
+                break;
+            case "PLOT_OTH_6":
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("stateOrUT")),
+                        escapeHtml(paper.get("financialYear")));
+                break;
+            case "PLOT_OTH_7":
+                formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("requirementUnder")),
+                        escapeHtml(paper.get("year")));
                 break;
             default:
                 formattedString = ""; // Default empty value if paper type is not recognized
