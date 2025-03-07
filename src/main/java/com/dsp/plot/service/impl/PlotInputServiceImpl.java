@@ -214,7 +214,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 .append(" (")
                 .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
                 .append(")</b> to lay on the Table:<br>");
-              
+
         // Check if paper details exist
         if (paperDetails == null || paperDetails.isEmpty()) {
             System.out.println("<b>No paper details available.</b> Details");
@@ -236,18 +236,16 @@ public class PlotInputServiceImpl implements PlotInputService {
                 if (abbr.equals("PLOT_REPORT")) {
                     String formattedString = getFormattedReportDetails(paper);
                     // Append numbered list item
-                    if(StringUtils.isBlank(formattedString))
-                    {
+                    if (StringUtils.isBlank(formattedString)) {
                         contentBuilder.append(formattedString);
                     }
                     contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
                 }
-                
+
                 // notifications
                 else if (abbr.equals("PLOT_NOTIFICATION")) {
                     String formattedString = getFormattedNotificationDetails(paper);
-                    if(StringUtils.isBlank(formattedString))
-                    {
+                    if (StringUtils.isBlank(formattedString)) {
                         contentBuilder.append(formattedString);
                     }
                     // Append numbered list item
@@ -257,8 +255,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 else if (abbr.equals("PLOT_OTHER")) {
                     String formattedString = getFormattedOtherPaperDetails(paper);
                     // Append numbered list item
-                    if(StringUtils.isBlank(formattedString))
-                    {
+                    if (StringUtils.isBlank(formattedString)) {
                         contentBuilder.append(formattedString);
                     }
                     contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
@@ -292,13 +289,14 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         System.out.println("paperType");
         System.out.println(paperType);
+        if (paperType == null) {
+            return "";
+        }
         String formattedString = "";
         MasterCode codeAbbr;
-        try{
+        try {
             codeAbbr = codeRepository.findById(paperType).get();
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             return "";
         }
         String abbr = codeAbbr.getAbbr();
@@ -365,12 +363,14 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         System.out.println("paperType");
         System.out.println(paperType);
-        String formattedString = "";
-        MasterCode codeAbbr; try{
-            codeAbbr = codeRepository.findById(paperType).get();
+        if (paperType == null) {
+            return "";
         }
-        catch(Exception e)
-        {
+        String formattedString = "";
+        MasterCode codeAbbr;
+        try {
+            codeAbbr = codeRepository.findById(paperType).get();
+        } catch (Exception e) {
             return "";
         }
         String abbr = codeAbbr.getAbbr();
@@ -438,12 +438,14 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         System.out.println("paperType");
         System.out.println(paperType);
-        String formattedString = "";
-        MasterCode codeAbbr; try{
-            codeAbbr = codeRepository.findById(paperType).get();
+        if (paperType == null) {
+            return "";
         }
-        catch(Exception e)
-        {
+        String formattedString = "";
+        MasterCode codeAbbr;
+        try {
+            codeAbbr = codeRepository.findById(paperType).get();
+        } catch (Exception e) {
             return "";
         }
         String abbr = codeAbbr.getAbbr();
