@@ -283,8 +283,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        System.out.println("paperType");
-        System.out.println(paperType);
+        
+        if(paperType==null)
+        {
+            return "";
+        }
         String formattedString = "";
         MasterCode codeAbbr;
         try {
@@ -337,8 +340,6 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private String getFormattedNotificationDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
-        // Long paperType = (paper.get("notificationId") instanceof Long) ? (Long)
-        // paper.get("notificationId") : null;
         Object paperNameId = paper.get("notificationId");
        
         Long paperType = null;
@@ -353,8 +354,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        System.out.println("paperType");
-        System.out.println(paperType);
+        if(paperType==null)
+        {
+            return "";
+        }
         String formattedString = "";
         MasterCode codeAbbr;
         try {
@@ -405,9 +408,6 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private String getFormattedOtherPaperDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
-
-        // Long paperType = (paper.get("otherPaperId") instanceof Long) ? (Long)
-        // paper.get("otherPaperId") : null;
         Object paperNameId = paper.get("otherPaperId");
         Long paperType = null;
       
@@ -422,8 +422,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        System.out.println("paperType");
-        System.out.println(paperType);
+    
+        if(paperType==null)
+        {
+            return "";
+        }
         String formattedString = "";
         MasterCode codeAbbr;
         try {
@@ -1063,10 +1066,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
     private Long getHouseId() {
         Long houseId = null;
-       String token= getTokenFromRequest();
-    
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-       
         if (principal instanceof UserDetailsDTO) {
             houseId = ((UserDetailsDTO) principal).getHouseId();
             System.out.println("houseId "+houseId);
