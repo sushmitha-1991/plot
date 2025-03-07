@@ -56,18 +56,17 @@ public class PlotInputController {
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @GetMapping("/getAll")
         public ResponseEntity<GenericResponse<List<PlotInputDTO>>> getAllPlotInputs(
-                        @RequestParam(required = false) Boolean isActive,
-                        @RequestParam(required = false) Boolean draftStatus,
-                        @RequestParam(required = false) Long lokSabhaNo,
-                        @RequestParam(required = false) Long lokSabhaSessionNo,
-                        @RequestParam(required = false) Long rajyaSabhaSessionNo,
-                        @RequestParam(required = false) LocalDate startDate,
-                        @RequestParam(required = false) LocalDate endDate,
-                        @RequestParam(required = false) String status) {
+                @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Boolean draftStatus,
+            @RequestParam(required = false) Long lokSabhaNo,
+            @RequestParam(required = false) Long lokSabhaSessionNo,
+            @RequestParam(required = false) Long rajyaSabhaSessionNo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String status) {
 
-                List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive, draftStatus, lokSabhaNo,
-                                lokSabhaSessionNo,
-                                rajyaSabhaSessionNo, startDate, endDate, status);
+                List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive,draftStatus,lokSabhaNo,lokSabhaSessionNo,
+                rajyaSabhaSessionNo,startDate,endDate,status);
 
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
@@ -88,11 +87,18 @@ public class PlotInputController {
                         @RequestParam(required = false) Long rajyaSabhaSessionNo,
                         @RequestParam(required = false) LocalDate startDate,
                         @RequestParam(required = false) LocalDate endDate,
-                        @RequestParam(required = false) String status) {
+                        @RequestParam(required = false) String status,
+                        @RequestParam(required = false) LocalDate submissionDate,
+                        @RequestParam(required = false) Long departmentId,
+                        @RequestParam(required = false) Long paperTypeId,
+                        @RequestParam(required = false) String paperName,
+                        @RequestParam(required = false) LocalDate proposedDateOfLaying,
+                        @RequestParam(required = false) LocalDate actualDateOfLaying,
+                        @RequestParam(required = false) Long ministryId) {
 
                 List<PlotInputDTO> fectchedEntities = plotinputService.getHistories(isActive, draftStatus, lokSabhaNo,
-                                lokSabhaSessionNo,
-                                rajyaSabhaSessionNo, startDate, endDate, status);
+                                lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
+                                departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying, ministryId);
 
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
@@ -244,8 +250,14 @@ public class PlotInputController {
                         @RequestParam(required = false) Boolean isActive,
                         @RequestParam(required = false) LocalDate startDate,
                         @RequestParam(required = false) LocalDate endDate,
-                        @RequestParam(required = false) String status) {
-                List<PlotDateChartDTO> response = plotinputService.getAllDateCharts(lokSabhaNo, lokSabhaSessionNo,rajyaSabhaNo, isActive, startDate, endDate,status);
+                        @RequestParam(required = false) String status,
+                        @RequestParam(required = false) Long ministryId,
+                        @RequestParam(required = false) String groupName,
+                        @RequestParam(required = false) LocalDate dateofSubmissionOfPapers,
+                        @RequestParam(required = false) LocalDate actualDateOfLaying) {
+                List<PlotDateChartDTO> response = plotinputService.getAllDateCharts(lokSabhaNo, lokSabhaSessionNo,
+                                rajyaSabhaNo, isActive, startDate, endDate, status, ministryId, groupName,
+                                dateofSubmissionOfPapers, actualDateOfLaying);
                 GenericResponse<List<PlotDateChartDTO>> responseDTO = new GenericResponse<>(HttpStatus.OK.value(),
                                 true, "dateCharts retrieved successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);

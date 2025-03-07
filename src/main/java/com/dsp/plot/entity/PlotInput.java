@@ -63,11 +63,11 @@ public class PlotInput extends InputInstance {
     @Column(name = "ministry_id")
     private Long ministryId;
 
+
     @Column(name = "generated_plot_id")
     private Long generatedPlotId;
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
-
 
     @Convert(converter = JsonMapConverter.class)
     @Column(name = "paper_details", columnDefinition = "JSONB")
@@ -97,6 +97,8 @@ public class PlotInput extends InputInstance {
 
     @Column(name = "proposed_date_of_laying")
     private LocalDate proposedDateOfLaying;
+    @Column(name = "actual_date_of_laying")
+    private LocalDate actualDateOfLaying;
 
     @Column(name = "prev_paper_laid_date")
     private LocalDate prevPaperLaidDate;
@@ -134,6 +136,15 @@ public class PlotInput extends InputInstance {
     @JoinColumn(name = "ministry_id", referencedColumnName = "id",insertable=false,updatable=false)
     private Ministries ministries;
     @ManyToOne
+<<<<<<< HEAD
     @JoinColumn(name = "department_id", referencedColumnName = "id",insertable=false,updatable=false)
     private Ministries departments;
+=======
+    @JoinColumn(name = "paper_type_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private MasterCode PaperTypes;
+    @ManyToOne
+    @JoinColumn(name = "department_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private Departments departments;
+
+>>>>>>> f519ad9b7415645daa1b6a9fa20540b548634141
    }

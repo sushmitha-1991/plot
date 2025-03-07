@@ -16,7 +16,7 @@ import com.dsp.plot.entity.PlotInput;
 
 @Repository
 public interface PlotHistoryRepository extends JpaRepository<PlotHistory, Long>, JpaSpecificationExecutor<PlotHistory> {
-    @Query(value = "SELECT * FROM plot.plot_history WHERE plot_input_id = :plotInputId ORDER BY created_by DESC LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM plot.plot_history WHERE plot_input_id = :plotInputId ORDER BY created_at DESC LIMIT 1", nativeQuery = true)
     Optional<PlotHistory> findPlotHistory(@Param("plotInputId") Long plotInputId);
 
     List<PlotHistory> findAllByPlotInputId(Long plotInputId);

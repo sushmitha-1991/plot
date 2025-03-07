@@ -3,6 +3,7 @@ package com.dsp.plot.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +15,6 @@ import lombok.NoArgsConstructor;
 public class InputInstanceDTO {
     
 	private Long id;
-	    private LocalDateTime createdAt;
-
 	private Long applicationId; // Reference to Application ID
 	private String applicationNo;
 	private String currentStatus;
@@ -28,4 +27,6 @@ public class InputInstanceDTO {
     private String rajyaSabhaSession;
 	 private String pendingAt;
     private Long applicationInstanceId;
+	private String htmlContentEnglish;
+	private String htmlContentHindi;
 }

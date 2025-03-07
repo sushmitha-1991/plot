@@ -1,4 +1,5 @@
 package com.dsp.plot.dto;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -13,17 +14,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ApplicationInstanceDTO {
-	private Long id;
- private Long applicationId; // Reference to Application ID
- private String applicationNo;
- private String currentStatus;
-private LocalDate documentDate;
-//  private String publishedDocumentUrl;
- private Long refId;
- private String lokSabhaSession;
+    private Long id;
+    private Long applicationId; // Reference to Application ID
+    private String applicationNo;
+    private String currentStatus;
+    private LocalDate documentDate;
+    // private String publishedDocumentUrl;
+    private Long refId;
+    private String lokSabhaSession;
     private String lokSabhaSessionNumber;
     private String rajyaSabhaSession;
     private String htmlContentEnglish;
-	private String htmlContentHindi;
-//  private String processInstanceId;
+    private String htmlContentHindi;
+    private Long parentInstanceId;
+    // private String processInstanceId;
 }

@@ -1,16 +1,24 @@
 package com.dsp.plot.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDate;
+
+import org.hibernate.envers.Audited;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
-
-import org.hibernate.envers.Audited;
 
 @Entity
 @Data
@@ -79,5 +87,9 @@ public class InputInstance  extends Auditable{
 
     @Column(name = "application_instance_id")
     private Long applicationInstanceId;
+    @Column(name = "html_content_en", columnDefinition = "text")
+	private String htmlContentEnglish;
+	@Column(name = "html_content_hi", columnDefinition = "text")
+	private String htmlContentHindi;
 
 }

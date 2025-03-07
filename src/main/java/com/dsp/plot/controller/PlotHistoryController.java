@@ -16,7 +16,7 @@ public class PlotHistoryController {
     private PlotHistoryService plotHistoryService;
 
     @PostMapping("/create")
-    public ResponseEntity<PlotHistoryDTO> createPlotHistory(@RequestBody PlotHistoryDTO dto) {
+    public ResponseEntity<List<PlotHistoryDTO>> createPlotHistory(@RequestBody List<PlotHistoryDTO> dto) {
         return ResponseEntity.ok(plotHistoryService.createPlotHistory(dto));
     }
 
