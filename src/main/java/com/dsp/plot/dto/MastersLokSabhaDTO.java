@@ -26,14 +26,6 @@ import lombok.Setter;
         @NotEmpty
         private String lokSabhaNumber;
 
-        // private LocalDate startDate;
-        // private LocalDate endDate;
-        
-        // private Long totalSessions;
-
-        // private Long totalSittings;
-        // @NotEmpty
-        // private Long createdBy;
         
         }
     

@@ -15,12 +15,11 @@ import lombok.NoArgsConstructor;
 public class InputInstanceDTO {
     
 	private Long id;
+	    private LocalDateTime createdAt;
 	private Long applicationId; // Reference to Application ID
 	private String applicationNo;
 	private String currentStatus;
-	// private String publishedDocumentUrl;
 	private Long refId;
-	// private String processInstanceId;
 	private LocalDate documentDate;
 	private String lokSabhaSession;
     private String lokSabhaSessionNumber;

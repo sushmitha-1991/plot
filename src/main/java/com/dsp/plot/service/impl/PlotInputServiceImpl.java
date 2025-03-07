@@ -221,18 +221,14 @@ public class PlotInputServiceImpl implements PlotInputService {
             System.out.println("<b>No paper details available.</b> Details");
             contentBuilder.append("<b>No paper details available.</b>");
         } else {
-            System.out.println("paper Details");
-            System.out.println(paperDetails);
+           
             int i = 1; // Initialize numbering for list items
             for (Map<String, Object> paper : paperDetails) {
-                System.out.println("paper");
-
-                System.out.println(paper);
+                
                 if (paper == null || paper.isEmpty())
                     continue; // Skip null/empty entries
                 // Create formatted output for each paper
-                System.out.println("$$$$$$$$$$");
-                System.out.println(abbr);
+                
                 // Reports
                 if (abbr.equals("PLOT_REPORT")) {
                     String formattedString = getFormattedReportDetails(paper);
@@ -277,8 +273,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         // ? (Long) paper.get("paperNameId")
         // : null;
         Object paperNameId = paper.get("paperNameId");
-        System.out.println("paperNameId");
-        System.out.println(paperNameId);
+       
         Long paperType = null;
         if (paperNameId instanceof Long) {
             paperType = (Long) paperNameId;
@@ -291,8 +286,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        System.out.println("paperType");
-        System.out.println(paperType);
+        
         String formattedString = "";
         MasterCode codeAbbr;
         try{
@@ -350,8 +344,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         // Long paperType = (paper.get("notificationId") instanceof Long) ? (Long)
         // paper.get("notificationId") : null;
         Object paperNameId = paper.get("notificationId");
-        System.out.println("paperNameId");
-        System.out.println(paperNameId);
+       
         Long paperType = null;
         if (paperNameId instanceof Long) {
             paperType = (Long) paperNameId;
@@ -364,8 +357,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        System.out.println("paperType");
-        System.out.println(paperType);
+       
         String formattedString = "";
         MasterCode codeAbbr; try{
             codeAbbr = codeRepository.findById(paperType).get();
@@ -378,7 +370,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         switch (abbr) {
             case "PLOT_NF_GEN":
                 System.out.println("###  " + abbr);
-
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("notificationType")),
                         escapeHtml(paper.get("publishedIn")),
@@ -387,7 +378,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 break;
             case "PLOT_NF_SON":
                 System.out.println("###  " + abbr);
-
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("notificationType")),
                         escapeHtml(paper.get("publishedIn")),
@@ -424,8 +414,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         // paper.get("otherPaperId") : null;
         Object paperNameId = paper.get("otherPaperId");
         Long paperType = null;
-        System.out.println("paperNameId");
-        System.out.println(paperNameId);
+      
         if (paperNameId instanceof Long) {
             paperType = (Long) paperNameId;
         } else if (paperNameId instanceof Integer) {
@@ -437,8 +426,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        System.out.println("paperType");
-        System.out.println(paperType);
+       
         String formattedString = "";
         MasterCode codeAbbr; try{
             codeAbbr = codeRepository.findById(paperType).get();
@@ -1070,8 +1058,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     public String getTokenFromRequest() {
-        System.out.println("httpRequest");
-        System.out.println(httpRequest);
+       
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
@@ -1081,17 +1068,14 @@ public class PlotInputServiceImpl implements PlotInputService {
     private Long getHouseId() {
         Long houseId = null;
        String token= getTokenFromRequest();
-       System.out.println("token "+token);
-       Long house = jwtUtil.extractHouseId(token);
-       System.out.println("house "+house);
+    
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("!!!!");
-        System.out.println(principal);
+       
         if (principal instanceof UserDetailsDTO) {
             houseId = ((UserDetailsDTO) principal).getHouseId();
             System.out.println("houseId "+houseId);
         }
-        return house;
+        return houseId;
     }
     @Override
     public List<PlotInputDTO> getAll() {

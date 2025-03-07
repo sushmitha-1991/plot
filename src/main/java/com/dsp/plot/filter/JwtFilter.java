@@ -11,11 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,9 +18,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.dsp.plot.config.ModifiedRequest;
 import com.dsp.plot.dto.AuthRequestDTO;
 import com.dsp.plot.service.CustomUserDetailsService;
 import com.dsp.plot.util.JwtUtil;
+
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -40,6 +38,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Value("${dsp1.authentication.user.ls}")
+    private String lsUserName;
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
@@ -48,72 +48,84 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Value("${auth.token.api}")
     private String authTokenApi; // URL to call for token generation
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-        try {
-            String authorizationHeader = request.getHeader("Authorization");
-            String username = null;
-            String jwt = null;
-            log.info("Authorization header: {}", authorizationHeader);
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                jwt = authorizationHeader.substring(7);
-                username = jwtUtil.extractUsername(jwt);
-                log.debug("JWT token found, username extracted: {}", username);
-            } else {
-                log.debug("No valid JWT token found, attempting to generate a new one...");
-                jwt = generateNewToken();
-                System.out.println("!!!!");
-                System.out.println(jwt);
-                if (jwt != null) {
-                    log.debug("New JWT token obtained: {}", jwt);
-                    // Manually set the token in the request header
-                    request.setAttribute("Authorization", "Bearer " + jwt);
-                    // Also set in response header for client usage
-                    response.setHeader("Authorization", "Bearer " + jwt);
-                    // Send new token in response header
-                    String testToken = (String) request.getAttribute("Authorization");
-                    log.info("Token stored in request attribute: {}", testToken);
-                } else {
-                    log.error("Failed to obtain a new JWT token");
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Unable to authenticate. No valid token available.");
-                    return;
+protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws ServletException, IOException {
+    try {
+        String authorizationHeader = request.getHeader("Authorization");
+        String username = null;
+        String jwt = null;
+
+        log.info("Authorization header received: {}", authorizationHeader);
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            jwt = authorizationHeader.substring(7);
+            log.debug("Extracted JWT: {}", jwt);
+
+            if (!jwt.isEmpty()) {
+                try {
+                    username = jwtUtil.extractUsername(jwt);
+                    log.debug("Valid JWT found for user: {}", username);
+                } catch (JwtException e) {
+                    log.warn("Invalid JWT token received, generating new token...");
+                    jwt = generateNewToken();  // ✅ Generate new token
+                    username = jwtUtil.extractUsername(jwt);
+                    if (jwt != null) {
+                        // ✅ Explicitly update the request by wrapping it
+                        request = new ModifiedRequest(request, "Bearer " + jwt);
+            
+                        // ✅ Set in response header
+                        response.setHeader("Authorization", "Bearer " + jwt);
+                        log.info("New JWT set in response headers.");
+                    } 
                 }
             }
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                log.debug("Attempting to load user details for username: {}", username);
-
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                System.out.println("userDetails");
-                System.out.println(userDetails);
-                if (userDetails.isEnabled() && jwtUtil.validateToken(jwt, userDetails)) {
-                    log.debug("JWT token validated successfully for user: {}", username);
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                        System.out.println("auth");
-                        System.out.println(auth);
-                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-
-                    log.debug("User authenticated successfully: {}", username);
-                } else {
-                    log.error("JWT token validation failed or user is not enabl4Red for username: {}", username);
-                }
-            }
-
-            chain.doFilter(request, response);
-        } catch (JwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage(), e);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Invalid JWT token");
-        } catch (Exception e) {
-            log.error("Error during JWT processing: {}", e.getMessage(), e);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("An error occurred while processing authentication");
+        } else {
+            log.debug("No JWT provided, generating a new token...");
+            jwt = generateNewToken();
+            username = jwtUtil.extractUsername(jwt);
+            if (jwt != null) {
+                // ✅ Explicitly update the request by wrapping it
+                request = new ModifiedRequest(request, "Bearer " + jwt);
+    
+                // ✅ Set in response header
+                response.setHeader("Authorization", "Bearer " + jwt);
+                log.info("New JWT set in response headers.");
+            } 
         }
+
+        
+        // else {
+        //     log.error("Failed to generate a new JWT token.");
+        //     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        //     response.getWriter().write("Unable to authenticate. No valid token available.");
+        //     return;
+        // }
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+            if (jwtUtil.validateToken(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                log.debug("User authenticated successfully: {}", username);
+            } else {
+                log.error("JWT Token validation failed for user: {}", username);
+            }
+        }
+        log.info("🟢 Final JWT before chain.doFilter: {}", jwt);
+        // ✅ Ensure the wrapped request is passed forward
+        chain.doFilter(request, response);
+
+    } catch (Exception e) {
+        log.error("Error during JWT processing: {}", e.getMessage(), e);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.getWriter().write("{\"error\": \"Server Error\", \"message\": \"An error occurred while processing authentication\"}");
     }
+}
+
 
     private String generateNewToken() {
         try {
@@ -121,92 +133,11 @@ public class JwtFilter extends OncePerRequestFilter {
                     .email("testuser5@sansad.nic.in")
                     .otp("123456")
                     .build();
-            log.info("Sending authentication request: {}", authRequest);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<AuthRequestDTO> requestEntity = new HttpEntity<>(authRequest, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(authTokenApi, requestEntity, String.class);
-            log.info("Token API Response: {}", response);
-            if (response.getStatusCode() == HttpStatus.OK) {
-                log.info("Generated Token: {}", response.getBody()); // ✅ Print the token
-                return response.getBody();
-            } else {
-                log.error("Failed to get new token, status: {}", response.getStatusCode());
-            }
+            return jwtUtil.generateToken(lsUserName);
+            
         } catch (Exception e) {
             log.error("Error calling token API: {}", e.getMessage(), e);
         }
         return null;
     }
 }
-// @Component
-// public class JwtFilter extends OncePerRequestFilter {
-
-// private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
-
-// @Autowired
-// private JwtUtil jwtUtil;
-
-// @Autowired
-// private CustomUserDetailsService userDetailsService;
-
-// @Override
-// protected void doFilterInternal(HttpServletRequest request,
-// HttpServletResponse response, FilterChain chain)
-// throws ServletException, IOException {
-// try {
-// final String authorizationHeader = request.getHeader("Authorization");
-
-// String username = null;
-// String jwt = null;
-
-// log.info("Authorization header: {}", authorizationHeader); // Debug log for
-// Authorization header
-
-// if (authorizationHeader != null && authorizationHeader.startsWith("Bearer "))
-// {
-// jwt = authorizationHeader.substring(7);
-// username = jwtUtil.extractUsername(jwt);
-// log.debug("JWT token found, username extracted: {}", username);
-// } else {
-// log.debug("No valid JWT token found in the Authorization header");
-// }
-
-// if (username != null &&
-// SecurityContextHolder.getContext().getAuthentication() == null) {
-// log.debug("Attempting to load user details for username: {}", username);
-// UserDetails userDetails =
-// this.userDetailsService.loadUserByUsername(username);
-// log.debug("UserDetails loaded for username: {}", username);
-
-// if (userDetails.isEnabled() && jwtUtil.validateToken(jwt, userDetails)) {
-// log.debug("JWT token validated successfully for user: {}", username);
-// UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new
-// UsernamePasswordAuthenticationToken(
-// userDetails, null, userDetails.getAuthorities());
-// usernamePasswordAuthenticationToken
-// .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-// SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-// log.debug("User authenticated successfully: {}", username);
-// } else {
-// log.error("JWT token validation failed or user is not enabled for username:
-// {}", username);
-// }
-// } else {
-// log.debug("No username found or authentication already set in context");
-// }
-// chain.doFilter(request, response);
-// } catch (JwtException e) {
-// log.error("Invalid JWT token: {}", e.getMessage(), e); // Log the exception
-// stack trace
-// response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-// response.getWriter().write("Invalid JWT token");
-// } catch (Exception e) {
-// log.error("Error during JWT processing: {}", e.getMessage(), e); // Log the
-// exception stack trace
-// response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-// response.getWriter().write("An error occurred while processing the
-// authentication request");
-// }
-// }
-// }

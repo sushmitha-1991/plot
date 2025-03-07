@@ -66,9 +66,6 @@ public class BaseUser extends Auditable implements UserDetails {
 	@Column(name = "last_name", nullable = false, length = 50)
 	private String lastName;
 
-//    @Column(name = "password_hash", nullable = false, length = 255)
-//    private String passwordHash;
-
 	@Column(name = "profile_picture", length = 255)
 	private String profilePicture; // Added profilePicture field
 

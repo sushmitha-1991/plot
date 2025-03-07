@@ -24,17 +24,7 @@ public class MastersBranchDTO {
 @NotEmpty
     private String officeName;
 
-    // @NotEmpty
-    // private String officeCode;
-
-
-    // private String description;
-
-    // @NotEmpty
-    // private Long houseId;
-    // @NotEmpty
-    // private Long createdBy;
-  
+    
 	
 	}
 

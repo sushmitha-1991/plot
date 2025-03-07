@@ -33,15 +33,4 @@ public class PlotHistoryController {
     public ResponseEntity<PlotHistoryDTO> getPlotHistoryById(@PathVariable Long id) {
         return ResponseEntity.ok(plotHistoryService.getPlotHistoryById(id));
     }
-
-    // @PutMapping("/update/{id}")
-    // public ResponseEntity<PlotHistoryDTO> updatePlotHistory(@PathVariable Long id, @RequestBody PlotHistoryDTO dto) {
-    //     return ResponseEntity.ok(plotHistoryService.updatePlotHistory(id, dto));
-    // }
-
-    // @DeleteMapping("/delete/{id}")
-    // public ResponseEntity<Void> deletePlotHistory(@PathVariable Long id) {
-    //     plotHistoryService.deletePlotHistory(id);
-    //     return ResponseEntity.noContent().build();
-    // }
 }

@@ -19,22 +19,10 @@ public class MastersLokSabhaSessionDTO {
     @NotEmpty
     private Long id;
 
-    // @NotEmpty
-    // private Long LokSabhaMasterId;
-
+    
     @NotEmpty
     private String sessionNumber;
-    // @NotEmpty
-    // private String sessionType;
-    // @NotEmpty
-    // private LocalDate sessionStart ;  
-    // @NotEmpty
-    // private LocalDate sessionEnd;
-    // @NotEmpty
-    // private Long totalSittings;
-    // @NotEmpty
-    // private Long createdBy;
-	
+    
 	}
 
     
