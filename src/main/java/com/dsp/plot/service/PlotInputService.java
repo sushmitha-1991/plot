@@ -40,5 +40,6 @@ public interface PlotInputService {
      Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
      String status);
      PlotDateChartDTO getDateChartById(Long id);
-     List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo,String lokSabhaSessionNo,String rajyaSabhaNo);
+     List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,Boolean isActive, LocalDate startDate, LocalDate endDate,
+     String status);
      }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
+import com.dsp.plot.entity.specification.DateChartSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
@@ -58,6 +60,7 @@ import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
 import com.dsp.plot.util.JwtUtil;
+import com.dsp.plot.filter.JwtFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -82,7 +85,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     @Autowired
     private PlotDateChartRepository plotDateChartRepository;
-        @Autowired
+    @Autowired
     private PlotHistoryRepository plotHistoryRepository;
 
     @Autowired
@@ -97,7 +100,9 @@ public class PlotInputServiceImpl implements PlotInputService {
     // private final PlotInputMapper mapper;
 
     @Autowired
-    private JwtUtil jwtutil;
+    private JwtUtil jwtUtil;
+    @Autowired
+    private JwtFilter jwtFilter;
     @Autowired
     private PlotInputRepository plotinputRepository;
     @Autowired
@@ -110,11 +115,9 @@ public class PlotInputServiceImpl implements PlotInputService {
             plotinputDTO.setStatus("In Progress");
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
-        System.out.println("SSSSSSSSS");
         if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
                     plotinputDTO.getProposedDateOfLaying());
-                    System.out.println("@@@@@@@@");
             if (daysDifference < 2) {
                 log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
                 log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
@@ -308,8 +311,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
-                    if(history.isPresent())
-                    {
+                    if (history.isPresent()) {
                         dto.setContent(history.get().getAddedText());
                     }
                     dtoList.add(dto);
@@ -318,8 +320,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
-                    if(history.isPresent())
-                    {
+                    if (history.isPresent()) {
                         dto.setContent(history.get().getAddedText());
                     }
                     dtoList.add(dto);
@@ -328,6 +329,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         return dtoList;
     }
+
     @Override
     public PlotInputDTO getById(Long id) {
         log.debug("Entering getById with id: {}", id);
@@ -423,102 +425,28 @@ public class PlotInputServiceImpl implements PlotInputService {
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
     }
 
-    // @Override
-    // public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String
-    // lokSabhaSessionNo, String rajyaSabhaNo) {
-    // String url = sansadUrl +
-    // "/integration-gateway/question-branch-api/get-question-chart?lsNo="
-    // + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
-
-    // //System.out.println("Requesting URL: " + url);
-
-    // String token = getTokenFromRequest();
-    // if (token == null || token.isEmpty()) {
-    // throw new RuntimeException("JWT Token is missing. Cannot proceed with the API
-    // request.");
-    // }
-
-    // HttpHeaders headers = new HttpHeaders();
-    // headers.setContentType(MediaType.APPLICATION_JSON);
-    // headers.set("Authorization", "Bearer " + token);
-
-    // HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-    // //System.out.println("Request Headers: " + headers);
-
-    // try {
-    // ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
-    // url, HttpMethod.GET, requestEntity, new
-    // ParameterizedTypeReference<List<QuesBranchApiDto>>() {});
-
-    // List<QuesBranchApiDto> quesDtoList = response.getBody();
-    // if (quesDtoList == null || quesDtoList.isEmpty()) {
-    // return Collections.emptyList();
-    // }
-    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-    // return quesDtoList.stream()
-    // .flatMap(quesDto -> {
-    // // Process Date List
-    // List<Map<String, Object>> datesList =
-    // Arrays.stream(quesDto.getDateOfAnsweringQuestions().split(","))
-    // .map(String::trim)
-    // .filter(date -> !date.isEmpty())
-    // .map(date -> {
-    // try {
-    // LocalDate proposedDate = LocalDate.parse(date, formatter);
-    // return Map.of(
-    // "proposedDateOfLying", proposedDate.toString(),
-    // "dateofSubmissionOfPapers", proposedDate.minusDays(2).toString(),
-    // "actualDateOfLying", proposedDate.toString()
-    // );
-    // } catch (Exception e) {
-    // System.err.println("Error parsing date: " + date + " - " + e.getMessage());
-    // return null;
-    // }
-    // })
-    // .filter(Objects::nonNull)
-    // .collect(Collectors.toList());
-
-    // return Arrays.stream(quesDto.getMinistriesDepartments().split(";"))
-    // .map(String::trim)
-    // .map(String::toUpperCase)
-    // .flatMap(ministry -> {
-    // PlotDateChartDTO dto = PlotDateChartDTO.builder()
-    // .groupName(quesDto.getGroup())
-    // .dates(datesList)
-    // .build();
-
-    // if (lokSabhaSessionNo != null) {
-    // masterLSSRepository.findById(Long.parseLong(lokSabhaSessionNo))
-    // .ifPresent(session -> {
-    // dto.setLokSabhaNo(session.getLokSabha().getId());
-    // dto.setLokSabhaSessionNo(session.getId());
-    // });
-    // } else if (rajyaSabhaNo != null) {
-    // mastersRSSRepository.findBySessionNumber(rajyaSabhaNo)
-    // .ifPresent(session -> dto.setRajyaSabhaSessionNo(session.getId()));
-    // }
-
-    // return ministriesRepository.findByMinistryName(ministry)
-    // .map(ministries -> {
-    // dto.setMinistryId(ministries.getId());
-    // PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
-    // return Stream.of(plotDateChartRepository.save(entity));
-    // })
-    // .orElseGet(Stream::empty);
-    // });
-    // })
-    // .collect(Collectors.toList());
-    // } catch (HttpClientErrorException e) {
-    // System.err.println("API Error: " + e.getStatusCode() + " - " +
-    // e.getResponseBodyAsString());
-    // throw new RuntimeException("Failed to call external API", e);
-    // } catch (Exception e) {
-    // System.err.println("Unexpected Error: " + e.getMessage());
-    // throw new RuntimeException("An error occurred while processing data", e);
-    // }
-    // }
     @Override
-    public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo) {
+    public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
+    Boolean isActive, LocalDate startDate, LocalDate endDate, String status) {
+        List<PlotDateChartDTO> dtoList = new ArrayList<>();
+        List<PlotDateChart> entitys;
+        if (isActive == null) {
+            isActive = true;
+        }
+        Specification<PlotDateChart> spec = Specification.where(null);
+        spec = spec.and(DateChartSpec.isActive(isActive));
+        // if (lokSabhaSessionNo != null) {
+        //     spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
+        // }
+        // if (rajyaSabhaNo != null) {
+        //     spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabhaNo));
+        // }
+        if (startDate != null || endDate != null) {
+            spec = spec.and(DateChartSpec.hasDateBetween(startDate, endDate));
+        }
+        if (status != null) {
+            spec = spec.and(DateChartSpec.hasStatus(status));
+        }
         List<PlotDateChartDTO> listOfDateCharts = plotDateChartRepository.findAll()
                 .stream()
                 .map(PlotInputMapper::dateChartMapToDTO)
@@ -529,8 +457,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                     .stream()
                     .map(PlotInputMapper::dateChartMapToDTO)
                     .collect(Collectors.toList());
-            //System.out.println(":::::  After");
-            //System.out.println(listOfDateCharts);
+            // System.out.println("::::: After");
+            // System.out.println(listOfDateCharts);
             return listOfDateCharts;
         }
         // questionBranchApi
@@ -543,7 +471,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
         List<PlotDateChartDTO> responseDtos = new ArrayList<>();
 
-        //System.out.println("Requesting URL: " + url);
+        // System.out.println("Requesting URL: " + url);
         // Get the JWT token from request/session (implement this method as per your app
         // logic)
         String token = getTokenFromRequest();
@@ -557,7 +485,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         // Create request entity with headers
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        //System.out.println("Request Headers: " + headers);
+        // System.out.println("Request Headers: " + headers);
         try {
             ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
                     url,
@@ -565,7 +493,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     requestEntity,
                     new ParameterizedTypeReference<List<QuesBranchApiDto>>() {
                     });
-            //System.out.println("API Response: " + response.getBody());
+            // System.out.println("API Response: " + response.getBody());
             List<QuesBranchApiDto> quesDtoList = response.getBody();
             for (QuesBranchApiDto quesDto : quesDtoList) {
                 // Define date format
@@ -591,8 +519,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                             .build();
                     dto.setDates(datesList);
                     dto.setGroupName(quesDto.getGroup());
-                    //System.out.println("@@@@@@@@@  ministry before   " + ministry);
-                    //System.out.println(dto);
+                    // System.out.println("@@@@@@@@@ ministry before " + ministry);
+                    // System.out.println(dto);
                     if (lokSabhaSessionNo != null) {
                         Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
                                 .findById(Long.parseLong(lokSabhaSessionNo));
@@ -609,25 +537,25 @@ public class PlotInputServiceImpl implements PlotInputService {
                             dto.setRajyaSabhaSessionNo(session.getId());
                         }
                     }
-                    //System.out.println("@@@@@@@@@  ministry after ls adding   " + ministry);
-                    //System.out.println(dto);
+                    // System.out.println("@@@@@@@@@ ministry after ls adding " + ministry);
+                    // System.out.println(dto);
                     ministry = ministry.toUpperCase();
                     ministry = ministry.trim();
-                    //System.out.println("ministry    " + ministry);
+                    // System.out.println("ministry " + ministry);
                     Optional<Ministries> optionalMinistries = ministriesRepository
                             .findByMinistryName(ministry);
-                    //System.out.println("optionalMinistries    " + optionalMinistries);
+                    // System.out.println("optionalMinistries " + optionalMinistries);
                     if (optionalMinistries.isPresent()) {
                         dto.setMinistryId(optionalMinistries.get().getId());
-                        //System.out.println("@@@@@@@@@  dto  " + optionalMinistries);
-                        //System.out.println(dto);
+                        // System.out.println("@@@@@@@@@ dto " + optionalMinistries);
+                        // System.out.println(dto);
                         PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
-                        //System.out.println("@@@@@@@@ dto to entity " + optionalMinistries);
-                        //System.out.println(entity);
+                        // System.out.println("@@@@@@@@ dto to entity " + optionalMinistries);
+                        // System.out.println(entity);
                         entity = plotDateChartRepository.save(entity);
-                        //System.out.println("after saving");
-                        //System.out.println(entity);
-                        //System.out.println("saved Successfully");
+                        // System.out.println("after saving");
+                        // System.out.println(entity);
+                        // System.out.println("saved Successfully");
                     }
 
                 }
@@ -649,9 +577,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
-
         try {
             // RestTemplate restTemplate = new RestTemplate();
             return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
@@ -662,26 +588,32 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     public String getTokenFromRequest() {
+        System.out.println("httpRequest");
+        System.out.println(httpRequest);
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
         }
         return null;
     }
-
     private Long getHouseId() {
         Long houseId = null;
+       String token= getTokenFromRequest();
+       System.out.println("token "+token);
+       Long house = jwtUtil.extractHouseId(token);
+       System.out.println("house "+house);
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("!!!!");
+        System.out.println(principal);
         if (principal instanceof UserDetailsDTO) {
             houseId = ((UserDetailsDTO) principal).getHouseId();
+            System.out.println("houseId "+houseId);
         }
-        return houseId;
+        return house;
     }
-
     @Override
     public List<PlotInputDTO> getAll() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAll'");
     }
-
 }

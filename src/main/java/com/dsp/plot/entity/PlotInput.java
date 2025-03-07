@@ -133,4 +133,7 @@ public class PlotInput extends InputInstance {
     @ManyToOne
     @JoinColumn(name = "ministry_id", referencedColumnName = "id",insertable=false,updatable=false)
     private Ministries ministries;
+    @ManyToOne
+    @JoinColumn(name = "department_id", referencedColumnName = "id",insertable=false,updatable=false)
+    private Ministries departments;
    }

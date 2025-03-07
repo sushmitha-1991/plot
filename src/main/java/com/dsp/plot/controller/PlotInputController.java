@@ -56,40 +56,43 @@ public class PlotInputController {
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @GetMapping("/getAll")
         public ResponseEntity<GenericResponse<List<PlotInputDTO>>> getAllPlotInputs(
-                @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false) Boolean draftStatus,
-            @RequestParam(required = false) Long lokSabhaNo,
-            @RequestParam(required = false) Long lokSabhaSessionNo,
-            @RequestParam(required = false) Long rajyaSabhaSessionNo,
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String status) {
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(required = false) Boolean draftStatus,
+                        @RequestParam(required = false) Long lokSabhaNo,
+                        @RequestParam(required = false) Long lokSabhaSessionNo,
+                        @RequestParam(required = false) Long rajyaSabhaSessionNo,
+                        @RequestParam(required = false) LocalDate startDate,
+                        @RequestParam(required = false) LocalDate endDate,
+                        @RequestParam(required = false) String status) {
 
-                List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive,draftStatus,lokSabhaNo,lokSabhaSessionNo,
-                rajyaSabhaSessionNo,startDate,endDate,status);
+                List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive, draftStatus, lokSabhaNo,
+                                lokSabhaSessionNo,
+                                rajyaSabhaSessionNo, startDate, endDate, status);
 
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+
         @Operation(summary = "Get all PlotInputs", description = "Retrieves a list of all PlotInputs.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "PlotInputs retrieved successfully"),
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @GetMapping("/get-plot-inputs")
         public ResponseEntity<GenericResponse<List<PlotInputDTO>>> getAllPlotInputsHistories(
-                @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false) Boolean draftStatus,
-            @RequestParam(required = false) Long lokSabhaNo,
-            @RequestParam(required = false) Long lokSabhaSessionNo,
-            @RequestParam(required = false) Long rajyaSabhaSessionNo,
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String status) {
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(required = false) Boolean draftStatus,
+                        @RequestParam(required = false) Long lokSabhaNo,
+                        @RequestParam(required = false) Long lokSabhaSessionNo,
+                        @RequestParam(required = false) Long rajyaSabhaSessionNo,
+                        @RequestParam(required = false) LocalDate startDate,
+                        @RequestParam(required = false) LocalDate endDate,
+                        @RequestParam(required = false) String status) {
 
-                List<PlotInputDTO> fectchedEntities = plotinputService.getHistories(isActive,draftStatus,lokSabhaNo,lokSabhaSessionNo,
-                rajyaSabhaSessionNo,startDate,endDate,status);
+                List<PlotInputDTO> fectchedEntities = plotinputService.getHistories(isActive, draftStatus, lokSabhaNo,
+                                lokSabhaSessionNo,
+                                rajyaSabhaSessionNo, startDate, endDate, status);
 
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
@@ -138,26 +141,22 @@ public class PlotInputController {
         @PutMapping("/updatedAtCreator/{id}")
         public ResponseEntity<GenericResponse<PlotInputDTO>> updateAtCreator(@PathVariable Long id,
                         @RequestBody PlotInputDTO plotinputDTO) {
-if(plotinputDTO.getStatus().equalsIgnoreCase("returned"))
-               {
-        
-                PlotInputDTO updatedEntity = plotinputService.update(id, plotinputDTO);
+                if (plotinputDTO.getStatus().equalsIgnoreCase("returned")) {
 
-                GenericResponse<PlotInputDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                                "PlotInput updated successfully", updatedEntity);
+                        PlotInputDTO updatedEntity = plotinputService.update(id, plotinputDTO);
 
-                return new ResponseEntity<>(response, HttpStatus.OK);
-               }
-               else
-               {
-                PlotInputDTO updatedEntity = plotinputService.update(id, plotinputDTO);
-                GenericResponse<PlotInputDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                                "PlotInput updated successfully", updatedEntity);
-                return new ResponseEntity<>(response, HttpStatus.OK);
-               }
+                        GenericResponse<PlotInputDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                        "PlotInput updated successfully", updatedEntity);
+
+                        return new ResponseEntity<>(response, HttpStatus.OK);
+                } else {
+                        PlotInputDTO updatedEntity = plotinputService.update(id, plotinputDTO);
+                        GenericResponse<PlotInputDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                        "PlotInput updated successfully", updatedEntity);
+                        return new ResponseEntity<>(response, HttpStatus.OK);
+                }
 
         }
-
 
         @Operation(summary = "Delete a PlotInput by ID", description = "Deletes a specific PlotInput by its ID.")
         @ApiResponses(value = {
@@ -181,11 +180,12 @@ if(plotinputDTO.getStatus().equalsIgnoreCase("returned"))
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @PostMapping("/raise-request")
         public ResponseEntity<GenericResponse<RequestDTO>> createRequest(@RequestBody RequestDTO dto) {
-                RequestDTO response=plotinputService.saveRequest(dto);
-                GenericResponse<RequestDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
-                true,"Request raised successfully.", response);
+                RequestDTO response = plotinputService.saveRequest(dto);
+                GenericResponse<RequestDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(),
+                                true, "Request raised successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
+
         @GetMapping("/getRequest/{id}")
         public ResponseEntity<GenericResponse<RequestDTO>> getRequestById(@PathVariable Long id) {
 
@@ -197,7 +197,6 @@ if(plotinputDTO.getStatus().equalsIgnoreCase("returned"))
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
-
         @Operation(summary = "Save Date Chart ", description = "Adding Date Chart in Plot")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Date Chart Saved Properly"),
@@ -205,11 +204,12 @@ if(plotinputDTO.getStatus().equalsIgnoreCase("returned"))
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @PostMapping("/addDateChart")
         public ResponseEntity<GenericResponse<PlotDateChartDTO>> addDateChart(@RequestBody PlotDateChartDTO dto) {
-                PlotDateChartDTO response=plotinputService.addDateChart(dto);
-                GenericResponse<PlotDateChartDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
-                true," Manage Date Chart submitted successfully.", response);
+                PlotDateChartDTO response = plotinputService.addDateChart(dto);
+                GenericResponse<PlotDateChartDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(),
+                                true, " Manage Date Chart submitted successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
+
         @Operation(summary = "Get all request ", description = "Retrieve request by its id.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "PlotDoc retrieved successfully"),
@@ -217,11 +217,12 @@ if(plotinputDTO.getStatus().equalsIgnoreCase("returned"))
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @GetMapping("/getDateChart/{id}")
         public ResponseEntity<GenericResponse<PlotDateChartDTO>> getDateChartById(@PathVariable Long id) {
-                PlotDateChartDTO response=plotinputService.getDateChartById(id);
-                GenericResponse<PlotDateChartDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
-                true,"Requests retrieved successfully.", response);
+                PlotDateChartDTO response = plotinputService.getDateChartById(id);
+                GenericResponse<PlotDateChartDTO> responseDTO = new GenericResponse<>(HttpStatus.OK.value(),
+                                true, "Requests retrieved successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
+
         @Operation(summary = "Get all request ", description = "Retrieve request by its id.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "PlotDoc retrieved successfully"),
@@ -229,17 +230,24 @@ if(plotinputDTO.getStatus().equalsIgnoreCase("returned"))
                         @ApiResponse(responseCode = "500", description = "Internal server error") })
         @GetMapping("/getAllRequests/{plotId}")
         public ResponseEntity<GenericResponse<List<RequestDTO>>> getAllRequests(@PathVariable Long plotId) {
-                List<RequestDTO> response=plotinputService.getAllRequestsByPlotId(plotId);
-                GenericResponse<List<RequestDTO>> responseDTO = new GenericResponse<>(HttpStatus.OK.value(), 
-                true,"Requests retrieved successfully.", response);
+                List<RequestDTO> response = plotinputService.getAllRequestsByPlotId(plotId);
+                GenericResponse<List<RequestDTO>> responseDTO = new GenericResponse<>(HttpStatus.OK.value(),
+                                true, "Requests retrieved successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
+
         @GetMapping("/getDateCharts")
-        public ResponseEntity<GenericResponse<List<PlotDateChartDTO>>> getAllDateCharts(@RequestParam(required=false) String lokSabhaNo,
-        @RequestParam(required=false) String lokSabhaSessionNo,@RequestParam(required=false) String rajyaSabhaNo) {
-                List<PlotDateChartDTO> response=plotinputService.getAllDateCharts( lokSabhaNo, lokSabhaSessionNo,rajyaSabhaNo);
+        public ResponseEntity<GenericResponse<List<PlotDateChartDTO>>> getAllDateCharts(
+                        @RequestParam(required = false) String lokSabhaNo,
+                        @RequestParam(required = false) String lokSabhaSessionNo,
+                        @RequestParam(required = false) String rajyaSabhaNo,
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(required = false) LocalDate startDate,
+                        @RequestParam(required = false) LocalDate endDate,
+                        @RequestParam(required = false) String status) {
+                List<PlotDateChartDTO> response = plotinputService.getAllDateCharts(lokSabhaNo, lokSabhaSessionNo,rajyaSabhaNo, isActive, startDate, endDate,status);
                 GenericResponse<List<PlotDateChartDTO>> responseDTO = new GenericResponse<>(HttpStatus.OK.value(),
-                true,"dateCharts retrieved successfully.", response);
+                                true, "dateCharts retrieved successfully.", response);
                 return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
 }

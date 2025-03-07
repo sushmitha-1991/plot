@@ -56,4 +56,7 @@ public class JwtUtil {
 	private Date extractExpiration(String token) {
 		return extractClaim(token, Claims::getExpiration);
 	}
+	public Long extractHouseId(String token) {
+        return extractClaim(token, claims -> claims.get("houseId", Long.class));
+    }
 }

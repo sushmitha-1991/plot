@@ -99,6 +99,7 @@ public class PlotInputMapper {
 
                                 .inputInstanceDTO(InputInstanceDTO.builder()
                                                 .id(entity.getId())
+                                                .createdAt(entity.getCreatedAt())
                                                 .applicationId(entity.getApplicationId())
                                                 .applicationNo(entity.getApplicationNo())
                                                 .currentStatus(entity.getCurrentStatus())
