@@ -3,7 +3,6 @@ package com.dsp.plot.service.impl;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -14,10 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-<<<<<<< HEAD
-=======
-import org.apache.commons.lang3.StringEscapeUtils;
->>>>>>> f519ad9b7415645daa1b6a9fa20540b548634141
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +51,7 @@ import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.specification.DateChartSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
+import com.dsp.plot.filter.JwtFilter;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
 import com.dsp.plot.repository.CodeRepository;
@@ -69,7 +65,6 @@ import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
 import com.dsp.plot.util.JwtUtil;
-import com.dsp.plot.filter.JwtFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -823,47 +818,11 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     @Override
     public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
-<<<<<<< HEAD
-    Boolean isActive, LocalDate startDate, LocalDate endDate, String status) {
-        List<PlotDateChartDTO> dtoList = new ArrayList<>();
-        List<PlotDateChart> entitys;
-        if (isActive == null) {
-            isActive = true;
-        }
-        Specification<PlotDateChart> spec = Specification.where(null);
-        spec = spec.and(DateChartSpec.isActive(isActive));
-        // if (lokSabhaSessionNo != null) {
-        //     spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
-        // }
-        // if (rajyaSabhaNo != null) {
-        //     spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabhaNo));
-        // }
-        if (startDate != null || endDate != null) {
-            spec = spec.and(DateChartSpec.hasDateBetween(startDate, endDate));
-        }
-        if (status != null) {
-            spec = spec.and(DateChartSpec.hasStatus(status));
-        }
-        List<PlotDateChartDTO> listOfDateCharts = plotDateChartRepository.findAll()
-                .stream()
-                .map(PlotInputMapper::dateChartMapToDTO)
-                .collect(Collectors.toList());
-        if (listOfDateCharts == null || listOfDateCharts.isEmpty()) {
-            String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo);
-            listOfDateCharts = plotDateChartRepository.findAll()
-                    .stream()
-                    .map(PlotInputMapper::dateChartMapToDTO)
-                    .collect(Collectors.toList());
-            // System.out.println("::::: After");
-            // System.out.println(listOfDateCharts);
-            return listOfDateCharts;
-=======
             Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId, String groupName,
             LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying) {
         Long houseId = getHouseId();
         if (isActive == null) {
             isActive = true;
->>>>>>> f519ad9b7415645daa1b6a9fa20540b548634141
         }
         Specification<PlotDateChart> spec = Specification.where(null);
         spec = spec.and(DateChartSpec.isActive(isActive));
@@ -928,102 +887,8 @@ public class PlotInputServiceImpl implements PlotInputService {
         return dtoList;
     }
 
+    
     // question api
-<<<<<<< HEAD
-    public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo) {
-        String url = sansadUrl + "/integration-gateway/question-branch-api/get-question-chart?lsNo="
-                + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
-        List<PlotDateChartDTO> responseDtos = new ArrayList<>();
-
-        // System.out.println("Requesting URL: " + url);
-        // Get the JWT token from request/session (implement this method as per your app
-        // logic)
-        String token = getTokenFromRequest();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        // Add the Authorization token if available
-        if (token != null && !token.isEmpty()) {
-            headers.set("Authorization", "Bearer " + token);
-        } else {
-            throw new RuntimeException("JWT Token is missing. Cannot proceed with the API request.");
-        }
-        // Create request entity with headers
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        // System.out.println("Request Headers: " + headers);
-        try {
-            ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    requestEntity,
-                    new ParameterizedTypeReference<List<QuesBranchApiDto>>() {
-                    });
-            // System.out.println("API Response: " + response.getBody());
-            List<QuesBranchApiDto> quesDtoList = response.getBody();
-            for (QuesBranchApiDto quesDto : quesDtoList) {
-                // Define date format
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-                // Convert to List<Map<String, Object>>
-                List<Map<String, Object>> datesList = Arrays
-                        .stream(quesDto.getDateOfAnsweringQuestions().split(","))
-                        .map(String::trim)
-                        .map(date -> {
-                            LocalDate proposedDate = LocalDate.parse(date, formatter);
-                            LocalDate submissionDate = proposedDate.minusDays(2);
-                            // Create the JSON-like structure
-                            Map<String, Object> dateMap = new HashMap<>();
-                            dateMap.put("proposedDateOfLying", proposedDate.toString());
-                            dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
-                            dateMap.put("actualDateOfLying", "");
-                            return dateMap;
-                        })
-                        .collect(Collectors.toList());
-                String[] ministries = quesDto.getMinistriesDepartments().split(";");
-                for (String ministry : ministries) {
-                    PlotDateChartDTO dto = PlotDateChartDTO.builder()
-                            .build();
-                    dto.setDates(datesList);
-                    dto.setGroupName(quesDto.getGroup());
-                    // System.out.println("@@@@@@@@@ ministry before " + ministry);
-                    // System.out.println(dto);
-                    if (lokSabhaSessionNo != null) {
-                        Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
-                                .findById(Long.parseLong(lokSabhaSessionNo));
-                        if (optionalSession.isPresent()) {
-                            MastersLokSabhaSession session = optionalSession.get();
-                            dto.setLokSabhaNo(session.getLokSabha().getId());
-                            dto.setLokSabhaSessionNo(session.getId());
-                        }
-                    } else if (rajyaSabhaNo != null) {
-                        Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
-                                .findBySessionNumber(rajyaSabhaNo);
-                        if (optionalSession.isPresent()) {
-                            MastersRajyaSabha session = optionalSession.get();
-                            dto.setRajyaSabhaSessionNo(session.getId());
-                        }
-                    }
-                    // System.out.println("@@@@@@@@@ ministry after ls adding " + ministry);
-                    // System.out.println(dto);
-                    ministry = ministry.toUpperCase();
-                    ministry = ministry.trim();
-                    // System.out.println("ministry " + ministry);
-                    Optional<Ministries> optionalMinistries = ministriesRepository
-                            .findByMinistryName(ministry);
-                    // System.out.println("optionalMinistries " + optionalMinistries);
-                    if (optionalMinistries.isPresent()) {
-                        dto.setMinistryId(optionalMinistries.get().getId());
-                        // System.out.println("@@@@@@@@@ dto " + optionalMinistries);
-                        // System.out.println(dto);
-                        PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
-                        // System.out.println("@@@@@@@@ dto to entity " + optionalMinistries);
-                        // System.out.println(entity);
-                        entity = plotDateChartRepository.save(entity);
-                        // System.out.println("after saving");
-                        // System.out.println(entity);
-                        // System.out.println("saved Successfully");
-                    }
-
-                }
-=======
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
             List<Long> existingMinistries, Long houseId) {
         List<PlotDateChart> entityList = new ArrayList<>();
@@ -1180,11 +1045,10 @@ public class PlotInputServiceImpl implements PlotInputService {
             } catch (HttpClientErrorException e) {
                 System.err.println("API Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
                 throw new RuntimeException("Failed to call external API", e);
->>>>>>> f519ad9b7415645daa1b6a9fa20540b548634141
             }
         }
     }
-
+    
     // Generate Application No Functionality
     public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
         String url = masterServiceUrl + "/serial-number";

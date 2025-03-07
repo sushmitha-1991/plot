@@ -135,16 +135,11 @@ public class PlotInput extends InputInstance {
     @ManyToOne
     @JoinColumn(name = "ministry_id", referencedColumnName = "id",insertable=false,updatable=false)
     private Ministries ministries;
-    @ManyToOne
-<<<<<<< HEAD
-    @JoinColumn(name = "department_id", referencedColumnName = "id",insertable=false,updatable=false)
-    private Ministries departments;
-=======
+
     @JoinColumn(name = "paper_type_id", referencedColumnName = "id",insertable=false,updatable=false)
     private MasterCode PaperTypes;
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id",insertable=false,updatable=false)
     private Departments departments;
 
->>>>>>> f519ad9b7415645daa1b6a9fa20540b548634141
    }

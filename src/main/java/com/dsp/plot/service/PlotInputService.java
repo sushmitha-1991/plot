@@ -34,17 +34,6 @@ public interface PlotInputService {
     List<RequestDTO> getAllRequestsByPlotId(Long plotId);
 
     RequestDTO getRequestById(Long id);
-<<<<<<< HEAD
-        // DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
-     PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
-     List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
-     Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-     String status);
-     PlotDateChartDTO getDateChartById(Long id);
-     List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,Boolean isActive, LocalDate startDate, LocalDate endDate,
-     String status);
-     }
-=======
 
     // DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
     PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
@@ -60,4 +49,3 @@ public interface PlotInputService {
             Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId, String groupName,
             LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying);
 }
->>>>>>> f519ad9b7415645daa1b6a9fa20540b548634141
