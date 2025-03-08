@@ -128,10 +128,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private String generateNewToken() {
         try {
-            AuthRequestDTO authRequest = AuthRequestDTO.builder()
-                    .email("testuser5@sansad.nic.in")
-                    .otp("123456")
-                    .build();
+            // AuthRequestDTO authRequest = AuthRequestDTO.builder()
+            //         .email("testuser5@sansad.nic.in")
+            //         .otp("123456")
+            //         .build();
             return jwtUtil.generateToken(lsUserName);
 
         } catch (Exception e) {
