@@ -4,11 +4,17 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.entity.MasterCode;
+import com.dsp.plot.entity.MastersLokSabhaSession;
+import com.dsp.plot.entity.MastersRajyaSabha;
+import com.dsp.plot.entity.Ministries;
 import com.dsp.plot.util.JsonMapConverter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,8 +30,12 @@ public class PlotLaidOnTableDTO {
     private Long lokSabhaSessionNo;
     private Long rajyaSabhaSessionNo;
     private LocalDate plotLaidDate;
-       private Long ministryId;
+    private Long ministryId;
+    private String status;
     private String title;
     private List<Map<String, Object>> documents;
-
+    private MastersLokSabhaSession lokSabhSessionDetails;
+    private MastersRajyaSabha rajyaSabhaSessionDetails;
+    private MinistriesDTO ministries;
+    
 }

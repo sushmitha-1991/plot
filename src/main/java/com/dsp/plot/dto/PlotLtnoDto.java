@@ -4,10 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.entity.MasterCode;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,11 +35,12 @@ public class PlotLtnoDto {
     private String status;
     private String remarks;
     private String refNo;
-    //Application Instance
+    // Application Instance
     private Long applicationId;
     private String applicationNo;
     private ApplicationInstanceDTO applicationInstanceDTO;
     private MastersLokSabhaSession lokSabhSessionDetails;
     private MastersRajyaSabha rajyaSabhaSessionDetails;
-    private Ministries ministries;
+    private MinistriesDTO ministries;
+    private MasterCodeDTO PaperTypes;
 }

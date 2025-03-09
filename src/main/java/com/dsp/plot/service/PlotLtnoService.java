@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
+import com.dsp.plot.dto.PlotLaidOnTableDTO;
 import com.dsp.plot.dto.PlotLtnoDto;
 import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.entity.PlotDateChart;
@@ -21,12 +22,21 @@ public interface PlotLtnoService {
 
     List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status);
+            String status,Long ministryId);
 
     PlotLtnoDto getById(Long id);
 
     PlotLtnoDto update(Long id, PlotLtnoDto plotLtnoDto);
 
     void delete(Long id);
+
+    PlotLaidOnTableDTO getTitleById(Long id);
+
+    PlotLaidOnTableDTO updateTitle(Long id, PlotLaidOnTableDTO plotDto);
+
+    List<PlotLaidOnTableDTO> getTitles(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo,
+            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,Long ministryId);
+
+    PlotLaidOnTableDTO saveTitle(PlotLaidOnTableDTO plotLaidOnTableDTO);
 
 }

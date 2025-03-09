@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +21,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.dsp.plot.dto.PlotLaidOnTableDTO;
 import com.dsp.plot.dto.PlotLtnoDto;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
+import com.dsp.plot.entity.PaperLaidOnTable;
 import com.dsp.plot.entity.PlotLtno;
+import com.dsp.plot.entity.specification.PlotInputSpec;
+import com.dsp.plot.entity.specification.PlotLtnoSpec;
+import com.dsp.plot.entity.specification.PlotTitleSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.LtnoMapper;
 import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
+import com.dsp.plot.repository.PaperLaidRepository;
 import com.dsp.plot.repository.PlotLtnoRepository;
 import com.dsp.plot.service.PlotLtnoService;
 
@@ -49,6 +56,8 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
     private HttpServletRequest httpRequest;
     @Autowired
     private PlotLtnoRepository ltnoRepo;
+    @Autowired
+    private PaperLaidRepository titleRepo;
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
     @Autowired
@@ -133,7 +142,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
     @Override
     public List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status) {
+            String status, Long ministryId) {
         log.debug("Entering getAll Plots");
         List<PlotLtnoDto> dtoList = new ArrayList<>();
         List<PlotLtno> entitys;
@@ -144,24 +153,26 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             isActive = true;
         }
         Specification<PlotLtno> spec = Specification.where(null);
-        // spec = spec.and(PlotInputSpec.isActive(isActive));
-        // if (draftStatus != null) {
-        // spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
-        // }
-        // if (lokSabhaSessionNo != null) {
-        // spec = spec.and(PlotInputSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
-        // }
-        // if (rajyaSabhaSessionNo != null) {
-        // spec = spec.and(PlotInputSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
-        // }
-        // if (startDate != null || endDate != null) {
-        // spec = spec.and(PlotInputSpec.hasDateBetween(startDate, endDate));
-        // }
-        // if (status != null) {
-        // spec = spec.and(PlotInputSpec.hasStatus(status));
-        // }
-        entitys = ltnoRepo.findAll();
-        // entitys = ltnoRepo.findAll(spec);
+        spec = spec.and(PlotLtnoSpec.isActive(isActive));
+
+        if (lokSabhaSessionNo != null) {
+            spec = spec.and(PlotLtnoSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
+        }
+        if (rajyaSabhaSessionNo != null) {
+            spec = spec.and(PlotLtnoSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
+        }
+        if (startDate != null || endDate != null) {
+            spec = spec.and(PlotLtnoSpec.hasDateBetween(startDate, endDate));
+        }
+        if (status != null) {
+            spec = spec.and(PlotLtnoSpec.hasStatus(status));
+        }
+        if (ministryId != null) {
+            spec = spec.and(PlotLtnoSpec.hasMinistryId(ministryId));
+        }
+
+        // entitys = ltnoRepo.findAll();
+        entitys = ltnoRepo.findAll(spec);
         Long houseId = getHouseId();
         for (PlotLtno entity : entitys) {
             if (houseId == 1) {
@@ -180,6 +191,100 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         log.info("Returning list of PlotDTOs: {}", dtoList);
         log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
+    }
+
+    @Override
+    public void delete(Long id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+    }
+
+    @Override
+    public PlotLaidOnTableDTO getTitleById(Long id) {
+        log.debug("Entering getById with id: {}", id);
+        PaperLaidOnTable dBEntity = titleRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Plot Ltno not found with id: " + id));
+        log.debug("Fetched Plot Laid On Table by id: {}", dBEntity);
+        PlotLaidOnTableDTO dto = LtnoMapper.titleToDTO(dBEntity);
+        return dto;
+    }
+
+    @Override
+    public List<PlotLaidOnTableDTO> getTitles(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo,
+            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, Long ministryId) {
+        // TODO Auto-generated method stub
+        log.debug("Entering getAll Plots");
+        List<PlotLaidOnTableDTO> dtoList = new ArrayList<>();
+        List<PaperLaidOnTable> entitys;
+        if (isActive == null) {
+            isActive = true;
+        }
+        Specification<PaperLaidOnTable> spec = Specification.where(null);
+        spec = spec.and(PlotTitleSpec.isActive(isActive));
+        if (lokSabhaSessionNo != null) {
+            spec = spec.and(PlotTitleSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
+        }
+        if (rajyaSabhaSessionNo != null) {
+            spec = spec.and(PlotTitleSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
+        }
+        if (startDate != null || endDate != null) {
+            spec = spec.and(PlotTitleSpec.hasDateBetween(startDate, endDate));
+        }
+        if (status != null) {
+            spec = spec.and(PlotTitleSpec.hasStatus(status));
+        }
+        entitys = titleRepo.findAll(spec);
+        // entitys = ltnoRepo.findAll(spec);
+        Long houseId = getHouseId();
+        for (PaperLaidOnTable entity : entitys) {
+            if (houseId == 1) {
+                if (entity.getRajyaSabhaSessionNo() != null) {
+                    PlotLaidOnTableDTO dto = LtnoMapper.titleToDTO(entity);
+                    dtoList.add(dto);
+                }
+            } else if (houseId == 2) {
+                if (entity.getLokSabhaSessionNo() != null) {
+                    PlotLaidOnTableDTO dto = LtnoMapper.titleToDTO(entity);
+                    dtoList.add(dto);
+                }
+            }
+        }
+        log.debug("Returning list of PlotDTOs: {}", dtoList);
+        log.info("Returning list of PlotDTOs: {}", dtoList);
+        log.error("Returning list of PlotDTOs: {}", dtoList);
+        return dtoList;
+    }
+
+    @Override
+    public PlotLaidOnTableDTO saveTitle(PlotLaidOnTableDTO plotLaidOnTableDTO) {
+        if (plotLaidOnTableDTO.getStatus() == null) {
+            plotLaidOnTableDTO.setStatus("In Progress");
+        }
+        log.debug("Entering savePlot with plotDTO: {}", plotLaidOnTableDTO);
+        try {
+            // Convert DTO to entity
+            PaperLaidOnTable entity = LtnoMapper.titleToEntity(plotLaidOnTableDTO);
+            log.debug("Converted PlotDTO to entity: {}", entity);
+            // Save Plot entity
+            Long houseId = getHouseId();
+
+            entity = titleRepo.save(entity);
+            log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
+            // entity = plotRepository.save(entity);
+            // Convert saved entity back to DTO
+            PlotLaidOnTableDTO responseDTO = LtnoMapper.titleToDTO(entity);
+            log.debug("Returning PlotInputDTO: {}", responseDTO);
+            return responseDTO;
+        } catch (Exception e) {
+            log.error("Error in savePlotInput: ", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public PlotLaidOnTableDTO updateTitle(Long id, PlotLaidOnTableDTO plotDto) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
@@ -202,7 +307,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
         PlotLtno dbEntityNew = LtnoMapper.toEntity(plotDTO);
-        
+
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true); // Allow access to private fields
@@ -269,12 +374,6 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             houseId = ((UserDetailsDTO) principal).getHouseId();
         }
         return houseId;
-    }
-
-    @Override
-    public void delete(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
 }

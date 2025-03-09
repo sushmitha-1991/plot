@@ -19,6 +19,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -28,7 +29,7 @@ import lombok.experimental.SuperBuilder;
 @Audited
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Builder
 @Table(name = "plot_date_chart", schema = "plot")
 public class PlotDateChart extends Auditable {
 

@@ -59,14 +59,12 @@ public class PlotInputDTO {
     private InputInstanceDTO inputInstanceDTO;
     private ApproverDTO nodalOfficerDTO;
     private ApproverDTO authenticatorDTO;
-    private Ministries ministies;
-    private MasterCode PaperTypes;
-    private Departments departments;
-
+    private MinistriesDTO ministies;
+    private MasterCodeDTO PaperTypes;
+    private DepartmentDTO departments;
     private MastersLokSabhaDTO lokSabhaDTO;
     private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
     private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
     // requests
     private List<RequestDTO> requests;
-
 }
