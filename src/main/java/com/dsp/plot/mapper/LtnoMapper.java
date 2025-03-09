@@ -20,6 +20,8 @@ public interface LtnoMapper {
                 .ltnoDate(dto.getLtnoDate())
                 .paperName(dto.getPaperName())
                 .ministryId(dto.getMinistryId())
+                .ltnoNo(dto.getLtnoNo())
+                .title(dto.getTitle())
                 .documents(dto.getDocuments())
                 .status(dto.getStatus())
                 .remarks(dto.getRemarks())
@@ -27,6 +29,14 @@ public interface LtnoMapper {
                 .applicationId(dto.getApplicationId())
                 .applicationNo(dto.getApplicationNo())
                 .build();
+                /*
+    
+    
+  
+    private String ltnoNo;
+    private String title;
+    
+    */
     }
 
     public static PlotLtnoDto toDTO(PlotLtno entity) {
@@ -41,6 +51,8 @@ public interface LtnoMapper {
                 .ministryId(entity.getMinistryId())
                 .documents(entity.getDocuments())
                 .status(entity.getStatus())
+                .ltnoNo(entity.getLtnoNo())
+                .title(entity.getTitle())
                 .remarks(entity.getRemarks())
                 .refNo(entity.getRefNo())
                 .applicationId(entity.getApplicationId())

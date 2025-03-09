@@ -72,6 +72,8 @@ public class PlotGenerate extends ApplicationInstance {
     private String paperName;
     @Column(name = "remarks", length = 200)
     private String remarks;
+    // @Column(name = "remarks", length = 200)
+    // private String remarks;
      @ManyToOne
     @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
     private MastersLokSabhaSession lokSabhSessionDetails;

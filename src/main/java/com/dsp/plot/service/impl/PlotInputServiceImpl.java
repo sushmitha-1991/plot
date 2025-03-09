@@ -45,13 +45,13 @@ import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
 import com.dsp.plot.entity.PlotDateChart;
+import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.specification.DateChartSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
-import com.dsp.plot.filter.JwtFilter;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
 import com.dsp.plot.repository.CodeRepository;
@@ -60,11 +60,11 @@ import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MinistriesRepository;
 import com.dsp.plot.repository.MyUserRepository;
 import com.dsp.plot.repository.PlotDateChartRepository;
+import com.dsp.plot.repository.PlotGenerateRepository;
 import com.dsp.plot.repository.PlotHistoryRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
-import com.dsp.plot.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -75,6 +75,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String masterServiceUrl;
     @Autowired
     private HttpServletRequest httpRequest;
+    @Autowired
+    private PlotGenerateRepository repository;
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
     @Autowired
@@ -100,10 +102,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
     // private final PlotInputMapper mapper;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
-    private JwtFilter jwtFilter;
+   
     @Autowired
     private PlotInputRepository plotinputRepository;
     @Autowired
@@ -540,9 +539,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         Specification<PlotInput> spec = Specification.where(null);
         spec = spec.and(PlotInputSpec.isActive(isActive));
-        // if (draftStatus != null) {
-        // spec = spec.and(PlotInputSpec.hasDraftStatus(draftStatus));
-        // }
+
         if (lokSabhaSessionNo != null) {
             spec = spec.and(PlotInputSpec.hasLokSabhaSessionNo(lokSabhaSessionNo));
         }
@@ -581,11 +578,47 @@ public class PlotInputServiceImpl implements PlotInputService {
         for (PlotInput entity : entitys) {
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
+                    if (entity.getApplicationInstanceId() != null) {
+                        PlotGenerate plot = repository
+                                .findById(entity.getApplicationInstanceId()).get();
+                        if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
+                                || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
+                            if (plot.getCurrentStatus().equalsIgnoreCase("published")
+                                    || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
+                                entity.setPendingAt(" ");
+                                entity.setStatus(plot.getCurrentStatus());
+                                entity.setCurrentStatus(plot.getCurrentStatus());
+                            } else {
+                                entity.setPendingAt("Table Office");
+                                entity.setStatus("In Progress");
+                                entity.setCurrentStatus("In Progress");
+                            }
+                        }
+                    }
+                    entity = plotinputRepository.save(entity);
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     dtoList.add(dto);
                 }
             } else if (houseId == 2) {
                 if (entity.getLokSabhaSessionNo() != null) {
+                    if (entity.getApplicationInstanceId() != null) {
+                        PlotGenerate plot = repository
+                                .findById(entity.getApplicationInstanceId()).get();
+                        if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
+                                || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
+                            if (plot.getCurrentStatus().equalsIgnoreCase("published")
+                                    || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
+                                entity.setPendingAt(" ");
+                                entity.setStatus(plot.getCurrentStatus());
+                                entity.setCurrentStatus(plot.getCurrentStatus());
+                            } else {
+                                entity.setPendingAt("Table Office A");
+                                entity.setStatus("In Progress");
+                                entity.setCurrentStatus("In Progress");
+                            }
+                        }
+                    }
+                    entity = plotinputRepository.save(entity);
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     dtoList.add(dto);
                 }
@@ -676,6 +709,25 @@ public class PlotInputServiceImpl implements PlotInputService {
         PlotInput dBEntity = plotinputRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PlotInput not found with id: " + id));
         log.debug("Fetched PlotInput by id: {}", dBEntity);
+
+        if (dBEntity.getApplicationInstanceId() != null) {
+            PlotGenerate plot = repository
+                    .findById(dBEntity.getApplicationInstanceId()).get();
+            if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
+                    || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
+                if (plot.getCurrentStatus().equalsIgnoreCase("published")
+                        || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
+                            dBEntity.setPendingAt(" ");
+                            dBEntity.setStatus(plot.getCurrentStatus());
+                            dBEntity.setCurrentStatus(plot.getCurrentStatus());
+                } else {
+                    // entity.setPendingAt("Table Office");
+                    dBEntity.setStatus("In Progress");
+                    dBEntity.setCurrentStatus("In Progress");
+                }
+            }
+        }
+        dBEntity = plotinputRepository.save(dBEntity);
         PlotInputDTO dto = PlotInputMapper.toDTO(dBEntity);
         return dto;
     }
@@ -715,8 +767,21 @@ public class PlotInputServiceImpl implements PlotInputService {
                 throw new RuntimeException("Error updating field: " + field.getName(), e);
             }
         }
-
         // Save the updated PlotInput
+        // dbEntity = plotinputRepository.save(dbEntity);
+        Long houseId = getHouseId();
+        if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
+            System.out.println("@@@@@@@@@");
+            BaseUser user = userRepository.findById(dbEntity.getCreatedBy()).get();
+            dbEntity.setPendingAt(user.getFirstName() + " " + user.getLastName());
+            System.out.println(dbEntity.getPendingAt());
+        } else {
+            if (houseId == 1) {
+                dbEntity.setPendingAt("Table Office");
+            } else if (houseId == 2) {
+                dbEntity.setPendingAt("Table Office A");
+            }
+        }
         dbEntity = plotinputRepository.save(dbEntity);
         // Prepare the response DTO
         return (PlotInputMapper.toDTO(dbEntity));
@@ -1030,6 +1095,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 throw new RuntimeException("Failed to call external API", e);
             }
         }
+
     }
 
     // Generate Application No Functionality

@@ -39,7 +39,6 @@ public class PlotGenerateDTO {
 	private String applicationNo;
 	private Long refId;
 	private String currentStatus;
-	
     private ApproverDTO approverDTO;
     private ApplicationInstanceDTO applicationInstanceDTO;
 }

@@ -140,9 +140,8 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
     }
 
     @Override
-    public List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo,
-            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status, Long ministryId) {
+    public List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
+            LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo,Long paperTypeId) {
         log.debug("Entering getAll Plots");
         List<PlotLtnoDto> dtoList = new ArrayList<>();
         List<PlotLtno> entitys;
@@ -167,8 +166,14 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         if (status != null) {
             spec = spec.and(PlotLtnoSpec.hasStatus(status));
         }
+        if (ltnoNo != null) {
+            spec = spec.and(PlotLtnoSpec.hasLtnoNo(ltnoNo));
+        }
         if (ministryId != null) {
             spec = spec.and(PlotLtnoSpec.hasMinistryId(ministryId));
+        }
+        if (paperTypeId != null) {
+            spec = spec.and(PlotLtnoSpec.hasPaperTypeId(paperTypeId));
         }
 
         // entitys = ltnoRepo.findAll();

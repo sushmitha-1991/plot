@@ -69,8 +69,7 @@ public class PlotGenerateController {
                         @RequestParam(required = false) String status) {
 
                 List<PlotGenerateDTO> fectchedEntities = plotService.getAll(isActive, draftStatus, lokSabhaNo,
-                                lokSabhaSessionNo,
-                                rajyaSabhaSessionNo, startDate, endDate, status);
+                                lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status);
 
                 GenericResponse<List<PlotGenerateDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotGenerates retrieved successfully", fectchedEntities);
@@ -141,6 +140,7 @@ public class PlotGenerateController {
                                 "Plot Document retrieved successfully.", docDTO);
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+
         @Operation(summary = "Get PlotDocument By Date", description = "Retrieve PlotDoc by its Date.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "PlotDoc retrieved successfully"),
@@ -163,6 +163,7 @@ public class PlotGenerateController {
                                 "Plot Index List retrieved successfully.", docDTO);
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+
         @Operation(summary = "Create a new PlotGenerate", description = "Creates a new PlotGenerate and returns the created PlotGenerate details.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "201", description = "PlotGenerate created successfully"),

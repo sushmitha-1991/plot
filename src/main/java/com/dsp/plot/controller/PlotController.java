@@ -52,9 +52,11 @@ public class PlotController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) Long ministryId) {
+            @RequestParam(required = false) Long ministryId,
+            @RequestParam(required = false) String ltnoNo,
+            @RequestParam(required = false) Long paperTypeId) {
         List<PlotLtnoDto> fectchedEntities = service.getAll(isActive, lokSabhaNo, lokSabhaSessionNo,
-                rajyaSabhaSessionNo, startDate, endDate, status,ministryId);
+                rajyaSabhaSessionNo, startDate, endDate, status,ministryId,ltnoNo,paperTypeId);
 
         GenericResponse<List<PlotLtnoDto>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                 "Plot retrieved successfully", fectchedEntities);

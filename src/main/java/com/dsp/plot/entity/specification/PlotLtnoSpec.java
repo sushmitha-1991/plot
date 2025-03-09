@@ -32,37 +32,7 @@ public class PlotLtnoSpec {
         };
     }
 
-    public static Specification<PlotLtno> hasActualDateOfLaying(LocalDate actualDateOfLaying) {
-        return (root, query, criteriaBuilder) -> {
-            if (actualDateOfLaying != null) {
-                return criteriaBuilder.between(root.get("actualDateOfLaying"), actualDateOfLaying, actualDateOfLaying);
-            } else {
-                return null;
-            }
-        };
-    }
-
-    public static Specification<PlotLtno> hasSubmissionDate(LocalDate submissionDate) {
-        return (root, query, criteriaBuilder) -> {
-            if (submissionDate != null) {
-                return criteriaBuilder.between(root.get("submissionDate"), submissionDate, submissionDate);
-            } else {
-                return null;
-            }
-        };
-    }
-
-    public static Specification<PlotLtno> hasProposedDateOfLaying(LocalDate proposedDateOfLaying) {
-        return (root, query, criteriaBuilder) -> {
-            if (proposedDateOfLaying != null) {
-                return criteriaBuilder.between(root.get("proposedDateOfLaying"), proposedDateOfLaying,
-                        proposedDateOfLaying);
-            } else {
-                return null;
-            }
-        };
-    }
-
+   
     public static Specification<PlotLtno> hasLokSabhaSessionNo(Long lokSabhaSessionNo) {
         return (root, query, criteriaBuilder) -> lokSabhaSessionNo != null
                 ? criteriaBuilder.equal(root.get("lokSabhaSessionNo"), lokSabhaSessionNo)
@@ -79,10 +49,19 @@ public class PlotLtnoSpec {
         return (root, query, criteriaBuilder) -> status != null ? criteriaBuilder.equal(root.get("status"), status)
                 : null;
     }
+    public static Specification<PlotLtno> hasLtnoNo(String ltnoNo) {
+        return (root, query, criteriaBuilder) -> ltnoNo != null ? criteriaBuilder.equal(root.get("ltnoNo"), ltnoNo)
+                : null;
+    }
 
     public static Specification<PlotLtno> hasMinistryId(Long ministryId) {
         return (root, query, criteriaBuilder) -> ministryId != null
                 ? criteriaBuilder.equal(root.get("ministryId"), ministryId)
+                : null;
+    }
+    public static Specification<PlotLtno> hasPaperTypeId(Long paperTypeId) {
+        return (root, query, criteriaBuilder) -> paperTypeId != null
+                ? criteriaBuilder.equal(root.get("paperTypeId"), paperTypeId)
                 : null;
     }
 

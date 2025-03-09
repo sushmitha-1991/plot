@@ -5,38 +5,33 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.dsp.plot.dto.DocumentDTO;
-import com.dsp.plot.dto.PlotDateChartDTO;
-import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.PlotLaidOnTableDTO;
 import com.dsp.plot.dto.PlotLtnoDto;
-import com.dsp.plot.dto.RequestDTO;
-import com.dsp.plot.entity.PlotDateChart;
 
 @Service
 public interface PlotLtnoService {
 
-    PlotLtnoDto save(PlotLtnoDto plotLtnoDto);
+        PlotLtnoDto save(PlotLtnoDto plotLtnoDto);
 
-    List<PlotLtnoDto> getAll();
+        List<PlotLtnoDto> getAll();
 
-    List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo,
-            Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status,Long ministryId);
+        List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
+                        LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo,Long paperTypeId);
 
-    PlotLtnoDto getById(Long id);
+        PlotLtnoDto getById(Long id);
 
-    PlotLtnoDto update(Long id, PlotLtnoDto plotLtnoDto);
+        PlotLtnoDto update(Long id, PlotLtnoDto plotLtnoDto);
 
-    void delete(Long id);
+        void delete(Long id);
 
-    PlotLaidOnTableDTO getTitleById(Long id);
+        PlotLaidOnTableDTO getTitleById(Long id);
 
-    PlotLaidOnTableDTO updateTitle(Long id, PlotLaidOnTableDTO plotDto);
+        PlotLaidOnTableDTO updateTitle(Long id, PlotLaidOnTableDTO plotDto);
 
-    List<PlotLaidOnTableDTO> getTitles(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo,
-            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,Long ministryId);
+        List<PlotLaidOnTableDTO> getTitles(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo,
+                        Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
+                        Long ministryId);
 
-    PlotLaidOnTableDTO saveTitle(PlotLaidOnTableDTO plotLaidOnTableDTO);
+        PlotLaidOnTableDTO saveTitle(PlotLaidOnTableDTO plotLaidOnTableDTO);
 
 }
