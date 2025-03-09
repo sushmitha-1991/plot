@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +23,7 @@ import lombok.Setter;
 @Builder
 @Entity
 @Table(schema = "master")
-public class Departments {
+public class Departments extends Auditable {
     @Id
     private Long id;
     @Column(name = "ministry_id")

@@ -1,27 +1,22 @@
 package com.dsp.plot.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import com.dsp.plot.entity.Departments;
-import com.dsp.plot.entity.MasterCode;
-import com.dsp.plot.entity.MastersLokSabhaSession;
-import com.dsp.plot.entity.MastersRajyaSabha;
-import com.dsp.plot.entity.Ministries;
-
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class PlotInputDTO {
     private Long id;
     private Long lokSabhaNo;
@@ -60,7 +55,7 @@ public class PlotInputDTO {
     private ApproverDTO nodalOfficerDTO;
     private ApproverDTO authenticatorDTO;
     private MinistriesDTO ministies;
-    private MasterCodeDTO PaperTypes;
+    private MasterCodeDTO paperTypes;
     private DepartmentDTO departments;
     private MastersLokSabhaDTO lokSabhaDTO;
     private MastersLokSabhaSessionDTO lokSabhaSessionDTO;

@@ -20,15 +20,19 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
-@Audited
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
+@Setter
+@Getter
+@Audited
 @Table(name = "application_instance", schema = "master")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class ApplicationInstance extends Auditable{

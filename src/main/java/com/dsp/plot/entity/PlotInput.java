@@ -32,8 +32,10 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "plot_input", schema = "plot")
 public class PlotInput extends InputInstance {
     // @Id
-    // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "plotinput_seq")
-    // @SequenceGenerator(name = "plotinput_seq", sequenceName = "plotinput_seq", allocationSize = 1)
+    // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator =
+    // "plotinput_seq")
+    // @SequenceGenerator(name = "plotinput_seq", sequenceName = "plotinput_seq",
+    // allocationSize = 1)
     // private Long id;
 
     @Column(name = "lok_sabha_no")
@@ -56,13 +58,12 @@ public class PlotInput extends InputInstance {
 
     @Column(name = "paper_type_id")
     private Long paperTypeId;
-    
+
     @Column(name = "paper_name")
     private String paperName;
 
     @Column(name = "ministry_id")
     private Long ministryId;
-
 
     @Column(name = "generated_plot_id")
     private Long generatedPlotId;
@@ -113,33 +114,33 @@ public class PlotInput extends InputInstance {
     private String nodalOfficerPhoneNo;
 
     @Column(name = "nodal_officer_mobile_no", length = 13)
-    private String nodalOfficerMobileNo;  
+    private String nodalOfficerMobileNo;
     @ManyToOne
-    @JoinColumn(name = "generated_plot_id", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "generated_plot_id", referencedColumnName = "id", insertable = false, updatable = false)
     private PlotGenerate plotGenerate;
     @ManyToOne
-    @JoinColumn(name = "authenticated_by_id", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "authenticated_by_id", referencedColumnName = "id", insertable = false, updatable = false)
     private BaseUser authenticatorDetails;
     @ManyToOne
-    @JoinColumn(name = "nodal_officer_id", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "nodal_officer_id", referencedColumnName = "id", insertable = false, updatable = false)
     private BaseUser nodalOfficerDetails;
     @ManyToOne
-    @JoinColumn(name = "lok_sabha_no", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "lok_sabha_no", referencedColumnName = "id", insertable = false, updatable = false)
     private MastersLokSabha lokSabhaDetails;
     @ManyToOne
-    @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id", insertable = false, updatable = false)
     private MastersLokSabhaSession lokSabhaSessionDetails;
     @ManyToOne
-    @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id", insertable = false, updatable = false)
     private MastersRajyaSabha rajyaSabhaSessionDetails;
     @ManyToOne
-    @JoinColumn(name = "ministry_id", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "ministry_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Ministries ministries;
     @ManyToOne
-    @JoinColumn(name = "paper_type_id", referencedColumnName = "id",insertable=false,updatable=false)
-    private MasterCode PaperTypes;
+    @JoinColumn(name = "paper_type_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private MasterCode paperTypes;
     @ManyToOne
-    @JoinColumn(name = "department_id", referencedColumnName = "id",insertable=false,updatable=false)
+    @JoinColumn(name = "department_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Departments departments;
 
-   }
+}

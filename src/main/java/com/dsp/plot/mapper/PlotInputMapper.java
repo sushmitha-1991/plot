@@ -1,10 +1,13 @@
 package com.dsp.plot.mapper;
 
 import com.dsp.plot.dto.ApproverDTO;
+import com.dsp.plot.dto.DepartmentDTO;
 import com.dsp.plot.dto.InputInstanceDTO;
+import com.dsp.plot.dto.MasterCodeDTO;
 import com.dsp.plot.dto.MastersLokSabhaDTO;
 import com.dsp.plot.dto.MastersLokSabhaSessionDTO;
 import com.dsp.plot.dto.MastersRajyaSabhaSessionDTO;
+import com.dsp.plot.dto.MinistriesDTO;
 import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.entity.PlotDateChart;
@@ -41,7 +44,7 @@ public class PlotInputMapper {
                                 .applicationId(dto.getApplicationId())
                                 .applicationNo(dto.getApplicationNo())
                                 .currentStatus(dto.getCurrentStatus())
-                                
+
                                 .refId(dto.getRefId())
                                 .documentDate(dto.getDocumentDate())
                                 .paperName(dto.getPaperName()).build();
@@ -96,9 +99,7 @@ public class PlotInputMapper {
                                 .currentStatus(entity.getCurrentStatus())
                                 .refId(entity.getRefId())
                                 .documentDate(entity.getDocumentDate())
-                                .ministies(entity.getMinistries())
-                                .departments(entity.getDepartments())
-                                .PaperTypes(entity.getPaperTypes())
+
                                 .inputInstanceDTO(InputInstanceDTO.builder()
                                                 .id(entity.getId())
                                                 .createdAt(entity.getCreatedAt())
@@ -133,15 +134,38 @@ public class PlotInputMapper {
                 if (entity.getLokSabhaSessionDetails() != null) {
 
                         dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
-                        .id(entity.getLokSabhaSessionDetails().getId())
-                        .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
+                                        .id(entity.getLokSabhaSessionDetails().getId())
+                                        .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
                                         .build());
                 }
                 if (entity.getRajyaSabhaSessionDetails() != null) {
 
                         dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
-                        .id(entity.getRajyaSabhaSessionDetails().getId())
-                        .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())
+                                        .id(entity.getRajyaSabhaSessionDetails().getId())
+                                        .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())
+                                        .build());
+                }
+                if (entity.getDepartments() != null) {
+
+                        dto.setDepartments(DepartmentDTO.builder()
+                                        .abbr(entity.getDepartments().getAbbr())
+                                        .departmentCode(entity.getDepartments().getDepartmentCode())
+                                        .departmentName(entity.getDepartments().getDepartmentName())
+                                        .build());
+                }
+                if (entity.getMinistries() != null) {
+
+                        dto.setMinisties(MinistriesDTO.builder()
+                                        .ministryName(entity.getMinistries().getMinistryName())
+                                        .build());
+                }
+                if (entity.getPaperTypes() != null) {
+
+                        dto.setPaperTypes(MasterCodeDTO.builder()
+                                        .abbr(entity.getPaperTypes().getAbbr())
+                                        .description(entity.getPaperTypes().getDescription())
+                                        .code(entity.getPaperTypes().getCode())
+                                        .displaySequence(entity.getPaperTypes().getDisplaySequence())
                                         .build());
                 }
                 if (entity.getAuthenticatorDetails() != null) {
@@ -188,7 +212,7 @@ public class PlotInputMapper {
         }
 
         public static PlotDateChartDTO dateChartMapToDTO(PlotDateChart entity) {
-                PlotDateChartDTO dto= PlotDateChartDTO.builder()
+                PlotDateChartDTO dto = PlotDateChartDTO.builder()
                                 .id(entity.getId())
                                 .lokSabhaNo(entity.getLokSabhaNo())
                                 .lokSabhaSessionNo(entity.getLokSabhaSessionNo())
@@ -198,27 +222,27 @@ public class PlotInputMapper {
                                 .dates(entity.getDates())
                                 .ministies(entity.getMinistries())
                                 .build();
-                                if (entity.getLokSabhaDetails() != null) {
-                                        dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
-                                                        .id(entity.getLokSabhaDetails().getId())
-                                                        .lokSabhaNumber(entity.getLokSabhaDetails().getLokSabhaNumber())
-                                                        .build());
-                                }
-                                if (entity.getLokSabhaSessionDetails() != null) {
-                
-                                        dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
+                if (entity.getLokSabhaDetails() != null) {
+                        dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
+                                        .id(entity.getLokSabhaDetails().getId())
+                                        .lokSabhaNumber(entity.getLokSabhaDetails().getLokSabhaNumber())
+                                        .build());
+                }
+                if (entity.getLokSabhaSessionDetails() != null) {
+
+                        dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
                                         .id(entity.getLokSabhaSessionDetails().getId())
                                         .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
-                                                        .build());
-                                }
-                                if (entity.getRajyaSabhaSessionDetails() != null) {
-                
-                                        dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
+                                        .build());
+                }
+                if (entity.getRajyaSabhaSessionDetails() != null) {
+
+                        dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
                                         .id(entity.getRajyaSabhaSessionDetails().getId())
                                         .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())
-                                                        .build());
-                                }
-                                return dto;
+                                        .build());
+                }
+                return dto;
         }
 
         public static PlotDateChart dateChartMapToEntity(PlotDateChartDTO dto) {

@@ -1,28 +1,21 @@
 package com.dsp.plot.dto;
 
-
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.envers.Audited;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.Setter;
 
 @Data
-@Audited
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Builder
+@Getter
+@Setter
 public class PlotIndexDTO {
     private Long id;
     private Long lokSabhaNo;
@@ -34,6 +27,6 @@ public class PlotIndexDTO {
     private String status;
     private String refNo;
     private String content;
-    private List<Map<String,Object>> indexDetails;
+    private List<Map<String, Object>> indexDetails;
 
 }

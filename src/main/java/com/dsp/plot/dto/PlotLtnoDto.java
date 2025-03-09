@@ -4,22 +4,22 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import com.dsp.plot.entity.MasterCode;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
-import com.dsp.plot.entity.Ministries;
 
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class PlotLtnoDto {
     private Long id;
     private Long lokSabhaNo;

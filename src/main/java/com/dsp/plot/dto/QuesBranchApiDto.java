@@ -1,15 +1,21 @@
 package com.dsp.plot.dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Getter
+@Setter
 public class QuesBranchApiDto {
 
-    private String group;
+	private String group;
 	private String ministriesDepartments;
 	private String dateOfAnsweringQuestions;
 }

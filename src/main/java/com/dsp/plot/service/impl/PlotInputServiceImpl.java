@@ -221,14 +221,14 @@ public class PlotInputServiceImpl implements PlotInputService {
             System.out.println("<b>No paper details available.</b> Details");
             contentBuilder.append("<b>No paper details available.</b>");
         } else {
-           
+
             int i = 1; // Initialize numbering for list items
             for (Map<String, Object> paper : paperDetails) {
-                
+
                 if (paper == null || paper.isEmpty())
                     continue; // Skip null/empty entries
                 // Create formatted output for each paper
-                
+
                 // Reports
                 if (abbr.equals("PLOT_REPORT")) {
                     String formattedString = getFormattedReportDetails(paper);
@@ -270,7 +270,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         // ? (Long) paper.get("paperNameId")
         // : null;
         Object paperNameId = paper.get("paperNameId");
-       
+
         Long paperType = null;
         if (paperNameId instanceof Long) {
             paperType = (Long) paperNameId;
@@ -283,9 +283,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        
-        if(paperType==null)
-        {
+
+        if (paperType == null) {
             return "";
         }
         String formattedString = "";
@@ -341,7 +340,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String getFormattedNotificationDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Object paperNameId = paper.get("notificationId");
-       
+
         Long paperType = null;
         if (paperNameId instanceof Long) {
             paperType = (Long) paperNameId;
@@ -354,8 +353,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-        if(paperType==null)
-        {
+        if (paperType == null) {
             return "";
         }
         String formattedString = "";
@@ -410,7 +408,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Object paperNameId = paper.get("otherPaperId");
         Long paperType = null;
-      
+
         if (paperNameId instanceof Long) {
             paperType = (Long) paperNameId;
         } else if (paperNameId instanceof Integer) {
@@ -422,9 +420,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = null; // Handle invalid string cases
             }
         }
-    
-        if(paperType==null)
-        {
+
+        if (paperType == null) {
             return "";
         }
         String formattedString = "";
@@ -874,7 +871,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         return dtoList;
     }
 
-    
     // question api
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
             List<Long> existingMinistries, Long houseId) {
@@ -1035,7 +1031,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
     }
-    
+
     // Generate Application No Functionality
     public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
         String url = masterServiceUrl + "/serial-number";
@@ -1057,22 +1053,24 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     public String getTokenFromRequest() {
-       
+
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
         }
         return null;
     }
+
     private Long getHouseId() {
         Long houseId = null;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetailsDTO) {
             houseId = ((UserDetailsDTO) principal).getHouseId();
-            System.out.println("houseId "+houseId);
+            System.out.println("houseId " + houseId);
         }
         return houseId;
     }
+
     @Override
     public List<PlotInputDTO> getAll() {
         // TODO Auto-generated method stub
