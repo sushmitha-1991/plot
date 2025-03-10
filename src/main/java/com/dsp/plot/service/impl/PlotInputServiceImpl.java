@@ -265,9 +265,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private String getFormattedReportDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
-        // Long paperType = (paper.get("paperNameId") instanceof Long)
-        // ? (Long) paper.get("paperNameId")
-        // : null;
+        
         Object paperNameId = paper.get("paperNameId");
 
         Long paperType = null;
@@ -299,33 +297,32 @@ public class PlotInputServiceImpl implements PlotInputService {
                 String nameAndPlace = escapeHtml(paper.get("constitutionalBody")) + ", "
                         + escapeHtml(paper.get("headquarters"));
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("paperTiltle")),
                         nameAndPlace,
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_RPT_2":
-                Map<String, Object> ministry = (Map<String, Object>) paper.get("ministryDepartmentPSU");
+                // Map<String, Object> ministry = (Map<String, Object>) paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("reportType")),
-                        escapeHtml(ministry.get("name")) + ", " + escapeHtml(ministry.get("headquarters")),
-
-                        escapeHtml(paper.get("yearOrTimePeriod")));
+                        escapeHtml(paper.get("paperTiltle")),
+                        escapeHtml(paper.get("ministryOrDepartment")),
+                        escapeHtml(paper.get("year")));
                 break;
             case "PLOT_RPT_3":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("companyHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_RPT_4":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("bankHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_RPT_5":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("headquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
@@ -338,67 +335,64 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private String getFormattedNotificationDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
-        Object paperNameId = paper.get("notificationId");
 
-        Long paperType = null;
-        if (paperNameId instanceof Long) {
-            paperType = (Long) paperNameId;
-        } else if (paperNameId instanceof Integer) {
-            paperType = ((Integer) paperNameId).longValue(); // Convert Integer to Long
-        } else if (paperNameId instanceof String) {
-            try {
-                paperType = Long.parseLong((String) paperNameId); // Convert String to Long
-            } catch (NumberFormatException e) {
-                paperType = null; // Handle invalid string cases
-            }
-        }
-        if (paperType == null) {
-            return "";
-        }
-        String formattedString = "";
-        MasterCode codeAbbr;
-        try {
-            codeAbbr = codeRepository.findById(paperType).get();
-        } catch (Exception e) {
-            return "";
-        }
-        String abbr = codeAbbr.getAbbr();
-        switch (abbr) {
-            case "PLOT_NF_GEN":
-                System.out.println("###  " + abbr);
-                formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("notificationType")),
+        // Object paperNameId = paper.get("notificationId");
+        // Long paperType = null;
+        // if (paperNameId instanceof Long) {
+        //     paperType = (Long) paperNameId;
+        // } else if (paperNameId instanceof Integer) {
+        //     paperType = ((Integer) paperNameId).longValue(); // Convert Integer to Long
+        // } else if (paperNameId instanceof String) {
+        //     try {
+        //         paperType = Long.parseLong((String) paperNameId); // Convert String to Long
+        //     } catch (NumberFormatException e) {
+        //         paperType = null; // Handle invalid string cases
+        //     }
+        // }
+        // if (paperType == null) {
+        //     return "";
+        // }
+        // MasterCode codeAbbr;
+        // try {
+        //     codeAbbr = codeRepository.findById(paperType).get();
+        // } catch (Exception e) {
+        //     return "";
+        // }
+        // String abbr = codeAbbr.getAbbr();
+        // switch (abbr) {
+        //     case "PLOT_NF_GEN":
+        //         System.out.println("###  " + abbr);
+            String formattedString = MessageFormat.format(template,
+                        escapeHtml(paper.get("paperTitle")),
                         escapeHtml(paper.get("publishedIn")),
-                        escapeHtml(paper.get("actUnderWhichLaid")));
+                        escapeHtml(paper.get("laidUnderAct")));
+        //         break;
+        //     case "PLOT_NF_SON":
+        //         System.out.println("###  " + abbr);
+        //         formattedString = MessageFormat.format(template,
+        //                 escapeHtml(paper.get("notificationType")),
+        //                 escapeHtml(paper.get("publishedIn")),
+        //                 escapeHtml(paper.get("actUnderWhichLaid")));
+        //         break;
+        //     case "PLOT_NF_NO":
+        //         System.out.println("###  " + abbr);
 
-                break;
-            case "PLOT_NF_SON":
-                System.out.println("###  " + abbr);
-                formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("notificationType")),
-                        escapeHtml(paper.get("publishedIn")),
-                        escapeHtml(paper.get("actUnderWhichLaid")));
-                break;
-            case "PLOT_NF_NO":
-                System.out.println("###  " + abbr);
-
-                formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("notificationType")),
-                        escapeHtml(paper.get("publishedIn")),
-                        escapeHtml(paper.get("actUnderWhichLaid")));
-                break;
-            case "PLOT_NF_ON":
-                System.out.println("###  " + abbr);
-
-                formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("notificationType")),
-                        escapeHtml(paper.get("publishedIn")),
-                        escapeHtml(paper.get("actUnderWhichLaid")));
-                break;
-            default:
-                formattedString = ""; // Default empty value if paper type is not recognized
-                break;
-        }
+        //         formattedString = MessageFormat.format(template,
+        //                 escapeHtml(paper.get("notificationType")),
+        //                 escapeHtml(paper.get("publishedIn")),
+        //                 escapeHtml(paper.get("actUnderWhichLaid")));
+        //         break;
+        //     case "PLOT_NF_ON":
+        //         System.out.println("###  " + abbr);
+        //         formattedString = MessageFormat.format(template,
+        //                 escapeHtml(paper.get("notificationType")),
+        //                 escapeHtml(paper.get("publishedIn")),
+        //                 escapeHtml(paper.get("actUnderWhichLaid")));
+        //         break;
+        //     default:
+        //         formattedString = ""; // Default empty value if paper type is not recognized
+        //         break;
+        // }
         System.out.println(formattedString);
         return formattedString;
     }
@@ -444,13 +438,13 @@ public class PlotInputServiceImpl implements PlotInputService {
                 // paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("title")),
-                        escapeHtml(paper.get("departmentName")),
+                        escapeHtml(paper.get("department")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_3":
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("title")),
-                        escapeHtml(paper.get("departmentName")),
+                        escapeHtml(paper.get("department")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
@@ -468,13 +462,13 @@ public class PlotInputServiceImpl implements PlotInputService {
             case "PLOT_OTH_6":
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("title")),
-                        escapeHtml(paper.get("stateOrUT")),
+                        escapeHtml(paper.get("stateUT")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_7":
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paper.get("title")),
-                        escapeHtml(paper.get("requirementUnder")),
+                        escapeHtml(paper.get("requirementUnderAct")),
                         escapeHtml(paper.get("year")));
                 break;
             default:
