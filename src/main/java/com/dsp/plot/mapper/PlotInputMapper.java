@@ -220,23 +220,27 @@ public class PlotInputMapper {
                                 .ministryId(entity.getMinistryId())
                                 .groupName(entity.getGroupName())
                                 .dates(entity.getDates())
-                                .ministies(entity.getMinistries())
                                 .build();
-                if (entity.getLokSabhaDetails() != null) {
-                        dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
-                                        .id(entity.getLokSabhaDetails().getId())
-                                        .lokSabhaNumber(entity.getLokSabhaDetails().getLokSabhaNumber())
+                if (entity.getMinistries() != null) {
+                        dto.setMinisties(MinistriesDTO.builder()
+                                        .ministryName(entity.getMinistries().getMinistryName())
                                         .build());
                 }
+                
                 if (entity.getLokSabhaSessionDetails() != null) {
-
+                        if(entity.getLokSabhaSessionDetails().getLokSabha()!=null)
+                        {
+                                dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
+                                        .id(entity.getLokSabhaSessionDetails().getLokSabha().getId())
+                                        .lokSabhaNumber(entity.getLokSabhaSessionDetails().getLokSabha().getLokSabhaNumber())
+                                        .build());
+                        }
                         dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
                                         .id(entity.getLokSabhaSessionDetails().getId())
                                         .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
                                         .build());
                 }
                 if (entity.getRajyaSabhaSessionDetails() != null) {
-
                         dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
                                         .id(entity.getRajyaSabhaSessionDetails().getId())
                                         .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())

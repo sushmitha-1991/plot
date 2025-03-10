@@ -41,5 +41,9 @@ public class PlotGenerateDTO {
 	private String currentStatus;
     private ApproverDTO approverDTO;
     private ApplicationInstanceDTO applicationInstanceDTO;
+    private MinistriesDTO ministies;
+    private MastersLokSabhaDTO lokSabhaDTO;
+    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO  rajyaSabhaSessionDTO;
 }
 

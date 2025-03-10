@@ -30,8 +30,9 @@ public class PlotLaidOnTableDTO {
     private String status;
     private String title;
     private List<Map<String, Object>> documents;
-    private MastersLokSabhaSession lokSabhSessionDetails;
-    private MastersRajyaSabha rajyaSabhaSessionDetails;
+    private MastersLokSabhaDTO lokSabhaDTO;
+    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
     private MinistriesDTO ministries;
     
 }

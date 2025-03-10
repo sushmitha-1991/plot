@@ -13,6 +13,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -58,9 +60,14 @@ public class PlotIndex extends Auditable {
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
-@Convert(converter = JsonMapConverter.class)
+    @Convert(converter = JsonMapConverter.class)
     @Column(name = "index_details", columnDefinition = "JSONB")
-    private List<Map<String,Object>> indexDetails;
-
+    private List<Map<String, Object>> indexDetails;
+    @ManyToOne
+    @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id", insertable = false, updatable = false)
+    private MastersLokSabhaSession lokSabhaSessionDetails;
+    @ManyToOne
+    @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id", insertable = false, updatable = false)
+    private MastersRajyaSabha rajyaSabhaSessionDetails;
 
 }

@@ -39,8 +39,9 @@ public class PlotLtnoDto {
     private Long applicationId;
     private String applicationNo;
     private ApplicationInstanceDTO applicationInstanceDTO;
-    private MastersLokSabhaSession lokSabhSessionDetails;
-    private MastersRajyaSabha rajyaSabhaSessionDetails;
+    private MastersLokSabhaDTO lokSabhaDTO;
+    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
     private MinistriesDTO ministries;
     private MasterCodeDTO PaperTypes;
 }

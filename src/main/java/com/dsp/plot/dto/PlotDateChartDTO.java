@@ -22,7 +22,7 @@ public class PlotDateChartDTO {
     private Long inputId;
     private String groupName;
     private List<Map<String, Object>> dates;
-    private Ministries ministies;
+    private MinistriesDTO ministies;
     private MastersLokSabhaDTO lokSabhaDTO;
     private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
     private MastersRajyaSabhaSessionDTO  rajyaSabhaSessionDTO;

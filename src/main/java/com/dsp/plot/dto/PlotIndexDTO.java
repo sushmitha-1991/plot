@@ -28,5 +28,8 @@ public class PlotIndexDTO {
     private String refNo;
     private String content;
     private List<Map<String, Object>> indexDetails;
+    private MastersLokSabhaDTO lokSabhaDTO;
+    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO  rajyaSabhaSessionDTO;
 
 }

@@ -288,8 +288,32 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
 
     @Override
     public PlotLaidOnTableDTO updateTitle(Long id, PlotLaidOnTableDTO plotDto) {
-        // TODO Auto-generated method stub
-        return null;
+        log.debug("Starting update for Plot with ID: {}", id);
+        // Fetch the existing PlotInput
+        PaperLaidOnTable dbEntity = titleRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Plot Ltno not found with id: " + id));
+        // Update only the fields you want to update: TODO. Default -> All parameters
+        // are updated
+        PaperLaidOnTable dbEntityNew = LtnoMapper.titleToEntity(plotDto);
+
+        Field[] fields = dbEntityNew.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true); // Allow access to private fields
+            try {
+                Object newValue = field.get(dbEntityNew);
+                if (newValue != null) {
+                    Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
+                    entityField.setAccessible(true);
+                    entityField.set(dbEntity, newValue);
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException("Error updating field: " + field.getName(), e);
+            }
+        }
+        // Save the updated PlotInput
+        dbEntity = titleRepo.save(dbEntity);
+        // Prepare the response DTO
+        return (LtnoMapper.titleToDTO(dbEntity));
     }
 
     @Override
@@ -311,8 +335,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Plot Ltno not found with id: " + id));
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
-        PlotLtno dbEntityNew = LtnoMapper.toEntity(plotDTO);
-
+        PlotLtno dbEntityNew = LtnoMapper.toEntity(plotDTO);            
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true); // Allow access to private fields
@@ -329,6 +352,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         }
         dbEntity.setDocumentDate(plotDTO.getLtnoDate());
         dbEntity.setCurrentStatus(plotDTO.getStatus());
+        
         // Save the updated PlotInput
         dbEntity = ltnoRepo.save(dbEntity);
         // Prepare the response DTO

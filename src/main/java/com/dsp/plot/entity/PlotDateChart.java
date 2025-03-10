@@ -53,13 +53,6 @@ public class PlotDateChart extends Auditable {
     @Column(name = "group_name")
     private String groupName;
 
-// @Column(name = "proposed_date_of_laying")
-// private List<LocalDate> proposedDateOfLyingList;
-// @Column(name = "date_of_submission_of_papers")
-// private List<LocalDate> dateOfSubmissionOfPapers;
-// @Column(name = "actual_date_of_lying")
-// private List<LocalDate> actualDateOfLying;
-
     @Column(name = "input_id")
     private Long inputId;
     
