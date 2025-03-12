@@ -70,13 +70,12 @@ public class PlotInputController {
                         @RequestParam(required = false) String paperName,
                         @RequestParam(required = false) LocalDate proposedDateOfLaying,
                         @RequestParam(required = false) LocalDate actualDateOfLaying,
-                        @RequestParam(required = false) Long ministryId
-
-        ) {
-
+                        @RequestParam(required = false) Long ministryId,
+                        @RequestParam(required = false) Boolean sendToLibrary) {
                 List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive, draftStatus, lokSabhaNo,
                                 lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
-                                departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying, ministryId);
+                                departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying,
+                                ministryId, sendToLibrary);
 
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
@@ -108,7 +107,8 @@ public class PlotInputController {
 
                 List<PlotInputDTO> fectchedEntities = plotinputService.getHistories(isActive, draftStatus, lokSabhaNo,
                                 lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
-                                departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying, ministryId);
+                                departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying,
+                                ministryId);
 
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);

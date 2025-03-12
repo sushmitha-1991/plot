@@ -66,10 +66,11 @@ public class PlotGenerateController {
                         @RequestParam(required = false) Long rajyaSabhaSessionNo,
                         @RequestParam(required = false) LocalDate startDate,
                         @RequestParam(required = false) LocalDate endDate,
-                        @RequestParam(required = false) String status) {
+                        @RequestParam(required = false) String status,
+                        @RequestParam(required = false) Boolean sendToLibrary) {
 
                 List<PlotGenerateDTO> fectchedEntities = plotService.getAll(isActive, draftStatus, lokSabhaNo,
-                                lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status);
+                                lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, sendToLibrary);
 
                 GenericResponse<List<PlotGenerateDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotGenerates retrieved successfully", fectchedEntities);

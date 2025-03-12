@@ -16,7 +16,7 @@ public interface PlotGenerateService {
 
     List<PlotGenerateDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
     Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-    String status);
+    String status,Boolean sendToLibrary);
     List<PlotGenerateDTO> getAll();
 
     PlotGenerateDTO getById(Long id);

@@ -12,40 +12,43 @@ import com.dsp.plot.dto.RequestDTO;
 @Service
 public interface PlotInputService {
 
-    PlotInputDTO save(PlotInputDTO plotinputDTO);
+        PlotInputDTO save(PlotInputDTO plotinputDTO);
 
-    List<PlotInputDTO> getAll();
+        List<PlotInputDTO> getAll();
 
-    List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo, Long lokSabhaSessionNo,
-            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, LocalDate dateOfSubmission,
-            Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
-            LocalDate actualDateOfLaying, Long ministry);
+        List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo, Long lokSabhaSessionNo,
+                        Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
+                        LocalDate dateOfSubmission,
+                        Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
+                        LocalDate actualDateOfLaying, Long ministry, Boolean sendToLibrary);
 
-    PlotInputDTO getById(Long id);
+        PlotInputDTO getById(Long id);
 
-    PlotInputDTO update(Long id, PlotInputDTO plotinputDTO);
+        PlotInputDTO update(Long id, PlotInputDTO plotinputDTO);
 
-    void delete(Long id);
+        void delete(Long id);
 
-    RequestDTO saveRequest(RequestDTO dto);
+        RequestDTO saveRequest(RequestDTO dto);
 
-    List<RequestDTO> getAllRequests();
+        List<RequestDTO> getAllRequests();
 
-    List<RequestDTO> getAllRequestsByPlotId(Long plotId);
+        List<RequestDTO> getAllRequestsByPlotId(Long plotId);
 
-    RequestDTO getRequestById(Long id);
+        RequestDTO getRequestById(Long id);
 
-    // DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
-    PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
+        // DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
+        PlotDateChartDTO addDateChart(PlotDateChartDTO dto);
 
-    List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo, Long lokSabhaSessionNo,
-            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, LocalDate dateOfSubmission,
-            Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
-            LocalDate actualDateOfLaying, Long ministry);
+        List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo, Long lokSabhaSessionNo,
+                        Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
+                        LocalDate dateOfSubmission,
+                        Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
+                        LocalDate actualDateOfLaying, Long ministry);
 
-    PlotDateChartDTO getDateChartById(Long id);
+        PlotDateChartDTO getDateChartById(Long id);
 
-    List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
-            Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId, String groupName,
-            LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying);
+        List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
+                        Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId,
+                        String groupName,
+                        LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying);
 }

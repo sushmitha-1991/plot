@@ -33,6 +33,7 @@ public class PlotInputMapper {
                                 .remarks(dto.getRemarks())
                                 .paperDetails(dto.getPaperDetails())
                                 .documents(dto.getDocuments())
+                                .generatedPlotId(dto.getGeneratePlotId())
                                 .proposedDateOfLaying(dto.getProposedDateOfLaying())
                                 .nodalOfficerId(dto.getNodalOfficerId())
                                 .nodalOfficerDesignation(dto.getNodalOfficerDesignation())

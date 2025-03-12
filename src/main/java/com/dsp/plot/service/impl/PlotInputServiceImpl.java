@@ -50,6 +50,7 @@ import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.specification.DateChartSpec;
+import com.dsp.plot.entity.specification.PlotGenerateSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
@@ -270,11 +271,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             Map<String, Object> paperNameMap = (Map<String, Object>) paperNameData;
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
             if (valueObj instanceof Number) { // Ensure it's a number before parsing
-            paperType = ((Number) valueObj).longValue();
+                paperType = ((Number) valueObj).longValue();
                 System.out.println("paperNameId: " + paperType);
             }
         }
-       
+
         String formattedString = "";
         MasterCode codeAbbr;
         try {
@@ -397,11 +398,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             Map<String, Object> paperNameMap = (Map<String, Object>) paperNameData;
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
             if (valueObj instanceof Number) { // Ensure it's a number before parsing
-            paperType = ((Number) valueObj).longValue();
+                paperType = ((Number) valueObj).longValue();
                 System.out.println("paperNameId: " + paperType);
             }
         }
-        
+
         if (paperType == null) {
             return "";
         }
@@ -512,10 +513,11 @@ public class PlotInputServiceImpl implements PlotInputService {
     public List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo, Long lokSabhaSessionNo,
             Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, LocalDate dateOfSubmission,
             Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
-            LocalDate actualDateOfLaying, Long ministry) {
+            LocalDate actualDateOfLaying, Long ministry, Boolean sendToLibrary) {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         List<PlotInput> entitys;
+        
         if (isActive == null) {
             isActive = true;
         }
@@ -542,6 +544,9 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         if (proposedDateOfLaying != null) {
             spec = spec.and(PlotInputSpec.hasProposedDateOfLaying(proposedDateOfLaying));
+        }
+        if (sendToLibrary != null) {
+            spec = spec.and(PlotInputSpec.hasSendToLibrary(sendToLibrary));
         }
         if (actualDateOfLaying != null) {
             spec = spec.and(PlotInputSpec.hasActualDateOfLaying(actualDateOfLaying));
@@ -765,7 +770,15 @@ public class PlotInputServiceImpl implements PlotInputService {
         dbEntity.setCurrentStatus(dbEntity.getStatus());
         dbEntity.setDocumentDate(dbEntity.getSubmissionDate());
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
+        dbEntity.setApplicationInstanceId(dbEntity.getGeneratedPlotId());
         dbEntity = plotinputRepository.save(dbEntity);
+        if(dbEntity.getSendToLibrary()&& dbEntity.getApplicationInstanceId()!=null)
+        {
+            PlotGenerate plot = repository
+                                .findById(dbEntity.getApplicationInstanceId()).get();
+            plot.setSendToLibrary(dbEntity.getSendToLibrary());
+            plot =repository.save(plot);
+        }
         // Prepare the response DTO
         return (PlotInputMapper.toDTO(dbEntity));
     }

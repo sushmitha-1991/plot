@@ -87,11 +87,11 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             Specification<PlotGenerate> spec = Specification.where(null);
             spec = spec.and(PlotGenerateSpec.isActive(true));
             spec = spec.and(PlotGenerateSpec.hasDraftStatus(false));
-            
+
             if (dateOfDoc == null) {
                 dateOfDoc = LocalDate.now();
             }
-            if (doc.equalsIgnoreCase("PLOT") ) {
+            if (doc.equalsIgnoreCase("PLOT")) {
                 entitys = plotRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
                 log.info(" Doc Found on Specified Date:{}", entitys);
             }
@@ -99,7 +99,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 log.info("No Doc Found on Specified Date");
                 throw new NoDataFoundException("No Doc Found On Specified Date");
             }
-         
+
             PlotGenerate entity = entitys.get(0);
             log.info("Doc Found on Specified Date:{}", entity);
             return DocumentDTO.builder()
@@ -249,7 +249,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     @Override
     public List<PlotGenerateDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate,
-            String status) {
+            String status, Boolean sendToLibrary) {
         log.info("Entering getAll Plots");
 
         List<PlotGenerateDTO> dtoList = new ArrayList<>();
@@ -260,6 +260,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         if (isActive == null) {
             isActive = true;
         }
+        
         Specification<PlotGenerate> spec = Specification.where(null);
         spec = spec.and(PlotGenerateSpec.isActive(isActive));
         spec = spec.and(PlotGenerateSpec.hasDraftStatus(draftStatus));
@@ -274,6 +275,9 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         }
         if (status != null) {
             spec = spec.and(PlotGenerateSpec.hasStatus(status));
+        }
+        if (sendToLibrary != null) {
+            spec = spec.and(PlotGenerateSpec.hasSendToLibrary(sendToLibrary));
         }
         entitys = plotRepository.findAll(spec);
         Long houseId = getHouseId();
@@ -305,7 +309,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         PlotGenerateDTO dto = PlotGenerateMapper.toDTO(dBEntity);
         return dto;
     }
-    
 
     @Transactional
     @Override
@@ -326,24 +329,24 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             dbEntityNew.setDocumentDate(dbEntityNew.getPlotDate());
         }
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
-            for (Field field : fields) {
-                field.setAccessible(true); // Allow access to private fields
-                try {
-                    Object newValue = field.get(dbEntityNew);
-                    if (newValue != null) {
-                        Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
-                        entityField.setAccessible(true);
-                        entityField.set(dbEntity, newValue);
-                    }
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new RuntimeException("Error updating field: " + field.getName(), e);
+        for (Field field : fields) {
+            field.setAccessible(true); // Allow access to private fields
+            try {
+                Object newValue = field.get(dbEntityNew);
+                if (newValue != null) {
+                    Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
+                    entityField.setAccessible(true);
+                    entityField.set(dbEntity, newValue);
                 }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException("Error updating field: " + field.getName(), e);
             }
+        }
         // Save the updated Plot
         dbEntity.setCurrentStatus(dbEntity.getStatus());
         dbEntity.setDocumentDate(dbEntity.getPlotDate());
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
-        dbEntity=plotRepository.save(dbEntity);
+        dbEntity = plotRepository.save(dbEntity);
         // Prepare the response DTO
         return (PlotGenerateMapper.toDTO(dbEntity));
     }
@@ -469,10 +472,9 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             spec = spec.and(PlotIndexSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
         }
         List<PlotIndex> response = plotIndexRepo.findAll(spec);
-        
-        List<PlotIndexDTO> responseDTO=new ArrayList<>();
-        for(PlotIndex entity:response)
-        {
+
+        List<PlotIndexDTO> responseDTO = new ArrayList<>();
+        for (PlotIndex entity : response) {
             responseDTO.add(PlotGenerateMapper.toIndexDTO(entity));
         }
         return responseDTO;

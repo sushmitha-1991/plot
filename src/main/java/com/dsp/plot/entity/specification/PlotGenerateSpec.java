@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.dsp.plot.entity.PlotGenerate;
+import com.dsp.plot.entity.PlotInput;
 
 public class PlotGenerateSpec 
 {
@@ -20,6 +21,10 @@ public class PlotGenerateSpec
     public static Specification<PlotGenerate> hasDraftStatus(Boolean draftStatus) {
         return (root, query, criteriaBuilder) ->
                 draftStatus != null ? criteriaBuilder.equal(root.get("draftFlag"), draftStatus) : null;
+    }
+     public static Specification<PlotGenerate> hasSendToLibrary(Boolean sendToLibrary) {
+        return (root, query, criteriaBuilder) ->
+        sendToLibrary != null ? criteriaBuilder.equal(root.get("sendToLibrary"), sendToLibrary) : null;
     }
     public static Specification<PlotGenerate> hasDateBetween(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> 
