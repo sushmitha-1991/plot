@@ -113,6 +113,9 @@ public class PlotInput extends InputInstance {
     @Column(name = "nodal_officer_phone_no", length = 13)
     private String nodalOfficerPhoneNo;
 
+    @Column(name = "is_send_to_library")
+    private Boolean sendToLibrary;
+
     @Column(name = "nodal_officer_mobile_no", length = 13)
     private String nodalOfficerMobileNo;
     @ManyToOne
@@ -142,5 +145,7 @@ public class PlotInput extends InputInstance {
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Departments departments;
+
+
 
 }

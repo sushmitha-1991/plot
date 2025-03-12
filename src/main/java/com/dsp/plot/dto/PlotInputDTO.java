@@ -45,6 +45,7 @@ public class PlotInputDTO {
     private String nodalOfficerMobileNo;
     private LocalDate prevPaperLaidDate;
     private String content;
+    private Boolean sendToLibrary;
     // Input Instances DTO
     private Long applicationId; // Reference to Application ID
     private String applicationNo;

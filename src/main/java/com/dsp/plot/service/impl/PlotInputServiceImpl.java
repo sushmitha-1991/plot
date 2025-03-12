@@ -734,7 +734,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
         PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
-
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true); // Allow access to private fields
@@ -750,7 +749,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         // Save the updated PlotInput
-        // dbEntity = plotinputRepository.save(dbEntity);
         Long houseId = getHouseId();
         if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
             System.out.println("@@@@@@@@@");
@@ -764,6 +762,9 @@ public class PlotInputServiceImpl implements PlotInputService {
                 dbEntity.setPendingAt("Table Office A");
             }
         }
+        dbEntity.setCurrentStatus(dbEntity.getStatus());
+        dbEntity.setDocumentDate(dbEntity.getSubmissionDate());
+        dbEntity.setHtmlContentEnglish(dbEntity.getContent());
         dbEntity = plotinputRepository.save(dbEntity);
         // Prepare the response DTO
         return (PlotInputMapper.toDTO(dbEntity));

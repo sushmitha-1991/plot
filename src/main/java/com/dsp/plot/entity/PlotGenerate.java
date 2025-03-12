@@ -72,6 +72,8 @@ public class PlotGenerate extends ApplicationInstance {
     private String paperName;
     @Column(name = "remarks", length = 200)
     private String remarks;
+    @Column(name = "is_send_to_library")
+    private Boolean sendToLibrary;
     // @Column(name = "remarks", length = 200)
     // private String remarks;
      @ManyToOne

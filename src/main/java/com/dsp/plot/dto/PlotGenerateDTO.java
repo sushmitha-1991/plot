@@ -33,6 +33,7 @@ public class PlotGenerateDTO {
     //PlotGenerate
     private List<Long> plotInputs;
     private List<Long> plots;
+    private Boolean sendToLibrary;
     //Application Instance DTO
     private Long id;
 	private Long applicationId;

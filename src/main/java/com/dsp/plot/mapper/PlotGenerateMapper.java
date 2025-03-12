@@ -32,6 +32,7 @@ public class PlotGenerateMapper {
                                 .paperType(dto.getPaperType())
                                 .paperName(dto.getPaperName())
                                 .remarks(dto.getRemarks())
+                                .sendToLibrary(dto.getSendToLibrary())
                                 .referenceFiles(dto.getReferenceFiles())
                                 .plotParentId(dto.getPlotParentId())
                                 // ApplicationInstanceDTO
@@ -54,6 +55,7 @@ public class PlotGenerateMapper {
                                 .approverAuthority(entity.getApproverAuthority())
                                 .designation(entity.getDesignation())
                                 .location(entity.getLocation())
+                                .sendToLibrary(entity.getSendToLibrary())
                                 .draftFlag(entity.getDraftFlag())
                                 .status(entity.getStatus())
                                 .content(entity.getContent())

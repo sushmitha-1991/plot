@@ -340,6 +340,9 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 }
             }
         // Save the updated Plot
+        dbEntity.setCurrentStatus(dbEntity.getStatus());
+        dbEntity.setDocumentDate(dbEntity.getPlotDate());
+        dbEntity.setHtmlContentEnglish(dbEntity.getContent());
         dbEntity=plotRepository.save(dbEntity);
         // Prepare the response DTO
         return (PlotGenerateMapper.toDTO(dbEntity));
