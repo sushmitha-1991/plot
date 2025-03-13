@@ -122,14 +122,7 @@ public class PlotInputMapper {
                                                 .applicationInstanceId(entity.getApplicationInstanceId())
                                                 .build())
                                 .build();
-                if (entity.getAuthenticatorDetails() != null) {
-                        dto.setAuthenticatorDTO(ApproverDTO.builder()
-                                        .id(entity.getAuthenticatorDetails().getId())
-                                        .username(entity.getAuthenticatorDetails().getFirstName() + " "
-                                                        + entity.getAuthenticatorDetails().getLastName())
-                                        .designation(entity.getAuthenticatorDetails().getDesignation().getAbbr())
-                                        .build());
-                }
+                
                 if (entity.getLokSabhaDetails() != null) {
                         dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
                                         .id(entity.getLokSabhaDetails().getId())
@@ -175,11 +168,16 @@ public class PlotInputMapper {
                 }
                 if (entity.getAuthenticatorDetails() != null) {
 
+                        String designation="";
+                        if(entity.getAuthenticatorDetails().getDesignation()!=null)
+                        {
+                                designation=entity.getAuthenticatorDetails().getDesignation().getAbbr();
+                        }
                         dto.setAuthenticatorDTO(ApproverDTO.builder()
                                         .id(entity.getAuthenticatorDetails().getId())
                                         .username(entity.getAuthenticatorDetails().getFirstName() + " "
                                                         + entity.getAuthenticatorDetails().getLastName())
-                                        .designation(entity.getAuthenticatorDetails().getDesignation().getAbbr())
+                                        .designation(designation)
                                         .build());
                 }
 

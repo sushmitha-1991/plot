@@ -28,6 +28,10 @@ public class PlotInputSpec
         return (root, query, criteriaBuilder) ->
         sendToLibrary != null ? criteriaBuilder.equal(root.get("sendToLibrary"), sendToLibrary) : null;
     }
+    public static Specification<PlotInput> hasCreatedBy(Long createdBy) {
+        return (root, query, criteriaBuilder) ->
+        createdBy != null ? criteriaBuilder.equal(root.get("createdBy"), createdBy) : null;
+    }
     public static Specification<PlotInput> hasDateBetween(LocalDate startDate, LocalDate endDate) {
             return (root, query, criteriaBuilder) -> {
                 // Extract LocalDate from createdAt (LocalDateTime)

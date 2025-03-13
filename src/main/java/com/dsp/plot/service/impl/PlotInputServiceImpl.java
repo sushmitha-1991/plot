@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -49,9 +51,11 @@ import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
+import com.dsp.plot.util.JwtUtil;
 import com.dsp.plot.entity.specification.DateChartSpec;
 import com.dsp.plot.entity.specification.PlotGenerateSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
+import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
@@ -76,6 +80,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String masterServiceUrl;
     @Autowired
     private HttpServletRequest httpRequest;
+    @Autowired
+    private JwtUtil utils;
     @Autowired
     private PlotGenerateRepository repository;
     @Autowired
@@ -120,7 +126,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     plotinputDTO.getProposedDateOfLaying());
             if (daysDifference < 2) {
                 log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
-                log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
+                // log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
                 throw new IllegalArgumentException(
                         "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
             }
@@ -169,7 +175,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 entity.setPendingAt("Table Office A");
                 serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
             }
-
             if (StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
                 SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
                 entity.setApplicationNo(applicationNo.getId());
@@ -178,7 +183,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             entity.setCurrentStatus(entity.getStatus());
             entity.setDocumentDate(entity.getSubmissionDate());
             log.debug("entity: {}", entity);
-
             // set content
             Optional<BaseUser> optionalUser = userRepository.findById(entity.getAuthenticatedById());
             Optional<MasterCode> paperAbbr = codeRepository.findById(entity.getPaperTypeId());
@@ -190,18 +194,34 @@ public class PlotInputServiceImpl implements PlotInputService {
             entity.setHtmlContentEnglish(contentText);
             entity = plotinputRepository.save(entity);
             entity.setRefId(entity.getId());
-            log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
+            log.info("before plot Input Saved: ID={},  Status={}", entity.getId(), entity.getStatus());
             entity = plotinputRepository.save(entity);
+            log.info("after plot Input Saved: ID={},  Status={}", entity.getId(), entity.getStatus());
             // Convert saved entity back to DTO
             PlotInputDTO responseDTO = PlotInputMapper.toDTO(entity);
+            // log.info("Returning PlotInputDTO: {} and saved Entity: {}", responseDTO,entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
             return responseDTO;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Database constraint violated: {}", e.getMessage());
+            throw new CustomDatabaseException("Invalid data input", e);
         } catch (Exception e) {
-            log.error("Error in savePlotInput: ", e);
-            throw e;
+            log.error("Unexpected error: {}", e.getMessage());
+            throw new CustomDatabaseException("An error occurred while saving plot input", e);
         }
     }
-
+    private PlotInput updateRefId(Long id)
+    {
+        Optional<PlotInput> entity=plotinputRepository.findById(id);
+        if(entity.isPresent())
+        {
+            PlotInput entityData=entity.get();
+            entityData.setRefId(id);
+            return entityData;
+        }
+        return null;
+        
+    }
     private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO, String abbr) {
         if (authenticatorDTO == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
@@ -214,20 +234,16 @@ public class PlotInputServiceImpl implements PlotInputService {
                 .append(" (")
                 .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
                 .append(")</b> to lay on the Table:<br>");
-
         // Check if paper details exist
         if (paperDetails == null || paperDetails.isEmpty()) {
             System.out.println("<b>No paper details available.</b> Details");
             contentBuilder.append("<b>No paper details available.</b>");
         } else {
-
             int i = 1; // Initialize numbering for list items
             for (Map<String, Object> paper : paperDetails) {
-
                 if (paper == null || paper.isEmpty())
                     continue; // Skip null/empty entries
                 // Create formatted output for each paper
-
                 // Reports
                 if (abbr.equals("PLOT_REPORT")) {
                     String formattedString = getFormattedReportDetails(paper);
@@ -237,7 +253,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                     contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
                 }
-
                 // notifications
                 else if (abbr.equals("PLOT_NOTIFICATION")) {
                     String formattedString = getFormattedNotificationDetails(paper);
@@ -263,6 +278,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         return contentBuilder.toString();
     }
 
+    // Report
     private String getFormattedReportDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Object paperNameData = paper.get("paperName");
@@ -326,6 +342,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         return formattedString;
     }
 
+    // notification
     private String getFormattedNotificationDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
 
@@ -390,10 +407,13 @@ public class PlotInputServiceImpl implements PlotInputService {
         return formattedString;
     }
 
+    // other paper
     private String getFormattedOtherPaperDetails(Map<String, Object> paper) {
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Long paperType = null;
         Object paperNameData = paper.get("paperName");
+        // Object paperNameData = paper.get("paperName");
+        //othersPaperName
         if (paperNameData instanceof Map) {
             Map<String, Object> paperNameMap = (Map<String, Object>) paperNameData;
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
@@ -402,7 +422,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 System.out.println("paperNameId: " + paperType);
             }
         }
-
         if (paperType == null) {
             return "";
         }
@@ -414,11 +433,10 @@ public class PlotInputServiceImpl implements PlotInputService {
             return "";
         }
         String abbr = codeAbbr.getAbbr();
-
         switch (abbr) {
             case "PLOT_OTH_1":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("title/Subject")),
                         escapeHtml(paper.get("")),
                         escapeHtml(paper.get("year")));
                 break;
@@ -517,7 +535,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         List<PlotInput> entitys;
-        
         if (isActive == null) {
             isActive = true;
         }
@@ -624,6 +641,9 @@ public class PlotInputServiceImpl implements PlotInputService {
             LocalDate proposedDateOfLaying, LocalDate actualDateOfLaying, Long ministry) {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
+        Long createdBy = getUserIdFromToken();
+        System.out.println("createdBy");
+        System.out.println(createdBy);
         List<PlotInput> entitys;
         if (isActive == null) {
             isActive = true;
@@ -663,7 +683,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (paperName != null) {
             spec = spec.and(PlotInputSpec.hasPaperName(paperName));
         }
-
         entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
@@ -671,7 +690,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
-                    if (history.isPresent()) {
+                    System.out.println("createdBy  RS");
+                    if(history.isPresent())
+                    System.out.println(history.get().getCreatedBy());
+                    if (history.isPresent() && history.get().getCreatedBy() == createdBy) {
                         dto.setContent(history.get().getAddedText());
                     }
                     dtoList.add(dto);
@@ -680,7 +702,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
-                    if (history.isPresent()) {
+                    System.out.println("createdBy  LS");
+                    if(history.isPresent())
+                    System.out.println(history.get().getCreatedBy());
+                    if (history.isPresent() && history.get().getCreatedBy() == createdBy) {
                         dto.setContent(history.get().getAddedText());
                     }
                     dtoList.add(dto);
@@ -734,11 +759,13 @@ public class PlotInputServiceImpl implements PlotInputService {
     public PlotInputDTO update(Long id, PlotInputDTO plotinputDTO) {
         log.debug("Starting update for PlotInput with ID: {}", id);
         // Fetch the existing PlotInput
+        
         PlotInput dbEntity = plotinputRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PlotInput not found with id: " + id));
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
         PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
+        
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true); // Allow access to private fields
@@ -752,6 +779,16 @@ public class PlotInputServiceImpl implements PlotInputService {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException("Error updating field: " + field.getName(), e);
             }
+        }
+        if (plotinputDTO.getPaperDetails() != null) {
+            Optional<BaseUser> optionalUser = userRepository.findById(dbEntity.getAuthenticatedById());
+            Optional<MasterCode> paperAbbr = codeRepository.findById(dbEntity.getPaperTypeId());
+            String abbr = "";
+            if (paperAbbr.isPresent())
+                abbr = paperAbbr.get().getAbbr();
+            String contentText = formatPaperDetails(dbEntity.getPaperDetails(), optionalUser.get(), abbr);
+            dbEntity.setContent(contentText);
+            dbEntity.setHtmlContentEnglish(contentText);
         }
         // Save the updated PlotInput
         Long houseId = getHouseId();
@@ -772,12 +809,11 @@ public class PlotInputServiceImpl implements PlotInputService {
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
         dbEntity.setApplicationInstanceId(dbEntity.getGeneratedPlotId());
         dbEntity = plotinputRepository.save(dbEntity);
-        if(dbEntity.getSendToLibrary()&& dbEntity.getApplicationInstanceId()!=null)
-        {
+        if (dbEntity.getSendToLibrary() && dbEntity.getApplicationInstanceId() != null) {
             PlotGenerate plot = repository
-                                .findById(dbEntity.getApplicationInstanceId()).get();
+                    .findById(dbEntity.getApplicationInstanceId()).get();
             plot.setSendToLibrary(dbEntity.getSendToLibrary());
-            plot =repository.save(plot);
+            plot = repository.save(plot);
         }
         // Prepare the response DTO
         return (PlotInputMapper.toDTO(dbEntity));
@@ -1131,6 +1167,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             System.out.println("houseId " + houseId);
         }
         return houseId;
+    }
+
+    private Long getUserIdFromToken() {
+        Long userId = utils.getUserIdFromAuthentication();
+        return userId;
     }
 
     @Override
