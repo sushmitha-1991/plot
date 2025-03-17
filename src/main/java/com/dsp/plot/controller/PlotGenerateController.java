@@ -194,4 +194,19 @@ public class PlotGenerateController {
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        @Operation(summary = "Get Index By Id", description = "Retrieve Index by its Id.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Index retrieved successfully"),
+                        @ApiResponse(responseCode = "404", description = "Index not found"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @PutMapping("/updateIndex/{id}")
+        public ResponseEntity<GenericResponse<PlotIndexDTO>> updateIndexById(@PathVariable Long id, @RequestBody PlotIndexDTO plotIndexDTO) {
+
+                PlotIndexDTO fetchedEntity = plotService.updateIndexById(id,plotIndexDTO);
+
+                GenericResponse<PlotIndexDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Updated Index By Id", fetchedEntity);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 }

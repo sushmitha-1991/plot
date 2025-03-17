@@ -29,6 +29,7 @@ import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.PaperLaidOnTable;
+import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.PlotLtno;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.entity.specification.PlotLtnoSpec;
@@ -366,6 +367,30 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
 
     }
 
+    @Override
+    public void deleteLtno(Long id) {
+        Optional<PlotLtno> dBEntryOptional = ltnoRepo.findByIdAndIsActive(id, true);
+        if (dBEntryOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Already Deleted or does not exists");
+        }
+        PlotLtno dBEntry = dBEntryOptional.get();
+        dBEntry.setIsDeleted(true);
+        dBEntry.setIsActive(false);
+        ltnoRepo.saveAndFlush(dBEntry);
+    }
+
+    @Override
+    public void deleteTitle(Long id) {
+        Optional<PaperLaidOnTable> dBEntryOptional = titleRepo.findByIdAndIsActive(id, true);
+        if (dBEntryOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Already Deleted or does not exists");
+        }
+        PaperLaidOnTable dBEntry = dBEntryOptional.get();
+        dBEntry.setIsDeleted(true);
+        dBEntry.setIsActive(false);
+        titleRepo.saveAndFlush(dBEntry);        
+    }
+
     // Generate Application No Functionality
     public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
         String url = masterServiceUrl + "/serial-number";
@@ -405,4 +430,5 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         return houseId;
     }
 
+   
 }

@@ -35,4 +35,6 @@ public interface PlotGenerateService {
 
     PlotIndexDTO getIndexById(Long id);
 
+    PlotIndexDTO updateIndexById(Long id, PlotIndexDTO plotIndexDTO);
+
 }

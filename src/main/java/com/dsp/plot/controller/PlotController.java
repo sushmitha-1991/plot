@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,108 +21,146 @@ import com.dsp.plot.dto.PlotLtnoDto;
 import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotLtnoService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 @RestController
 @RequestMapping("/plot-ltno")
 public class PlotController {
-    @Autowired
-    private PlotLtnoService service;
+        @Autowired
+        private PlotLtnoService service;
 
-    @PostMapping("/paper-title/create")
-    public ResponseEntity<GenericResponse<PlotLaidOnTableDTO>> createTitle(@RequestBody PlotLaidOnTableDTO plotLaidOnTableDTO) {
-        PlotLaidOnTableDTO savedEntity = service.saveTitle(plotLaidOnTableDTO);
+        @PostMapping("/paper-title/create")
+        public ResponseEntity<GenericResponse<PlotLaidOnTableDTO>> createTitle(
+                        @RequestBody PlotLaidOnTableDTO plotLaidOnTableDTO) {
+                PlotLaidOnTableDTO savedEntity = service.saveTitle(plotLaidOnTableDTO);
 
-        GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
-                "PlotLtno created successfully", savedEntity);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-    @PostMapping("/create")
-    public ResponseEntity<GenericResponse<PlotLtnoDto>> create(@RequestBody PlotLtnoDto plotLtnoDto) {
-        PlotLtnoDto savedEntity = service.save(plotLtnoDto);
+                GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
+                                "PlotLtno created successfully", savedEntity);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
+        }
 
-        GenericResponse<PlotLtnoDto> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
-                "PlotLtno created successfully", savedEntity);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
+        @PostMapping("/create")
+        public ResponseEntity<GenericResponse<PlotLtnoDto>> create(@RequestBody PlotLtnoDto plotLtnoDto) {
+                PlotLtnoDto savedEntity = service.save(plotLtnoDto);
 
-    @GetMapping("/getAll")
-    public ResponseEntity<GenericResponse<List<PlotLtnoDto>>> getAll(
-            @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false) Long lokSabhaNo,
-            @RequestParam(required = false) Long lokSabhaSessionNo,
-            @RequestParam(required = false) Long rajyaSabhaSessionNo,
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) Long ministryId,
-            @RequestParam(required = false) String ltnoNo,
-            @RequestParam(required = false) Long paperTypeId) {
-        List<PlotLtnoDto> fectchedEntities = service.getAll(isActive, lokSabhaNo, lokSabhaSessionNo,
-                rajyaSabhaSessionNo, startDate, endDate, status,ministryId,ltnoNo,paperTypeId);
+                GenericResponse<PlotLtnoDto> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
+                                "PlotLtno created successfully", savedEntity);
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
+        }
 
-        GenericResponse<List<PlotLtnoDto>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                "Plot retrieved successfully", fectchedEntities);
+        @GetMapping("/getAll")
+        public ResponseEntity<GenericResponse<List<PlotLtnoDto>>> getAll(
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(required = false) Long lokSabhaNo,
+                        @RequestParam(required = false) Long lokSabhaSessionNo,
+                        @RequestParam(required = false) Long rajyaSabhaSessionNo,
+                        @RequestParam(required = false) LocalDate startDate,
+                        @RequestParam(required = false) LocalDate endDate,
+                        @RequestParam(required = false) String status,
+                        @RequestParam(required = false) Long ministryId,
+                        @RequestParam(required = false) String ltnoNo,
+                        @RequestParam(required = false) Long paperTypeId) {
+                List<PlotLtnoDto> fectchedEntities = service.getAll(isActive, lokSabhaNo, lokSabhaSessionNo,
+                                rajyaSabhaSessionNo, startDate, endDate, status, ministryId, ltnoNo, paperTypeId);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+                GenericResponse<List<PlotLtnoDto>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Plot retrieved successfully", fectchedEntities);
 
-    @GetMapping("/getTitles")
-    public ResponseEntity<GenericResponse<List<PlotLaidOnTableDTO>>> getTitles(
-            @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false) Long lokSabhaNo,
-            @RequestParam(required = false) Long lokSabhaSessionNo,
-            @RequestParam(required = false) Long rajyaSabhaSessionNo,
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) Long ministryId) {
-        List<PlotLaidOnTableDTO> fectchedEntities = service.getTitles(isActive, lokSabhaNo, lokSabhaSessionNo,
-                rajyaSabhaSessionNo, startDate, endDate, status,ministryId);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
-        GenericResponse<List<PlotLaidOnTableDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                "Plot retrieved successfully", fectchedEntities);
+        @GetMapping("/getTitles")
+        public ResponseEntity<GenericResponse<List<PlotLaidOnTableDTO>>> getTitles(
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(required = false) Long lokSabhaNo,
+                        @RequestParam(required = false) Long lokSabhaSessionNo,
+                        @RequestParam(required = false) Long rajyaSabhaSessionNo,
+                        @RequestParam(required = false) LocalDate startDate,
+                        @RequestParam(required = false) LocalDate endDate,
+                        @RequestParam(required = false) String status,
+                        @RequestParam(required = false) Long ministryId) {
+                List<PlotLaidOnTableDTO> fectchedEntities = service.getTitles(isActive, lokSabhaNo, lokSabhaSessionNo,
+                                rajyaSabhaSessionNo, startDate, endDate, status, ministryId);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+                GenericResponse<List<PlotLaidOnTableDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Plot retrieved successfully", fectchedEntities);
 
-    @GetMapping("/get/{id}")
-    public ResponseEntity<GenericResponse<PlotLtnoDto>> getById(@PathVariable Long id) {
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
-        PlotLtnoDto fetchedEntity = service.getById(id);
+        @GetMapping("/get/{id}")
+        public ResponseEntity<GenericResponse<PlotLtnoDto>> getById(@PathVariable Long id) {
 
-        GenericResponse<PlotLtnoDto> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                "Retrieved Plot By Id", fetchedEntity);
+                PlotLtnoDto fetchedEntity = service.getById(id);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+                GenericResponse<PlotLtnoDto> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Retrieved Plot By Id", fetchedEntity);
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<GenericResponse<PlotLtnoDto>> update(@PathVariable Long id,
-            @RequestBody PlotLtnoDto plotLtnoDto) {
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
-        PlotLtnoDto updatedEntity = service.update(id, plotLtnoDto);
+        @PutMapping("/update/{id}")
+        public ResponseEntity<GenericResponse<PlotLtnoDto>> update(@PathVariable Long id,
+                        @RequestBody PlotLtnoDto plotLtnoDto) {
 
-        GenericResponse<PlotLtnoDto> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                "Plot updated successfully", updatedEntity);
+                PlotLtnoDto updatedEntity = service.update(id, plotLtnoDto);
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-    
-    @GetMapping("/getTitle/{id}")
-    public ResponseEntity<GenericResponse<PlotLaidOnTableDTO>> getTitleById(@PathVariable Long id) {
+                GenericResponse<PlotLtnoDto> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Plot updated successfully", updatedEntity);
 
-        PlotLaidOnTableDTO fetchedEntity = service.getTitleById(id);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
-        GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                "Retrieved Plot By Id", fetchedEntity);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+        @GetMapping("/getTitle/{id}")
+        public ResponseEntity<GenericResponse<PlotLaidOnTableDTO>> getTitleById(@PathVariable Long id) {
 
-    @PutMapping("/updateTitle/{id}")
-    public ResponseEntity<GenericResponse<PlotLaidOnTableDTO>> updateTitle(@PathVariable Long id,
-            @RequestBody PlotLaidOnTableDTO plotDto) {
+                PlotLaidOnTableDTO fetchedEntity = service.getTitleById(id);
+
+                GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Retrieved Plot By Id", fetchedEntity);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        @PutMapping("/updateTitle/{id}")
+        public ResponseEntity<GenericResponse<PlotLaidOnTableDTO>> updateTitle(@PathVariable Long id,
+                        @RequestBody PlotLaidOnTableDTO plotDto) {
                 PlotLaidOnTableDTO updatedEntity = service.updateTitle(id, plotDto);
-        GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                "Plot updated successfully", updatedEntity);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+                GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Plot updated successfully", updatedEntity);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        @Operation(summary = "Delete a Ltno by ID", description = "Deletes a specific Ltno by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Ltno deleted successfully"),
+                        @ApiResponse(responseCode = "404", description = "Ltno not found"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @DeleteMapping("/deleteLtno/{id}")
+        public ResponseEntity<GenericResponse<String>> deleteLtno(@PathVariable Long id) {
+
+                service.deleteLtno(id);
+
+                GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Ltno deleted successfully", null);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        @Operation(summary = "Delete a Title by ID", description = "Deletes a specific Title by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Title deleted successfully"),
+                        @ApiResponse(responseCode = "404", description = "Title not found"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @DeleteMapping("/deleteTitle/{id}")
+        public ResponseEntity<GenericResponse<String>> deleteTitle(@PathVariable Long id) {
+
+                service.deleteTitle(id);
+
+                GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Title deleted successfully", null);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 }

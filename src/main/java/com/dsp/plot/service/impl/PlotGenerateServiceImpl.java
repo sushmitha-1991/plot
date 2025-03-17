@@ -50,13 +50,10 @@ import com.dsp.plot.service.PlotGenerateService;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Service
 public class PlotGenerateServiceImpl implements PlotGenerateService {
+
 
     @Value("${workflow.service.url}")
     private String draftUrl;
@@ -349,6 +346,40 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         dbEntity = plotRepository.save(dbEntity);
         // Prepare the response DTO
         return (PlotGenerateMapper.toDTO(dbEntity));
+    }
+    @Override
+   public PlotIndexDTO updateIndexById(Long id, PlotIndexDTO plotIndexDTO)
+    {
+        log.debug("Starting update for Plot with ID: {}", id);
+        // Fetch the existing Plot
+        PlotIndex dbEntity =plotIndexRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Plot not found with id: " + id));
+        // Update only the fields you want to update: TODO. Default -> All parameters
+        // are updated
+        PlotIndex dbEntityNew = PlotGenerateMapper.toEntityIndex(plotIndexDTO);
+        dbEntityNew.setId(dbEntity.getId());
+        if (dbEntityNew.getStatus() == null) {
+            dbEntityNew.setStatus("In Progress");
+        }
+        Field[] fields = dbEntityNew.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true); // Allow access to private fields
+            try {
+                Object newValue = field.get(dbEntityNew);
+                if (newValue != null) {
+                    Field entityField = dbEntity.getClass().getDeclaredField(field.getName());
+                    entityField.setAccessible(true);
+                    entityField.set(dbEntity, newValue);
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException("Error updating field: " + field.getName(), e);
+            }
+        }
+        // Save the updated Plot
+        
+        dbEntity = plotIndexRepo.save(dbEntity);
+        // Prepare the response DTO
+        return (PlotGenerateMapper.toIndexDTO(dbEntity));
     }
 
     @Override

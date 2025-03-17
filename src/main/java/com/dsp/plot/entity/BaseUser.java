@@ -71,7 +71,8 @@ public class BaseUser extends Auditable implements UserDetails {
 
 	@Column(name = "address", length = 255)
 	private String address;
-
+	@Column(name = "abbr")
+	private String abbr;
 	@Column(name = "is_verified")
 	private Boolean isVerified = false;
 

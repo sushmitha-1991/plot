@@ -70,6 +70,7 @@ import com.dsp.plot.repository.PlotHistoryRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.service.PlotInputService;
+import com.dsp.plot.util.UserUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -81,7 +82,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
-    private JwtUtil utils;
+    private UserUtils utils;
     @Autowired
     private PlotGenerateRepository repository;
     @Autowired
@@ -126,7 +127,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                     plotinputDTO.getProposedDateOfLaying());
             if (daysDifference < 2) {
                 log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
-                // log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
+                // log.info("Date of Submission must be at least 2 days before the Proposed Date
+                // Of Lying", plotinputDTO);
                 throw new IllegalArgumentException(
                         "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
             }
@@ -199,7 +201,8 @@ public class PlotInputServiceImpl implements PlotInputService {
             log.info("after plot Input Saved: ID={},  Status={}", entity.getId(), entity.getStatus());
             // Convert saved entity back to DTO
             PlotInputDTO responseDTO = PlotInputMapper.toDTO(entity);
-            // log.info("Returning PlotInputDTO: {} and saved Entity: {}", responseDTO,entity);
+            // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
+            // responseDTO,entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
             return responseDTO;
         } catch (DataIntegrityViolationException e) {
@@ -210,18 +213,18 @@ public class PlotInputServiceImpl implements PlotInputService {
             throw new CustomDatabaseException("An error occurred while saving plot input", e);
         }
     }
-    private PlotInput updateRefId(Long id)
-    {
-        Optional<PlotInput> entity=plotinputRepository.findById(id);
-        if(entity.isPresent())
-        {
-            PlotInput entityData=entity.get();
+
+    private PlotInput updateRefId(Long id) {
+        Optional<PlotInput> entity = plotinputRepository.findById(id);
+        if (entity.isPresent()) {
+            PlotInput entityData = entity.get();
             entityData.setRefId(id);
             return entityData;
         }
         return null;
-        
+
     }
+
     private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO, String abbr) {
         if (authenticatorDTO == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
@@ -413,7 +416,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         Long paperType = null;
         Object paperNameData = paper.get("paperName");
         // Object paperNameData = paper.get("paperName");
-        //othersPaperName
+        // othersPaperName
         if (paperNameData instanceof Map) {
             Map<String, Object> paperNameMap = (Map<String, Object>) paperNameData;
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
@@ -642,8 +645,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         Long createdBy = getUserIdFromToken();
-        System.out.println("createdBy");
-        System.out.println(createdBy);
         List<PlotInput> entitys;
         if (isActive == null) {
             isActive = true;
@@ -689,24 +690,24 @@ public class PlotInputServiceImpl implements PlotInputService {
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
-                    Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
-                    System.out.println("createdBy  RS");
-                    if(history.isPresent())
-                    System.out.println(history.get().getCreatedBy());
-                    if (history.isPresent() && history.get().getCreatedBy() == createdBy) {
-                        dto.setContent(history.get().getAddedText());
+                    List<PlotHistory> histories = plotHistoryRepository
+                            .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
+                    for (PlotHistory history : histories) {
+                        Long createdData = history.getCreatedBy();
+                        if (createdData == createdBy)
+                            dto.setContent(history.getAddedText());
                     }
                     dtoList.add(dto);
                 }
             } else if (houseId == 2) {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
-                    Optional<PlotHistory> history = plotHistoryRepository.findPlotHistory(dto.getId());
-                    System.out.println("createdBy  LS");
-                    if(history.isPresent())
-                    System.out.println(history.get().getCreatedBy());
-                    if (history.isPresent() && history.get().getCreatedBy() == createdBy) {
-                        dto.setContent(history.get().getAddedText());
+                    List<PlotHistory> histories = plotHistoryRepository
+                            .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
+                    for (PlotHistory history : histories) {
+                        Long createdData = history.getCreatedBy();
+                        if (createdData == createdBy)
+                            dto.setContent(history.getAddedText());
                     }
                     dtoList.add(dto);
                 }
@@ -759,13 +760,11 @@ public class PlotInputServiceImpl implements PlotInputService {
     public PlotInputDTO update(Long id, PlotInputDTO plotinputDTO) {
         log.debug("Starting update for PlotInput with ID: {}", id);
         // Fetch the existing PlotInput
-        
         PlotInput dbEntity = plotinputRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PlotInput not found with id: " + id));
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
         PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
-        
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true); // Allow access to private fields
@@ -793,10 +792,12 @@ public class PlotInputServiceImpl implements PlotInputService {
         // Save the updated PlotInput
         Long houseId = getHouseId();
         if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
-            System.out.println("@@@@@@@@@");
+            if (dbEntity.getApplicationInstanceId() != null) {
+                throw new ResourceNotFoundException(
+                        "Plot has already generated with Specific Ministry Input  So cannot be returned: " + id);
+            }
             BaseUser user = userRepository.findById(dbEntity.getCreatedBy()).get();
             dbEntity.setPendingAt(user.getFirstName() + " " + user.getLastName());
-            System.out.println(dbEntity.getPendingAt());
         } else {
             if (houseId == 1) {
                 dbEntity.setPendingAt("Table Office");
@@ -809,7 +810,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
         dbEntity.setApplicationInstanceId(dbEntity.getGeneratedPlotId());
         dbEntity = plotinputRepository.save(dbEntity);
-        if (dbEntity.getSendToLibrary() && dbEntity.getApplicationInstanceId() != null) {
+        if (dbEntity.getApplicationInstanceId() != null && dbEntity.getSendToLibrary()) {
             PlotGenerate plot = repository
                     .findById(dbEntity.getApplicationInstanceId()).get();
             plot.setSendToLibrary(dbEntity.getSendToLibrary());
@@ -1171,6 +1172,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private Long getUserIdFromToken() {
         Long userId = utils.getUserIdFromAuthentication();
+        System.out.println(userId);
         return userId;
     }
 

@@ -21,4 +21,8 @@ public interface PlotHistoryRepository extends JpaRepository<PlotHistory, Long>,
 
     List<PlotHistory> findAllByPlotInputId(Long plotInputId);
 
+    List<PlotHistory> findAllByPlotInputIdOrderByCreatedAtDesc(Long id);
+
+    List<PlotHistory> findAllByPlotInputIdOrderByCreatedAtAsc(Long id);
+
 }

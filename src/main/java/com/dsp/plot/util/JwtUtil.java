@@ -70,20 +70,6 @@ public class JwtUtil {
         return extractClaim(token, claims -> claims.get("houseId", Long.class));
     }
 
-	//copied from template Engine
-	public Long getUserIdFromAuthentication() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null || !authentication.isAuthenticated()) {
-			throw new IllegalStateException("No authenticated user found");
-		}
-
-		String username = authentication.getName();
-		BaseUser baseUser = myUserRepository.findByUsername(username);
-		if (baseUser == null) {
-			throw new UsernameNotFoundException("Authenticated user not found in the database");
-		}
-
-		return baseUser.getId();
-	}
+	
 
 }

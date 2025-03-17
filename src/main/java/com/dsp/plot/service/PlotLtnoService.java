@@ -34,4 +34,8 @@ public interface PlotLtnoService {
 
         PlotLaidOnTableDTO saveTitle(PlotLaidOnTableDTO plotLaidOnTableDTO);
 
+        void deleteTitle(Long id);
+
+        void deleteLtno(Long id);
+
 }
