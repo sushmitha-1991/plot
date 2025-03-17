@@ -16,7 +16,7 @@ public interface PlotLtnoService {
         List<PlotLtnoDto> getAll();
 
         List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
-                        LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo,Long paperTypeId);
+                        LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo,String paperType);
 
         PlotLtnoDto getById(Long id);
 
@@ -30,7 +30,7 @@ public interface PlotLtnoService {
 
         List<PlotLaidOnTableDTO> getTitles(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo,
                         Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
-                        Long ministryId);
+                        Long ministryId,String title);
 
         PlotLaidOnTableDTO saveTitle(PlotLaidOnTableDTO plotLaidOnTableDTO);
 

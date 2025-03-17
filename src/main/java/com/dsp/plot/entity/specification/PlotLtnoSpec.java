@@ -2,6 +2,8 @@ package com.dsp.plot.entity.specification;
 
 import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.dsp.plot.entity.PaperLaidOnTable;
 import com.dsp.plot.entity.PlotLtno;
 import jakarta.persistence.criteria.Expression;
 
@@ -59,10 +61,13 @@ public class PlotLtnoSpec {
                 ? criteriaBuilder.equal(root.get("ministryId"), ministryId)
                 : null;
     }
-    public static Specification<PlotLtno> hasPaperTypeId(Long paperTypeId) {
-        return (root, query, criteriaBuilder) -> paperTypeId != null
-                ? criteriaBuilder.equal(root.get("paperTypeId"), paperTypeId)
-                : null;
+    public static Specification<PlotLtno> hasPaperType(String paperType) {
+        return (root, query, criteriaBuilder) -> {
+            if (paperType == null || paperType.isBlank()) {
+                return null; // No filter applied if title is null or empty
+            }
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("paperType")), "%" + paperType.toLowerCase() + "%");
+        };
     }
 
 }

@@ -41,8 +41,8 @@ public class PlotLtno extends ApplicationInstance{
     private Long lokSabhaSessionNo;
     @Column(name = "rajya_sabha_session_no")
     private Long rajyaSabhaSessionNo;
-    @Column(name = "paper_type_id")
-    private Long paperTypeId;
+    @Column(name = "paper_type")
+    private String paperType;
     @Column(name = "ltno_date")
     private LocalDate ltnoDate;
     @Column(name = "paper_name")
@@ -71,7 +71,4 @@ public class PlotLtno extends ApplicationInstance{
     @ManyToOne
     @JoinColumn(name = "ministry_id", referencedColumnName = "id",insertable=false,updatable=false)
     private Ministries ministries;
-    @ManyToOne
-    @JoinColumn(name = "paper_type_id", referencedColumnName = "id",insertable=false,updatable=false)
-    private MasterCode paperTypes;
 }

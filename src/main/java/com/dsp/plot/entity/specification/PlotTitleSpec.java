@@ -55,6 +55,14 @@ public class PlotTitleSpec {
         return (root, query, criteriaBuilder) -> status != null ? criteriaBuilder.equal(root.get("status"), status)
                 : null;
     }
+    public static Specification<PaperLaidOnTable> hasTitle(String title) {
+        return (root, query, criteriaBuilder) -> {
+            if (title == null || title.isBlank()) {
+                return null; // No filter applied if title is null or empty
+            }
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%");
+        };
+    }
 
     public static Specification<PaperLaidOnTable> hasMinistryId(Long ministryId) {
         return (root, query, criteriaBuilder) -> ministryId != null

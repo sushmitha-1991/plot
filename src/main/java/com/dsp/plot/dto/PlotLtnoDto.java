@@ -25,7 +25,7 @@ public class PlotLtnoDto {
     private Long lokSabhaNo;
     private Long lokSabhaSessionNo;
     private Long rajyaSabhaSessionNo;
-    private Long paperTypeId;
+    private String paperType;
     private LocalDate ltnoDate;
     private String paperName;
     private Long ministryId;
@@ -43,5 +43,4 @@ public class PlotLtnoDto {
     private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
     private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
     private MinistriesDTO ministries;
-    private MasterCodeDTO PaperTypes;
 }

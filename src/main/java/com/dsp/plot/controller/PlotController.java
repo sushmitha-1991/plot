@@ -61,9 +61,9 @@ public class PlotController {
                         @RequestParam(required = false) String status,
                         @RequestParam(required = false) Long ministryId,
                         @RequestParam(required = false) String ltnoNo,
-                        @RequestParam(required = false) Long paperTypeId) {
+                        @RequestParam(required = false) String paperType) {
                 List<PlotLtnoDto> fectchedEntities = service.getAll(isActive, lokSabhaNo, lokSabhaSessionNo,
-                                rajyaSabhaSessionNo, startDate, endDate, status, ministryId, ltnoNo, paperTypeId);
+                                rajyaSabhaSessionNo, startDate, endDate, status, ministryId, ltnoNo,paperType);
 
                 GenericResponse<List<PlotLtnoDto>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "Plot retrieved successfully", fectchedEntities);
@@ -80,12 +80,13 @@ public class PlotController {
                         @RequestParam(required = false) LocalDate startDate,
                         @RequestParam(required = false) LocalDate endDate,
                         @RequestParam(required = false) String status,
-                        @RequestParam(required = false) Long ministryId) {
+                        @RequestParam(required = false) Long ministryId,
+                        @RequestParam(required = false) String title) {
                 List<PlotLaidOnTableDTO> fectchedEntities = service.getTitles(isActive, lokSabhaNo, lokSabhaSessionNo,
-                                rajyaSabhaSessionNo, startDate, endDate, status, ministryId);
+                                rajyaSabhaSessionNo, startDate, endDate, status, ministryId,title);
 
                 GenericResponse<List<PlotLaidOnTableDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                                "Plot retrieved successfully", fectchedEntities);
+                                "Plot Title retrieved successfully", fectchedEntities);
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }

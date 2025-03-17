@@ -142,7 +142,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
 
     @Override
     public List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
-            LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo,Long paperTypeId) {
+            LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo,String paperType) {
         log.debug("Entering getAll Plots");
         List<PlotLtnoDto> dtoList = new ArrayList<>();
         List<PlotLtno> entitys;
@@ -173,8 +173,8 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         if (ministryId != null) {
             spec = spec.and(PlotLtnoSpec.hasMinistryId(ministryId));
         }
-        if (paperTypeId != null) {
-            spec = spec.and(PlotLtnoSpec.hasPaperTypeId(paperTypeId));
+        if (paperType != null) {
+            spec = spec.and(PlotLtnoSpec.hasPaperType(paperType));
         }
 
         // entitys = ltnoRepo.findAll();
@@ -217,7 +217,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
 
     @Override
     public List<PlotLaidOnTableDTO> getTitles(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo,
-            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, Long ministryId) {
+            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, Long ministryId,String title) {
         // TODO Auto-generated method stub
         log.debug("Entering getAll Plots");
         List<PlotLaidOnTableDTO> dtoList = new ArrayList<>();
@@ -239,8 +239,13 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         if (status != null) {
             spec = spec.and(PlotTitleSpec.hasStatus(status));
         }
+        if (ministryId != null) {
+            spec = spec.and(PlotTitleSpec.hasMinistryId(ministryId));
+        }
+        if (title != null) {
+            spec = spec.and(PlotTitleSpec.hasTitle(title));
+        }
         entitys = titleRepo.findAll(spec);
-        // entitys = ltnoRepo.findAll(spec);
         Long houseId = getHouseId();
         for (PaperLaidOnTable entity : entitys) {
             if (houseId == 1) {
@@ -353,7 +358,6 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         }
         dbEntity.setDocumentDate(plotDTO.getLtnoDate());
         dbEntity.setCurrentStatus(plotDTO.getStatus());
-        
         // Save the updated PlotInput
         dbEntity = ltnoRepo.save(dbEntity);
         // Prepare the response DTO
