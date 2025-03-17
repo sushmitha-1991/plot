@@ -113,6 +113,8 @@ public interface LtnoMapper {
                 .plotLaidDate(dto.getPlotLaidDate())
                 .ministryId(dto.getMinistryId())
                 .status(dto.getStatus())
+                .applicationId(dto.getApplicationId())
+                .refNo(dto.getRefNo())
                 .title(dto.getTitle())
                 .build();
 
@@ -128,6 +130,8 @@ public interface LtnoMapper {
                 .plotLaidDate(entity.getPlotLaidDate())
                 .ministryId(entity.getMinistryId())
                 .title(entity.getTitle())
+                .applicationId(entity.getApplicationId())
+                .refNo(entity.getRefNo())
                 .status(entity.getStatus())
                 .build();
         if (entity.getMinistries() != null) {

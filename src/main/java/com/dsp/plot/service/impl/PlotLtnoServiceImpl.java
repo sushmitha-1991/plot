@@ -142,7 +142,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
 
     @Override
     public List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
-            LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo,String paperType) {
+            LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo, String paperType) {
         log.debug("Entering getAll Plots");
         List<PlotLtnoDto> dtoList = new ArrayList<>();
         List<PlotLtno> entitys;
@@ -217,7 +217,8 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
 
     @Override
     public List<PlotLaidOnTableDTO> getTitles(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo,
-            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, Long ministryId,String title) {
+            Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, Long ministryId,
+            String title) {
         // TODO Auto-generated method stub
         log.debug("Entering getAll Plots");
         List<PlotLaidOnTableDTO> dtoList = new ArrayList<>();
@@ -278,7 +279,15 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             log.debug("Converted PlotDTO to entity: {}", entity);
             // Save Plot entity
             Long houseId = getHouseId();
-
+            SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
+            serialNumberRequest.setAppId(plotLaidOnTableDTO.getApplicationId());
+            if (houseId == 1) {
+                serialNumberRequest.setSessionId(plotLaidOnTableDTO.getRajyaSabhaSessionNo());
+            } else if (houseId == 2) {
+                serialNumberRequest.setSessionId(plotLaidOnTableDTO.getLokSabhaSessionNo());
+            }
+            SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
+            entity.setRefNo(applicationNo.getId());
             entity = titleRepo.save(entity);
             log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
             // entity = plotRepository.save(entity);
@@ -287,7 +296,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             log.debug("Returning PlotInputDTO: {}", responseDTO);
             return responseDTO;
         } catch (Exception e) {
-            log.error("Error in savePlotInput: ", e);
+            log.error("Error in Title: ", e);
             throw e;
         }
     }
@@ -341,7 +350,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Plot Ltno not found with id: " + id));
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
-        PlotLtno dbEntityNew = LtnoMapper.toEntity(plotDTO);            
+        PlotLtno dbEntityNew = LtnoMapper.toEntity(plotDTO);
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true); // Allow access to private fields
@@ -392,7 +401,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         PaperLaidOnTable dBEntry = dBEntryOptional.get();
         dBEntry.setIsDeleted(true);
         dBEntry.setIsActive(false);
-        titleRepo.saveAndFlush(dBEntry);        
+        titleRepo.saveAndFlush(dBEntry);
     }
 
     // Generate Application No Functionality
@@ -434,5 +443,4 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         return houseId;
     }
 
-   
 }

@@ -28,6 +28,8 @@ public class PlotLaidOnTableDTO {
     private LocalDate plotLaidDate;
     private Long ministryId;
     private String status;
+    private String refNo;
+    private Long applicationId;
     private String title;
     private List<Map<String, Object>> documents;
     private MastersLokSabhaDTO lokSabhaDTO;

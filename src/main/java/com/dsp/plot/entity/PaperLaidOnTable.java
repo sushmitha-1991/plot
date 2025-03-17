@@ -48,8 +48,12 @@ public class PaperLaidOnTable extends Auditable {
   private LocalDate plotLaidDate;
   @Column(name = "status", nullable = false)
   private String status;
+  @Column(name = "ref_no", nullable = false)
+  private String refNo;
   @Column(name = "ministry_id")
   private Long ministryId;
+  @Column(name = "application_id")
+  private Long applicationId;
   @Column(name = "title", columnDefinition = "text", nullable = false)
   private String title;
   @Convert(converter = JsonMapConverter.class)
