@@ -13,5 +13,7 @@ import com.dsp.plot.entity.PlotIndex;
 @Repository
 public interface PlotIndexRepository extends JpaRepository<PlotIndex, Long>, JpaSpecificationExecutor<PlotIndex>  {
 
+    Optional<PlotIndex> findByIdAndIsActive(Long id, boolean isActive);
+    Optional<List<PlotIndex>> findByIsActive(boolean isActive);
 
 }

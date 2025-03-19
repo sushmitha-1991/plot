@@ -110,6 +110,21 @@ public class PlotGenerateController {
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        @Operation(summary = "Delete a Index by ID", description = "Deletes a specific Index by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Index deleted successfully"),
+                        @ApiResponse(responseCode = "404", description = "Index not found"),
+                        @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @DeleteMapping("/deleteIndex/{id}")
+        public ResponseEntity<GenericResponse<String>> deleteIndex(@PathVariable Long id) {
+
+                plotService.deleteIndex(id);
+
+                GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Ltno deleted successfully", null);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
 
         @Operation(summary = "Delete a PlotGenerate by ID", description = "Deletes a specific PlotGenerate by its ID.")
         @ApiResponses(value = {

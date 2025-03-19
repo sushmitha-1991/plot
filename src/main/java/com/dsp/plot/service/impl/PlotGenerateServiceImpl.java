@@ -393,6 +393,17 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         dBEntry.setIsActive(false);
         plotRepository.saveAndFlush(dBEntry);
     }
+    @Override
+    public void deleteIndex(Long id) {
+        Optional<PlotIndex> dBEntryOptional = plotIndexRepo.findByIdAndIsActive(id, true);
+        if (dBEntryOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Already Deleted or does not exists");
+        }
+        PlotIndex dBEntry = dBEntryOptional.get();
+        dBEntry.setIsDeleted(true);
+        dBEntry.setIsActive(false);
+        plotIndexRepo.saveAndFlush(dBEntry);
+    }
 
     // Generate Application No Functionality
     public SerialNumberResponse generateApplicationNo(SerialNumberRequest request) {
