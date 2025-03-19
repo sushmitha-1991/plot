@@ -121,7 +121,7 @@ public class PlotGenerateController {
                 plotService.deleteIndex(id);
 
                 GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                                "Ltno deleted successfully", null);
+                                "Index deleted successfully", null);
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
