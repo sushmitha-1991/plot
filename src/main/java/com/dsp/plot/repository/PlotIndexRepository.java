@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotIndex;
+import java.util.Optional;
 
 @Repository
 public interface PlotIndexRepository extends JpaRepository<PlotIndex, Long>, JpaSpecificationExecutor<PlotIndex>  {
