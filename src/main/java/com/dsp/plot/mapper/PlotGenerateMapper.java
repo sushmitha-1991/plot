@@ -7,10 +7,8 @@ import com.dsp.plot.dto.MastersLokSabhaSessionDTO;
 import com.dsp.plot.dto.MastersRajyaSabhaSessionDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.PlotIndexDTO;
-import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotIndex;
-import com.dsp.plot.entity.Request;
 
 public class PlotGenerateMapper {
 
@@ -149,6 +147,7 @@ public class PlotGenerateMapper {
                                 .applicationId(entity.getApplicationId())
                                 .reportName(entity.getReportName())
                                 .indexDetails(entity.getIndexDetails())
+                                .createdById(entity.getCreatedBy())
                                 .build();
                 if (entity.getLokSabhaSessionDetails() != null) {
                         if (entity.getLokSabhaSessionDetails().getLokSabha() != null) {

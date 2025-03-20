@@ -29,6 +29,7 @@ import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
+import com.dsp.plot.entity.BaseUser;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.PlotGenerate;
@@ -43,6 +44,7 @@ import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
 import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
+import com.dsp.plot.repository.MyUserRepository;
 import com.dsp.plot.repository.PlotGenerateRepository;
 import com.dsp.plot.repository.PlotIndexRepository;
 import com.dsp.plot.repository.PlotInputRepository;
@@ -54,7 +56,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class PlotGenerateServiceImpl implements PlotGenerateService {
 
-
     @Value("${workflow.service.url}")
     private String draftUrl;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
@@ -65,7 +66,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     private HttpServletRequest httpRequest;
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
-
+    @Autowired
+    private MyUserRepository myUserRepository;
     @Autowired
     private MasterLSSRepository masterLSSRepository;
     @Autowired
@@ -257,7 +259,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         if (isActive == null) {
             isActive = true;
         }
-        
+
         Specification<PlotGenerate> spec = Specification.where(null);
         spec = spec.and(PlotGenerateSpec.isActive(isActive));
         spec = spec.and(PlotGenerateSpec.hasDraftStatus(draftStatus));
@@ -347,12 +349,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         // Prepare the response DTO
         return (PlotGenerateMapper.toDTO(dbEntity));
     }
+
     @Override
-   public PlotIndexDTO updateIndexById(Long id, PlotIndexDTO plotIndexDTO)
-    {
+    public PlotIndexDTO updateIndexById(Long id, PlotIndexDTO plotIndexDTO) {
         log.debug("Starting update for Plot with ID: {}", id);
         // Fetch the existing Plot
-        PlotIndex dbEntity =plotIndexRepo.findById(id)
+        PlotIndex dbEntity = plotIndexRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Plot not found with id: " + id));
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
@@ -376,7 +378,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             }
         }
         // Save the updated Plot
-        
+
         dbEntity = plotIndexRepo.save(dbEntity);
         // Prepare the response DTO
         return (PlotGenerateMapper.toIndexDTO(dbEntity));
@@ -393,6 +395,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         dBEntry.setIsActive(false);
         plotRepository.saveAndFlush(dBEntry);
     }
+
     @Override
     public void deleteIndex(Long id) {
         Optional<PlotIndex> dBEntryOptional = plotIndexRepo.findByIdAndIsActive(id, true);
@@ -517,7 +520,16 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
         List<PlotIndexDTO> responseDTO = new ArrayList<>();
         for (PlotIndex entity : response) {
-            responseDTO.add(PlotGenerateMapper.toIndexDTO(entity));
+            Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
+
+            PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(entity);
+            if (username.isPresent()) {
+                BaseUser user = username.get();
+                dto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
+            }
+
+            responseDTO.add(dto);
+
         }
         return responseDTO;
     }

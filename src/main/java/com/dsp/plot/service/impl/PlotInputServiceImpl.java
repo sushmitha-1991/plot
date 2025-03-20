@@ -191,7 +191,8 @@ public class PlotInputServiceImpl implements PlotInputService {
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
-            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalUser.get(), abbr,entity.getApplicationNo());
+            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalUser.get(), abbr,
+                    entity.getApplicationNo());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
             entity = plotinputRepository.save(entity);
@@ -199,9 +200,9 @@ public class PlotInputServiceImpl implements PlotInputService {
             log.info("before plot Input Saved: ID={},  Status={}", entity.getId(), entity.getStatus());
             entity = plotinputRepository.save(entity);
             log.info("after plot Input Saved: ID={},  Status={}", entity.getId(), entity.getStatus());
-            
-            //update Application No in DocumentMetadata table using Uuid
-            updateAppNo(entity.getDocuments(),entity.getApplicationNo());
+
+            // update Application No in DocumentMetadata table using Uuid
+            updateAppNo(entity.getDocuments(), entity.getApplicationNo());
             // Convert saved entity back to DTO
             PlotInputDTO responseDTO = PlotInputMapper.toDTO(entity);
             // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
@@ -228,7 +229,8 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     }
 
-    private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO, String abbr,String applicationNo) {
+    private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO, String abbr,
+            String applicationNo) {
         if (authenticatorDTO == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
         }
@@ -252,7 +254,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 // Create formatted output for each paper
                 // Reports
                 if (abbr.equals("PLOT_REPORT")) {
-                    String formattedString = getFormattedReportDetails(paper,applicationNo);
+                    String formattedString = getFormattedReportDetails(paper, applicationNo);
                     // Append numbered list item
                     if (StringUtils.isBlank(formattedString)) {
                         contentBuilder.append(formattedString);
@@ -261,7 +263,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
                 // notifications
                 else if (abbr.equals("PLOT_NOTIFICATION")) {
-                    String formattedString = getFormattedNotificationDetails(paper,applicationNo);
+                    String formattedString = getFormattedNotificationDetails(paper, applicationNo);
                     if (StringUtils.isBlank(formattedString)) {
                         contentBuilder.append(formattedString);
                     }
@@ -270,7 +272,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
                 // others
                 else if (abbr.equals("PLOT_OTHER")) {
-                    String formattedString = getFormattedOtherPaperDetails(paper,applicationNo);
+                    String formattedString = getFormattedOtherPaperDetails(paper, applicationNo);
                     // Append numbered list item
                     if (StringUtils.isBlank(formattedString)) {
                         contentBuilder.append(formattedString);
@@ -285,23 +287,23 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     // Report
-    private String getFormattedReportDetails(Map<String, Object> paper,String applicationNo) {
-        Object paperDocs=paper.get("documents");
+    private String getFormattedReportDetails(Map<String, Object> paper, String applicationNo) {
+        Object paperDocs = paper.get("documents");
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
             // Ensure all elements are of type Map
             boolean allMaps = tempList.stream().allMatch(item -> item instanceof Map);
             if (allMaps) {
                 List<Map<String, Object>> docs = tempList.stream()
-                    .map(item -> (Map<String, Object>) item)
-                    .toList();
-                updateAppNo(docs,applicationNo);
+                        .map(item -> (Map<String, Object>) item)
+                        .toList();
+                updateAppNo(docs, applicationNo);
             }
         }
         // if(paperDocs instanceof List<Map>)
         // {
-        //     List<Map<String, Object>> docs = (List<Map<String, Object>>) paperDocs;
-        //     updateAppNo(docs);
+        // List<Map<String, Object>> docs = (List<Map<String, Object>>) paperDocs;
+        // updateAppNo(docs);
         // }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Object paperNameData = paper.get("paperName");
@@ -366,19 +368,19 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     // notification
-    private String getFormattedNotificationDetails(Map<String, Object> paper,String applicationNo) {
-        Object paperDocs=paper.get("documents");
-        System.out.println("###-paperDocs  ::"+paperDocs);
+    private String getFormattedNotificationDetails(Map<String, Object> paper, String applicationNo) {
+        Object paperDocs = paper.get("documents");
+        System.out.println("###-paperDocs  ::" + paperDocs);
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
             // Ensure all elements are of type Map
             boolean allMaps = tempList.stream().allMatch(item -> item instanceof Map);
             if (allMaps) {
                 List<Map<String, Object>> docs = tempList.stream()
-                    .map(item -> (Map<String, Object>) item)
-                    .toList();
-        System.out.println("###-docs  ::"+docs);
-                updateAppNo(docs,applicationNo);
+                        .map(item -> (Map<String, Object>) item)
+                        .toList();
+                System.out.println("###-docs  ::" + docs);
+                updateAppNo(docs, applicationNo);
             }
         }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
@@ -445,19 +447,19 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     // other paper
-    private String getFormattedOtherPaperDetails(Map<String, Object> paper,String applicationNo) {
-        Object paperDocs=paper.get("documents");
-        System.out.println("###-paperDocs  ::"+paperDocs);
+    private String getFormattedOtherPaperDetails(Map<String, Object> paper, String applicationNo) {
+        Object paperDocs = paper.get("documents");
+        System.out.println("###-paperDocs  ::" + paperDocs);
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
             // Ensure all elements are of type Map
             boolean allMaps = tempList.stream().allMatch(item -> item instanceof Map);
             if (allMaps) {
                 List<Map<String, Object>> docs = tempList.stream()
-                    .map(item -> (Map<String, Object>) item)
-                    .toList();
-        System.out.println("###-docs  ::"+docs);
-                updateAppNo(docs,applicationNo);
+                        .map(item -> (Map<String, Object>) item)
+                        .toList();
+                System.out.println("###-docs  ::" + docs);
+                updateAppNo(docs, applicationNo);
             }
         }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
@@ -833,7 +835,8 @@ public class PlotInputServiceImpl implements PlotInputService {
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
-            String contentText = formatPaperDetails(dbEntity.getPaperDetails(), optionalUser.get(), abbr,dbEntity.getApplicationNo());
+            String contentText = formatPaperDetails(dbEntity.getPaperDetails(), optionalUser.get(), abbr,
+                    dbEntity.getApplicationNo());
             dbEntity.setContent(contentText);
             dbEntity.setHtmlContentEnglish(contentText);
         }
@@ -846,6 +849,19 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
             BaseUser user = userRepository.findById(dbEntity.getCreatedBy()).get();
             dbEntity.setPendingAt(user.getFirstName() + " " + user.getLastName());
+        } else if (dbEntityNew.getStatus().equalsIgnoreCase("published") ||
+                dbEntityNew.getStatus().equalsIgnoreCase("approved")) {
+            if (dbEntity.getApplicationInstanceId() != null) {
+                PlotGenerate plot = repository
+                .findById(dbEntity.getApplicationInstanceId()).get();
+                plot.setStatus(dbEntity.getStatus());
+                plot.setCurrentStatus(dbEntity.getStatus());
+                if (houseId == 1) {
+                    dbEntity.setPendingAt("Table Office");
+                } else if (houseId == 2) {
+                    dbEntity.setPendingAt("Table Office A");
+                }
+            }
         } else {
             if (houseId == 1) {
                 dbEntity.setPendingAt("Table Office");
@@ -1217,12 +1233,12 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         return houseId;
     }
-    private void updateAppNo(List<Map<String,Object>> docs,String applicationNo)
-    {
+
+    private void updateAppNo(List<Map<String, Object>> docs, String applicationNo) {
         System.out.println("#######");
         System.out.println(docs);
         if (docs.size() > 0) {
-            for (int i = 0; i <docs.size(); i++) {
+            for (int i = 0; i < docs.size(); i++) {
                 String uuid = String.valueOf(docs.get(i).get("documentUuid"));
                 if (!StringUtils.isBlank(uuid)) {
                     int uuidExist = plotinputRepository.checkUuidExists(uuid);
