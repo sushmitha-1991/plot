@@ -35,6 +35,8 @@ public class PlotLtnoDto {
     private String status;
     private String remarks;
     private String refNo;
+    private Long noOfPages;
+
     // Application Instance
     private Long applicationId;
     private String applicationNo;

@@ -62,6 +62,8 @@ public class PlotLtno extends ApplicationInstance{
     private String remarks;
     @Column(name = "ref_no")
     private String refNo;
+    @Column(name = "no_of_pages")
+    private Long noOfPages;
     @ManyToOne
     @JoinColumn(name = "lok_sabha_session_no", referencedColumnName = "id",insertable=false,updatable=false)
     private MastersLokSabhaSession lokSabhSessionDetails;
