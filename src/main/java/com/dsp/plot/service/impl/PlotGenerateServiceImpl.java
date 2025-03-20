@@ -526,7 +526,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 BaseUser user = username.get();
                 dto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
             }
-
             responseDTO.add(dto);
 
         }
@@ -577,13 +576,24 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         entity.setRefNo(applicationNo.getId());
         entity = plotIndexRepo.save(entity);
         PlotIndexDTO responseDto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(entity.getId()).get());
+        Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
+            if (username.isPresent()) {
+                BaseUser user = username.get();
+                responseDto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
+            }
         return responseDto;
     }
 
     @Override
     public PlotIndexDTO getIndexById(Long id) {
         // TODO Auto-generated method stub
-        PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(id).get());
+        PlotIndex entity=plotIndexRepo.findById(id).get();
+        PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(entity);
+        Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
+        if (username.isPresent()) {
+            BaseUser user = username.get();
+            dto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
+        }
         return dto;
     }
     // @Override
