@@ -521,7 +521,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         List<PlotIndexDTO> responseDTO = new ArrayList<>();
         for (PlotIndex entity : response) {
             Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
-
             PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(entity);
             if (username.isPresent()) {
                 BaseUser user = username.get();
