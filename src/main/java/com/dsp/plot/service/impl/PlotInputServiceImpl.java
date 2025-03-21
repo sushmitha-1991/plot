@@ -10,10 +10,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1237,20 +1238,44 @@ public class PlotInputServiceImpl implements PlotInputService {
     private void updateAppNo(List<Map<String, Object>> docs, String applicationNo) {
         System.out.println("#######");
         System.out.println(docs);
-        if (docs.size() > 0) {
-            for (int i = 0; i < docs.size(); i++) {
-                String uuid = String.valueOf(docs.get(i).get("documentUuid"));
-                if (!StringUtils.isBlank(uuid)) {
-                    int uuidExist = plotinputRepository.checkUuidExists(uuid);
-                    System.out.println("UUUUUUUUUUUUUU");
-                    System.err.println(uuidExist);
-                    if (uuidExist == 1) {
-                        System.out.println("@@@@@");
-                        System.err.println(uuidExist + "       %%%" + uuid);
-                        plotinputRepository.updateApplicationNoByUUID(uuid, applicationNo);
+        // if (docs!=null && docs.size() > 0) {
+        //     for (int i = 0; i < docs.size(); i++) {
+        //         String uuid = String.valueOf(docs.get(i).get("documentUuid"));
+        //         if (!StringUtils.isBlank(uuid)) {
+        //             int uuidExist = plotinputRepository.checkUuidExists(uuid);
+        //             System.out.println("UUUUUUUUUUUUUU");
+        //             System.err.println(uuidExist);
+        //             if (uuidExist == 1) {
+        //                 System.out.println("@@@@@");
+        //                 System.err.println(uuidExist + "       %%%" + uuid);
+        //                 plotinputRepository.updateApplicationNoByUUID(uuid, applicationNo);
+        //             }
+        //         }
+        //     }
+        // }
+        if (docs!=null && docs.size() > 0){
+            for (Map<String, Object> doc : docs) {
+                Object uuidObj = doc.get("documentUuid");
+                if (uuidObj instanceof String uuid && StringUtils.isNotBlank(uuid)) {
+                    try {
+                        int uuidExist = plotinputRepository.checkUuidExists(uuid);
+                        System.out.println("Checking UUID: " + uuid);
+                        System.err.println("UUID Exist Status: " + uuidExist);
+        
+                        if (uuidExist == 1) {
+                            System.out.println("Updating application number for UUID: " + uuid);
+                            plotinputRepository.updateApplicationNoByUUID(uuid, applicationNo);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error processing UUID: " + uuid + " - " + e.getMessage());
+                        e.printStackTrace();
                     }
+                } else {
+                    System.err.println("Invalid or missing UUID in document: " + doc);
                 }
             }
+        } else {
+            System.err.println("Document list is null or empty.");
         }
     }
 

@@ -473,13 +473,10 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         if (token == null) {
             throw new IllegalStateException("Authorization token is missing");
         }
-
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         HttpEntity<Void> entity = new HttpEntity<>(headers); // No body needed for DELETE request
-
         try {
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
@@ -493,7 +490,6 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             throw e;
         }
     }
-
     @Override
     public List<PlotIndexDTO> getIndexes(Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
             LocalDate startDate, LocalDate endDate, String status, String reportName, Long createdBy) {
