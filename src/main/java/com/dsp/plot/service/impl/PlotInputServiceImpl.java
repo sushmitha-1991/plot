@@ -131,7 +131,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Override
     public PlotInputDTO save(PlotInputDTO plotinputDTO) {
         if (plotinputDTO.getStatus() == null) {
-            plotinputDTO.setStatus("In Progress");
+            plotinputDTO.setStatus("Submitted");
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
         if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
@@ -316,7 +316,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 updateAppNo(docs, applicationNo);
             }
         }
-      
+
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Object paperNameData = paper.get("paperName");
 
@@ -329,10 +329,9 @@ public class PlotInputServiceImpl implements PlotInputService {
 
             if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
                 paperType = numberValue.longValue();
-                System.out.println("paperNameId: " + paperType);
-            }  if (labelObj instanceof String stringValue) {
+            }
+            if (labelObj instanceof String stringValue) {
                 paperTitle = stringValue;
-                System.out.println("paperTitle: " + paperTitle);
             }
         }
 
@@ -389,7 +388,6 @@ public class PlotInputServiceImpl implements PlotInputService {
     // notification
     private String getFormattedNotificationDetails(Map<String, Object> paper, String applicationNo) {
         Object paperDocs = paper.get("documents");
-        System.out.println("###-paperDocs  ::" + paperDocs);
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
             // Ensure all elements are of type Map
@@ -398,7 +396,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 List<Map<String, Object>> docs = tempList.stream()
                         .map(item -> (Map<String, Object>) item)
                         .toList();
-                System.out.println("###-docs  ::" + docs);
                 updateAppNo(docs, applicationNo);
             }
         }
@@ -414,16 +411,12 @@ public class PlotInputServiceImpl implements PlotInputService {
 
             if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
                 paperType = numberValue.longValue();
-                System.out.println("paperNameId: " + paperType);
-            } 
-             if (labelObj instanceof String stringValue) {
+            }
+            if (labelObj instanceof String stringValue) {
                 paperTitle = stringValue;
-                System.out.println("paperTitle: " + paperTitle);
             }
         }
 
-
-       
         // Object paperNameId = paper.get("notificationId");
         // Long paperType = null;
         // if (paperNameId instanceof Long) {
@@ -449,21 +442,18 @@ public class PlotInputServiceImpl implements PlotInputService {
         // String abbr = codeAbbr.getAbbr();
         // switch (abbr) {
         // case "PLOT_NF_GEN":
-        // System.out.println("### " + abbr);
         String formattedString = MessageFormat.format(template,
                 escapeHtml(paperTitle),
                 escapeHtml(paper.get("publishedIn")),
                 escapeHtml(paper.get("laidUnderAct")));
         // break;
         // case "PLOT_NF_SON":
-        // System.out.println("### " + abbr);
         // formattedString = MessageFormat.format(template,
         // escapeHtml(paper.get("notificationType")),
         // escapeHtml(paper.get("publishedIn")),
         // escapeHtml(paper.get("actUnderWhichLaid")));
         // break;
         // case "PLOT_NF_NO":
-        // System.out.println("### " + abbr);
 
         // formattedString = MessageFormat.format(template,
         // escapeHtml(paper.get("notificationType")),
@@ -471,7 +461,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         // escapeHtml(paper.get("actUnderWhichLaid")));
         // break;
         // case "PLOT_NF_ON":
-        // System.out.println("### " + abbr);
         // formattedString = MessageFormat.format(template,
         // escapeHtml(paper.get("notificationType")),
         // escapeHtml(paper.get("publishedIn")),
@@ -488,7 +477,6 @@ public class PlotInputServiceImpl implements PlotInputService {
     // other paper
     private String getFormattedOtherPaperDetails(Map<String, Object> paper, String applicationNo) {
         Object paperDocs = paper.get("documents");
-        System.out.println("###-paperDocs  ::" + paperDocs);
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
             // Ensure all elements are of type Map
@@ -497,28 +485,25 @@ public class PlotInputServiceImpl implements PlotInputService {
                 List<Map<String, Object>> docs = tempList.stream()
                         .map(item -> (Map<String, Object>) item)
                         .toList();
-                System.out.println("###-docs  ::" + docs);
                 updateAppNo(docs, applicationNo);
             }
         }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Object paperNameData = paper.get("paperName");
-       
+
         Long paperType = null;
         String paperTitle = "";
 
         if (paperNameData instanceof Map<?, ?> paperNameMap) {
-            Object valueObj = paperNameMap.get("value"); 
+            Object valueObj = paperNameMap.get("value");
             Object labelObj = paperNameMap.get("label"); // Extract "value" field
             // Extract "value" field
-//label
+            // label
             if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
                 paperType = numberValue.longValue();
-                System.out.println("paperNameId: " + paperType);
-            } 
-             if (labelObj instanceof String stringValue) {
+            }
+            if (labelObj instanceof String stringValue) {
                 paperTitle = stringValue;
-                System.out.println("paperTitle: " + paperTitle);
             }
         }
         if (paperType == null) {
@@ -697,6 +682,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setCurrentStatus("In Progress");
                             }
                         }
+                    } else {
+                        entity.setPendingAt("Table Office");
+                        entity.setStatus("Submitted");
+                        entity.setCurrentStatus("Submitted");
                     }
                     entity = plotinputRepository.save(entity);
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
@@ -720,6 +709,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setCurrentStatus("In Progress");
                             }
                         }
+                    } else {
+                        entity.setPendingAt("Table Office A");
+                        entity.setStatus("Submitted");
+                        entity.setCurrentStatus("Submitted");
                     }
                     entity = plotinputRepository.save(entity);
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
@@ -785,6 +778,26 @@ public class PlotInputServiceImpl implements PlotInputService {
         for (PlotInput entity : entitys) {
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
+                    if (entity.getApplicationInstanceId() != null) {
+                        PlotGenerate plot = repository
+                                .findById(entity.getApplicationInstanceId()).get();
+                        if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
+                                || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
+                            if (plot.getCurrentStatus().equalsIgnoreCase("published")
+                                    || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
+                                entity.setPendingAt(" ");
+                                entity.setStatus(plot.getCurrentStatus());
+                                entity.setCurrentStatus(plot.getCurrentStatus());
+                            } else {
+                                // entity.setPendingAt("Table Office");
+                                entity.setStatus("In Progress");
+                                entity.setCurrentStatus("In Progress");
+                            }
+                        }
+                    } else {
+                        entity.setStatus("Submitted");
+                        entity.setCurrentStatus("Submitted");
+                    }
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     List<PlotHistory> histories = plotHistoryRepository
                             .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
@@ -797,6 +810,26 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             } else if (houseId == 2) {
                 if (entity.getLokSabhaSessionNo() != null) {
+                    if (entity.getApplicationInstanceId() != null) {
+                        PlotGenerate plot = repository
+                                .findById(entity.getApplicationInstanceId()).get();
+                        if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
+                                || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
+                            if (plot.getCurrentStatus().equalsIgnoreCase("published")
+                                    || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
+                                entity.setPendingAt(" ");
+                                entity.setStatus(plot.getCurrentStatus());
+                                entity.setCurrentStatus(plot.getCurrentStatus());
+                            } else {
+                                // entity.setPendingAt("Table Office");
+                                entity.setStatus("In Progress");
+                                entity.setCurrentStatus("In Progress");
+                            }
+                        }
+                    } else {
+                        entity.setStatus("Submitted");
+                        entity.setCurrentStatus("Submitted");
+                    }
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     List<PlotHistory> histories = plotHistoryRepository
                             .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
@@ -835,6 +868,9 @@ public class PlotInputServiceImpl implements PlotInputService {
                     dBEntity.setCurrentStatus("In Progress");
                 }
             }
+        } else {
+            dBEntity.setStatus("Submitted");
+            dBEntity.setCurrentStatus("Submitted");
         }
         dBEntity = plotinputRepository.save(dBEntity);
         PlotInputDTO dto = PlotInputMapper.toDTO(dBEntity);
@@ -908,6 +944,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         .findById(dbEntity.getApplicationInstanceId()).get();
                 plot.setStatus(dbEntity.getStatus());
                 plot.setCurrentStatus(dbEntity.getStatus());
+                plot = repository.save(plot);
                 if (houseId == 1) {
                     dbEntity.setPendingAt("Table Office");
                 } else if (houseId == 2) {
@@ -1041,12 +1078,12 @@ public class PlotInputServiceImpl implements PlotInputService {
             Optional<MastersRajyaSabha> rajyaSabha = mastersRSSRepository.findBySessionNumber(rajyaSabhaNo);
             spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabha.get().getId()));
         }
-        List<PlotDateChart> listOfDateCharts = plotDateChartRepository.findAll(spec);
+        List<PlotDateChart> listOfDateCharts = plotDateChartRepository.findAll();
         List<Long> existingMinistries = listOfDateCharts.stream()
                 .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
         String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, houseId);
-        listOfDateCharts = plotDateChartRepository.findAll();
+        listOfDateCharts = plotDateChartRepository.findAll(spec);
         List<PlotDateChartDTO> dtoList = new ArrayList<>();
         for (PlotDateChart entity : listOfDateCharts) {
             boolean shouldAdd = true;
@@ -1062,24 +1099,39 @@ public class PlotInputServiceImpl implements PlotInputService {
                     continue;
                 }
             }
-            List<Map<String, Object>> dateList = entity.getDates(); // Extracts list of date mappings
+            List<Map<String, Object>> dateList = entity.getDates();
+            List<String> existingDOS = new ArrayList<>();
+            List<String> existingADL = new ArrayList<>();
+
+            // Extracts list of date mappings
             for (Map<String, Object> dateEntry : dateList) {
                 String existingdateofSubmissionOfPapers = (String) dateEntry.get("dateofSubmissionOfPapers");
                 String existingactualDateOfLaying = (String) dateEntry.get("actualDateOfLaying");
 
-                if (dateofSubmissionOfPapers != null
-                        && !dateofSubmissionOfPapers.equals(existingdateofSubmissionOfPapers)) {
+                if (existingdateofSubmissionOfPapers != null) {
+                    existingDOS.add(existingdateofSubmissionOfPapers);
+                }
+                if (existingactualDateOfLaying != null) {
+                    existingADL.add(existingactualDateOfLaying);
+                }
+            }
+            if (dateofSubmissionOfPapers != null) {
+                if (existingDOS.contains(dateofSubmissionOfPapers.toString())) {
+                    shouldAdd = true;
+                } else {
                     shouldAdd = false;
-                    continue;
                 }
-                if (actualDateOfLaying != null && !actualDateOfLaying.equals(existingactualDateOfLaying)) {
+            }
+            if (actualDateOfLaying != null) {
+                if (existingADL.contains(actualDateOfLaying.toString())) {
+                    shouldAdd = true;
+                } else {
                     shouldAdd = false;
-                    continue;
                 }
-                if (shouldAdd) {
-                    dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
-                    break; // Stop checking further dates for this entity once added
-                }
+            }
+            if (shouldAdd) {
+                dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
+                 // Stop checking further dates for this entity once added
             }
         }
         return dtoList;
@@ -1205,15 +1257,25 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 return dateMap;
                             })
                             .collect(Collectors.toList());
-                    String[] ministries = quesDto.getMinistriesDepartments().split(";");
+                    String ministriesStr = quesDto.getMinistriesDepartments();
+                    String[] ministries;
+
+                    if (ministriesStr.contains(";")) {
+                        ministries = ministriesStr.split(";");
+                    } else {
+                        ministries = new String[] { ministriesStr }; // Store as a single-element array
+                    }
+                    // String[] ministries = quesDto.getMinistriesDepartments().split(";");
                     for (String ministry : ministries) {
                         ministry = ministry.toUpperCase();
                         ministry = ministry.trim();
                         Optional<Ministries> optionalMinistries = ministriesRepository
                                 .findByMinistryName(ministry);
+
                         if (optionalMinistries.isPresent()) {
                             Long ministryId = optionalMinistries.get().getId();
                             // Check if ministryId already exists in the list
+
                             if (existingMinistries.contains(ministryId)) {
                                 continue; // Skip adding entry if ministryId is already present
                             }
@@ -1287,9 +1349,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     private void updateAppNo(List<Map<String, Object>> docs, String applicationNo) {
-        System.out.println("#######");
-        System.out.println(docs);
         
+
         if (docs != null && docs.size() > 0) {
             for (Map<String, Object> doc : docs) {
                 Object uuidObj = doc.get("documentUuid");
