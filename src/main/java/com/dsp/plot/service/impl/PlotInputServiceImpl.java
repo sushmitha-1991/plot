@@ -126,6 +126,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Autowired
 
     private AuthorityRepository authorityRepository;
+
     @Transactional
     @Override
     public PlotInputDTO save(PlotInputDTO plotinputDTO) {
@@ -198,13 +199,14 @@ public class PlotInputServiceImpl implements PlotInputService {
             log.debug("entity: {}", entity);
             // set content
             Optional<MinistryAuthority> optionalAuthority = authorityRepository.findById(entity.getAuthenticatedById());
-            Optional<Departments> optionalDepartment =departmentRepo.findById(entity.getDepartmentId());
+            Optional<Departments> optionalDepartment = departmentRepo.findById(entity.getDepartmentId());
 
             Optional<MasterCode> paperAbbr = codeRepository.findById(entity.getPaperTypeId());
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
-            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
+            String contentText = formatPaperDetails(entity.getPaperDetails(),
+                    optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
                     entity.getApplicationNo());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
@@ -242,7 +244,8 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     }
 
-    private String formatPaperDetails(List<Map<String, Object>> paperDetails, String Authenticator,String department, String abbr,
+    private String formatPaperDetails(List<Map<String, Object>> paperDetails, String Authenticator, String department,
+            String abbr,
             String applicationNo) {
         if (Authenticator == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
@@ -313,20 +316,23 @@ public class PlotInputServiceImpl implements PlotInputService {
                 updateAppNo(docs, applicationNo);
             }
         }
-        // if(paperDocs instanceof List<Map>)
-        // {
-        // List<Map<String, Object>> docs = (List<Map<String, Object>>) paperDocs;
-        // updateAppNo(docs);
-        // }
+      
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         Object paperNameData = paper.get("paperName");
+
         Long paperType = null;
-        if (paperNameData instanceof Map) {
-            Map<String, Object> paperNameMap = (Map<String, Object>) paperNameData;
+        String paperTitle = "";
+
+        if (paperNameData instanceof Map<?, ?> paperNameMap) {
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
-            if (valueObj instanceof Number) { // Ensure it's a number before parsing
-                paperType = ((Number) valueObj).longValue();
+            Object labelObj = paperNameMap.get("label"); // Extract "value" field
+
+            if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
+                paperType = numberValue.longValue();
                 System.out.println("paperNameId: " + paperType);
+            }  if (labelObj instanceof String stringValue) {
+                paperTitle = stringValue;
+                System.out.println("paperTitle: " + paperTitle);
             }
         }
 
@@ -343,7 +349,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 String nameAndPlace = escapeHtml(paper.get("constitutionalBody")) + ", "
                         + escapeHtml(paper.get("headquarters"));
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("paperTiltle")),
+                        escapeHtml(paperTitle),
                         nameAndPlace,
                         escapeHtml(paper.get("year")));
                 break;
@@ -351,25 +357,25 @@ public class PlotInputServiceImpl implements PlotInputService {
                 // Map<String, Object> ministry = (Map<String, Object>)
                 // paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("paperTiltle")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("ministryOrDepartment")),
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_RPT_3":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("paperTiltle")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("companyHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_RPT_4":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("paperTiltle")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("bankHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_RPT_5":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("paperTiltle")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("headquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
@@ -397,7 +403,27 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
+        Object paperNameData = paper.get("paperName");
 
+        Long paperType = null;
+        String paperTitle = "";
+
+        if (paperNameData instanceof Map<?, ?> paperNameMap) {
+            Object valueObj = paperNameMap.get("value"); // Extract "value" field
+            Object labelObj = paperNameMap.get("label"); // Extract "value" field
+
+            if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
+                paperType = numberValue.longValue();
+                System.out.println("paperNameId: " + paperType);
+            } 
+             if (labelObj instanceof String stringValue) {
+                paperTitle = stringValue;
+                System.out.println("paperTitle: " + paperTitle);
+            }
+        }
+
+
+       
         // Object paperNameId = paper.get("notificationId");
         // Long paperType = null;
         // if (paperNameId instanceof Long) {
@@ -425,7 +451,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         // case "PLOT_NF_GEN":
         // System.out.println("### " + abbr);
         String formattedString = MessageFormat.format(template,
-                escapeHtml(paper.get("paperTitle")),
+                escapeHtml(paperTitle),
                 escapeHtml(paper.get("publishedIn")),
                 escapeHtml(paper.get("laidUnderAct")));
         // break;
@@ -476,16 +502,23 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
-        Long paperType = null;
         Object paperNameData = paper.get("paperName");
-        // Object paperNameData = paper.get("paperName");
-        // othersPaperName
-        if (paperNameData instanceof Map) {
-            Map<String, Object> paperNameMap = (Map<String, Object>) paperNameData;
-            Object valueObj = paperNameMap.get("value"); // Extract "value" field
-            if (valueObj instanceof Number) { // Ensure it's a number before parsing
-                paperType = ((Number) valueObj).longValue();
+       
+        Long paperType = null;
+        String paperTitle = "";
+
+        if (paperNameData instanceof Map<?, ?> paperNameMap) {
+            Object valueObj = paperNameMap.get("value"); 
+            Object labelObj = paperNameMap.get("label"); // Extract "value" field
+            // Extract "value" field
+//label
+            if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
+                paperType = numberValue.longValue();
                 System.out.println("paperNameId: " + paperType);
+            } 
+             if (labelObj instanceof String stringValue) {
+                paperTitle = stringValue;
+                System.out.println("paperTitle: " + paperTitle);
             }
         }
         if (paperType == null) {
@@ -502,7 +535,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         switch (abbr) {
             case "PLOT_OTH_1":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("title/Subject")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("")),
                         escapeHtml(paper.get("year")));
                 break;
@@ -510,37 +543,37 @@ public class PlotInputServiceImpl implements PlotInputService {
                 // Map<String, Object> ministry = (Map<String, Object>)
                 // paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("title")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("department")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_3":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("title")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("department")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("titleOfReport")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("bankHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_5":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("title")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("statementNumber")),
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_OTH_6":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("title")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("stateUT")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_7":
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paper.get("title")),
+                        escapeHtml(paperTitle),
                         escapeHtml(paper.get("requirementUnderAct")),
                         escapeHtml(paper.get("year")));
                 break;
@@ -843,16 +876,18 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         if (plotinputDTO.getPaperDetails() != null) {
-            // Optional<BaseUser> optionalUser = userRepository.findById(dbEntity.getAuthenticatedById());
-            Optional<MinistryAuthority> optionalAuthority = authorityRepository.findById(dbEntity.getAuthenticatedById());
-            Optional<Departments> optionalDepartment =departmentRepo.findById(dbEntity.getDepartmentId());
-
+            // Optional<BaseUser> optionalUser =
+            // userRepository.findById(dbEntity.getAuthenticatedById());
+            Optional<MinistryAuthority> optionalAuthority = authorityRepository
+                    .findById(dbEntity.getAuthenticatedById());
+            Optional<Departments> optionalDepartment = departmentRepo.findById(dbEntity.getDepartmentId());
 
             Optional<MasterCode> paperAbbr = codeRepository.findById(dbEntity.getPaperTypeId());
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
-            String contentText = formatPaperDetails(dbEntity.getPaperDetails(),  optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
+            String contentText = formatPaperDetails(dbEntity.getPaperDetails(),
+                    optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
                     dbEntity.getApplicationNo());
             dbEntity.setContent(contentText);
             dbEntity.setHtmlContentEnglish(contentText);
@@ -870,7 +905,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 dbEntityNew.getStatus().equalsIgnoreCase("approved")) {
             if (dbEntity.getApplicationInstanceId() != null) {
                 PlotGenerate plot = repository
-                .findById(dbEntity.getApplicationInstanceId()).get();
+                        .findById(dbEntity.getApplicationInstanceId()).get();
                 plot.setStatus(dbEntity.getStatus());
                 plot.setCurrentStatus(dbEntity.getStatus());
                 if (houseId == 1) {
@@ -1254,22 +1289,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private void updateAppNo(List<Map<String, Object>> docs, String applicationNo) {
         System.out.println("#######");
         System.out.println(docs);
-        // if (docs!=null && docs.size() > 0) {
-        //     for (int i = 0; i < docs.size(); i++) {
-        //         String uuid = String.valueOf(docs.get(i).get("documentUuid"));
-        //         if (!StringUtils.isBlank(uuid)) {
-        //             int uuidExist = plotinputRepository.checkUuidExists(uuid);
-        //             System.out.println("UUUUUUUUUUUUUU");
-        //             System.err.println(uuidExist);
-        //             if (uuidExist == 1) {
-        //                 System.out.println("@@@@@");
-        //                 System.err.println(uuidExist + "       %%%" + uuid);
-        //                 plotinputRepository.updateApplicationNoByUUID(uuid, applicationNo);
-        //             }
-        //         }
-        //     }
-        // }
-        if (docs!=null && docs.size() > 0){
+        
+        if (docs != null && docs.size() > 0) {
             for (Map<String, Object> doc : docs) {
                 Object uuidObj = doc.get("documentUuid");
                 if (uuidObj instanceof String uuid && StringUtils.isNotBlank(uuid)) {
@@ -1277,7 +1298,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         int uuidExist = plotinputRepository.checkUuidExists(uuid);
                         System.out.println("Checking UUID: " + uuid);
                         System.err.println("UUID Exist Status: " + uuidExist);
-        
+
                         if (uuidExist == 1) {
                             System.out.println("Updating application number for UUID: " + uuid);
                             plotinputRepository.updateApplicationNoByUUID(uuid, applicationNo);
