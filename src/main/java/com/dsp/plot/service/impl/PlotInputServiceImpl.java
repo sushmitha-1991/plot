@@ -10,7 +10,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,10 +44,12 @@ import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.BaseUser;
+import com.dsp.plot.entity.Departments;
 import com.dsp.plot.entity.MasterCode;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
+import com.dsp.plot.entity.MinistryAuthority;
 import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotHistory;
@@ -59,7 +63,9 @@ import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
+import com.dsp.plot.repository.AuthorityRepository;
 import com.dsp.plot.repository.CodeRepository;
+import com.dsp.plot.repository.DepartmentRepository;
 import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MinistriesRepository;
@@ -115,6 +121,11 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Autowired
     private RequestRepository requestRepository;
 
+    @Autowired
+    private DepartmentRepository departmentRepo;
+    @Autowired
+
+    private AuthorityRepository authorityRepository;
     @Transactional
     @Override
     public PlotInputDTO save(PlotInputDTO plotinputDTO) {
@@ -186,12 +197,14 @@ public class PlotInputServiceImpl implements PlotInputService {
             entity.setDocumentDate(entity.getSubmissionDate());
             log.debug("entity: {}", entity);
             // set content
-            Optional<BaseUser> optionalUser = userRepository.findById(entity.getAuthenticatedById());
+            Optional<MinistryAuthority> optionalAuthority = authorityRepository.findById(entity.getAuthenticatedById());
+            Optional<Departments> optionalDepartment =departmentRepo.findById(entity.getDepartmentId());
+
             Optional<MasterCode> paperAbbr = codeRepository.findById(entity.getPaperTypeId());
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
-            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalUser.get(), abbr,
+            String contentText = formatPaperDetails(entity.getPaperDetails(), optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
                     entity.getApplicationNo());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
@@ -229,18 +242,18 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     }
 
-    private String formatPaperDetails(List<Map<String, Object>> paperDetails, BaseUser authenticatorDTO, String abbr,
+    private String formatPaperDetails(List<Map<String, Object>> paperDetails, String Authenticator,String department, String abbr,
             String applicationNo) {
-        if (authenticatorDTO == null) {
+        if (Authenticator == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
         }
         StringBuilder contentBuilder = new StringBuilder();
         contentBuilder.append("<html><body>");
         // Authenticator details (always included)
         contentBuilder.append("<b>")
-                .append(escapeHtml(authenticatorDTO.getUsername()))
+                .append(escapeHtml(Authenticator))
                 .append(" (")
-                .append(escapeHtml(authenticatorDTO.getDesignation().getAbbr()))
+                .append(escapeHtml(department))
                 .append(")</b> to lay on the Table:<br>");
         // Check if paper details exist
         if (paperDetails == null || paperDetails.isEmpty()) {
@@ -830,12 +843,16 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         if (plotinputDTO.getPaperDetails() != null) {
-            Optional<BaseUser> optionalUser = userRepository.findById(dbEntity.getAuthenticatedById());
+            // Optional<BaseUser> optionalUser = userRepository.findById(dbEntity.getAuthenticatedById());
+            Optional<MinistryAuthority> optionalAuthority = authorityRepository.findById(dbEntity.getAuthenticatedById());
+            Optional<Departments> optionalDepartment =departmentRepo.findById(dbEntity.getDepartmentId());
+
+
             Optional<MasterCode> paperAbbr = codeRepository.findById(dbEntity.getPaperTypeId());
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
-            String contentText = formatPaperDetails(dbEntity.getPaperDetails(), optionalUser.get(), abbr,
+            String contentText = formatPaperDetails(dbEntity.getPaperDetails(),  optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
                     dbEntity.getApplicationNo());
             dbEntity.setContent(contentText);
             dbEntity.setHtmlContentEnglish(contentText);

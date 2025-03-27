@@ -123,39 +123,33 @@ public class PlotInputMapper {
                                                 .build())
                                 .build();
                 
-                if (entity.getLokSabhaDetails() != null) {
-                        dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
-                                        .id(entity.getLokSabhaDetails().getId())
-                                        .lokSabhaNumber(entity.getLokSabhaDetails().getLokSabhaNumber())
-                                        .build());
-                }
-                if (entity.getLokSabhaSessionDetails() != null) {
+                // if (entity.getLokSabhaDetails() != null) {
+                //         dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
+                //                         .id(entity.getLokSabhaDetails().getId())
+                //                         .lokSabhaNumber(entity.getLokSabhaDetails().getLokSabhaNumber())
+                //                         .build());
+                // }
+                // if (entity.getLokSabhaSessionDetails() != null) {
 
-                        dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
-                                        .id(entity.getLokSabhaSessionDetails().getId())
-                                        .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
-                                        .build());
-                }
-                if (entity.getRajyaSabhaSessionDetails() != null) {
-
-                        dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
-                                        .id(entity.getRajyaSabhaSessionDetails().getId())
-                                        .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())
-                                        .build());
-                }
+                //         dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
+                //                         .id(entity.getLokSabhaSessionDetails().getId())
+                //                         .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
+                //                         .build());
+                // }
+                // if (entity.getRajyaSabhaSessionDetails() != null) {
+                //         dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
+                //                         .id(entity.getRajyaSabhaSessionDetails().getId())
+                //                         .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())
+                //                         .build());
+                // }
                 if (entity.getDepartments() != null) {
-
-                        dto.setDepartments(DepartmentDTO.builder()
-                                        .abbr(entity.getDepartments().getAbbr())
-                                        .departmentCode(entity.getDepartments().getDepartmentCode())
-                                        .departmentName(entity.getDepartments().getDepartmentName())
-                                        .build());
+                        dto.setDepartmentName(entity.getDepartments().getDepartmentName());
+                        dto.setDepartmentCode(entity.getDepartments().getDepartmentCode());
+                       
                 }
                 if (entity.getMinistries() != null) {
 
-                        dto.setMinisties(MinistriesDTO.builder()
-                                        .ministryName(entity.getMinistries().getMinistryName())
-                                        .build());
+                        dto.setMinistryName(entity.getMinistries().getMinistryName());
                 }
                 if (entity.getPaperTypes() != null) {
 
@@ -167,32 +161,14 @@ public class PlotInputMapper {
                                         .build());
                 }
                 if (entity.getAuthenticatorDetails() != null) {
-
-                        String designation="";
-                        if(entity.getAuthenticatorDetails().getDesignation()!=null)
-                        {
-                                designation=entity.getAuthenticatorDetails().getDesignation().getAbbr();
-                        }
-                        dto.setAuthenticatorDTO(ApproverDTO.builder()
-                                        .id(entity.getAuthenticatorDetails().getId())
-                                        .username(entity.getAuthenticatorDetails().getFirstName() + " "
-                                                        + entity.getAuthenticatorDetails().getLastName())
-                                        .designation(designation)
-                                        .build());
+                        dto.setAuthenticatorName(entity.getAuthenticatorDetails().getAuthorityName());
                 }
 
                 if (entity.getNodalOfficerDetails() != null) {
-                        String designation = "";
-                        if (entity.getNodalOfficerDetails().getDesignation() != null) {
-                                designation = entity.getNodalOfficerDetails().getDesignation().getAbbr();
-                        }
-
-                        dto.setNodalOfficerDTO(ApproverDTO.builder()
-                                        .id(entity.getNodalOfficerDetails().getId())
-                                        .username(entity.getNodalOfficerDetails().getFirstName() + " "
-                                                        + entity.getNodalOfficerDetails().getLastName())
-                                        .designation(designation)
-                                        .build());
+dto.setNodalOfficerName(entity.getNodalOfficerDetails().getFirstName()+" "+entity.getNodalOfficerDetails().getMiddleName()+" "+entity.getNodalOfficerDetails().getLastName());
+                        // if (entity.getNodalOfficerDetails().getDesignation() != null) {
+                        //         dto.setNodalOfficerDesignation(entity.getNodalOfficerDetails().getDesignation().getAbbr());
+                        // }
                 }
                 return dto;
 

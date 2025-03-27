@@ -123,7 +123,7 @@ public class PlotInput extends InputInstance {
     private PlotGenerate plotGenerate;
     @ManyToOne
     @JoinColumn(name = "authenticated_by_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private BaseUser authenticatorDetails;
+    private MinistryAuthority authenticatorDetails;
     @ManyToOne
     @JoinColumn(name = "nodal_officer_id", referencedColumnName = "id", insertable = false, updatable = false)
     private BaseUser nodalOfficerDetails;

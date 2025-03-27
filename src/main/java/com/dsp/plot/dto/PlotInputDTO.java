@@ -53,14 +53,23 @@ public class PlotInputDTO {
     private Long refId;
     private LocalDate documentDate;
     private InputInstanceDTO inputInstanceDTO;
-    private ApproverDTO nodalOfficerDTO;
-    private ApproverDTO authenticatorDTO;
-    private MinistriesDTO ministies;
+
+
+    private String nodalOfficerName;
+    private String authenticatorName;
+
+    private String ministryName;
+    private String departmentName;
+    private Integer departmentCode;
+    // private ApproverDTO nodalOfficerDTO;
+
+    // private MinistryAuthorityDTO authenticatorDTO;
+    // private MinistriesDTO ministies;
     private MasterCodeDTO paperTypes;
-    private DepartmentDTO departments;
-    private MastersLokSabhaDTO lokSabhaDTO;
-    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
-    private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
+    // private DepartmentDTO departments;
+    // private MastersLokSabhaDTO lokSabhaDTO;
+    // private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    // private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
     // requests
     private List<RequestDTO> requests;
 }
