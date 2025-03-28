@@ -1,10 +1,14 @@
 package com.dsp.plot.entity;
 
+import org.hibernate.envers.Audited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,9 +24,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
+@Audited
 @Entity
-@Table(name = "plot_request",schema = "plot")
-public class Request extends Auditable{
+@Table(name = "plot_request", schema = "plot")
+public class Request extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "plotrequest_seq")
     @SequenceGenerator(name = "plotrequest_seq", sequenceName = "plotrequest_seq", allocationSize = 1)
@@ -31,5 +36,8 @@ public class Request extends Auditable{
     private Long plotInputId;
     @Column(name = "request_data")
     private String request;
+    @ManyToOne
+    @JoinColumn(name = "plot_input_id", referencedColumnName = "id",updatable=false,insertable=false)
+    private PlotInput plotInput;
 
 }

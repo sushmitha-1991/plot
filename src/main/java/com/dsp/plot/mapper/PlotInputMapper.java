@@ -71,6 +71,7 @@ public class PlotInputMapper {
         }
 
         public static PlotInputDTO toDTO(PlotInput entity) {
+               
                 PlotInputDTO dto = PlotInputDTO.builder()
                                 .id(entity.getId())
                                 .ministryId(entity.getMinistryId())
@@ -105,7 +106,6 @@ public class PlotInputMapper {
                                 .currentStatus(entity.getCurrentStatus())
                                 .refId(entity.getRefId())
                                 .documentDate(entity.getDocumentDate())
-
                                 .inputInstanceDTO(InputInstanceDTO.builder()
                                                 .id(entity.getId())
                                                 .createdAt(entity.getCreatedAt())
@@ -123,7 +123,6 @@ public class PlotInputMapper {
                                                 .applicationInstanceId(entity.getApplicationInstanceId())
                                                 .build())
                                 .build();
-
                 if (entity.getLokSabhaDetails() != null) {
                         dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
                                         .id(entity.getLokSabhaDetails().getId())
@@ -149,18 +148,16 @@ public class PlotInputMapper {
                         dto.setDepartments(DepartmentDTO.builder()
                                         .departmentName(entity.getDepartments().getDepartmentName())
                                         .departmentCode(entity.getDepartments().getDepartmentCode())
+                                        .abbr(entity.getDepartments().getAbbr())
                                         .build());
-
                 }
                 if (entity.getMinistries() != null) {
-
                         dto.setMinisties(MinistriesDTO.builder()
                                         .ministryName(entity.getMinistries().getMinistryName())
                                         .build());
                         dto.setMinistryName(entity.getMinistries().getMinistryName());
                 }
                 if (entity.getPaperTypes() != null) {
-
                         dto.setPaperTypes(MasterCodeDTO.builder()
                                         .abbr(entity.getPaperTypes().getAbbr())
                                         .description(entity.getPaperTypes().getDescription())
@@ -171,12 +168,11 @@ public class PlotInputMapper {
                 if (entity.getAuthenticatorDetails() != null) {
                         dto.setAuthenticatorName(entity.getAuthenticatorDetails().getAuthorityName());
                         dto.setAuthenticatorDTO(MinistryAuthorityDTO.builder()
-                        .ministryCode(entity.getAuthenticatorDetails().getMinistryCode())
-                        .id(entity.getAuthenticatorDetails().getId())
-                        .ministryId(entity.getAuthenticatorDetails().getMinistryId())
-                        .authorityName(entity.getAuthenticatorDetails().getAuthorityName())
-                        .build());
-
+                                        .ministryCode(entity.getAuthenticatorDetails().getMinistryCode())
+                                        .id(entity.getAuthenticatorDetails().getId())
+                                        .ministryId(entity.getAuthenticatorDetails().getMinistryId())
+                                        .authorityName(entity.getAuthenticatorDetails().getAuthorityName())
+                                        .build());
                 }
                 if (entity.getNodalOfficerDetails() != null) {
                         dto.setNodalOfficerName(entity.getNodalOfficerDetails().getFirstName() + " "
@@ -186,7 +182,6 @@ public class PlotInputMapper {
                                 dto.setNodalOfficerDesignation(
                                                 entity.getNodalOfficerDetails().getDesignation().getAbbr());
                         }
-
                         dto.setNodalOfficerDTO(ApproverDTO.builder()
                                         .id(entity.getNodalOfficerDetails().getId())
                                         .username(entity.getNodalOfficerDetails().getFirstName()
@@ -196,7 +191,6 @@ public class PlotInputMapper {
                 }
 
                 return dto;
-
                 // .paperTiltle(entity.getPaperTiltle())
                 // .article(entity.getArticle())
                 // .placeOfPublished(entity.getPlaceOfPublished())
@@ -264,4 +258,5 @@ public class PlotInputMapper {
                                 .dates(dto.getDates())
                                 .build();
         }
+       
 }

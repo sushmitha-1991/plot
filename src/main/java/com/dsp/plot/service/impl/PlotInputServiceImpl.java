@@ -104,6 +104,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private PlotDateChartRepository plotDateChartRepository;
     @Autowired
     private PlotHistoryRepository plotHistoryRepository;
+    @Autowired
+    private RequestRepository requestRepository;
 
     @Autowired
     private MyUserRepository userRepository;
@@ -118,8 +120,6 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     @Autowired
     private PlotInputRepository plotinputRepository;
-    @Autowired
-    private RequestRepository requestRepository;
 
     @Autowired
     private DepartmentRepository departmentRepo;
@@ -584,7 +584,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         List<RequestDTO> dtoList = new ArrayList<>();
 
         try {
-            dtoList = requestRepository.findByPlotInputId(plotId)
+            dtoList = requestRepository.findByPlotInputIdAndIsActive(plotId, true)
                     .stream().map(RequestMapper::toDTO)
                     .collect(Collectors.toList());
             return dtoList;
@@ -663,6 +663,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
+
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     if (entity.getApplicationInstanceId() != null) {
@@ -687,7 +688,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                         entity.setCurrentStatus("Submitted");
                     }
                     entity = plotinputRepository.save(entity);
+                    System.out.println("entity:::" + entity);
+
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    dto.setRequests(getRequests(dto.getId()));
                     dtoList.add(dto);
                 }
             } else if (houseId == 2) {
@@ -714,7 +718,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                         entity.setCurrentStatus("Submitted");
                     }
                     entity = plotinputRepository.save(entity);
+
+                    System.out.println("entity:::" + entity);
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    dto.setRequests(getRequests(dto.getId()));
+
                     dtoList.add(dto);
                 }
             }
@@ -798,6 +806,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                         entity.setCurrentStatus("Submitted");
                     }
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    dto.setRequests(getRequests(dto.getId()));
+
                     List<PlotHistory> histories = plotHistoryRepository
                             .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
                     for (PlotHistory history : histories) {
@@ -837,6 +847,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                         if (createdData == createdBy)
                             dto.setContent(history.getAddedText());
                     }
+                    dto.setRequests(getRequests(dto.getId()));
+
                     dtoList.add(dto);
                 }
             }
@@ -873,6 +885,8 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         dBEntity = plotinputRepository.save(dBEntity);
         PlotInputDTO dto = PlotInputMapper.toDTO(dBEntity);
+        dto.setRequests(getRequests(dto.getId()));
+
         return dto;
     }
 
@@ -930,6 +944,23 @@ public class PlotInputServiceImpl implements PlotInputService {
         // Save the updated PlotInput
         Long houseId = getHouseId();
         if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
+            // List<Request> requests =
+            // requestRepository.findByPlotInputIdAndIsActive(dbEntity.getId(), true);
+            // for (Request request : requests) {
+            // request.setIsActive(false);
+            // request.setIsDeleted(true);
+            // request=requestRepository.save(request);
+            // }
+            List<Request> requests = requestRepository.findByPlotInputIdAndIsActive(dbEntity.getId(), true);
+
+            // Update fields in a single loop
+            requests.forEach(request -> {
+                request.setIsActive(false);
+                request.setIsDeleted(true);
+            });
+
+            // Save all updated requests in a single batch operation
+            requestRepository.saveAll(requests);
             if (dbEntity.getApplicationInstanceId() != null) {
                 throw new ResourceNotFoundException(
                         "Plot has already generated with Specific Ministry Input  So cannot be returned: " + id);
@@ -969,7 +1000,10 @@ public class PlotInputServiceImpl implements PlotInputService {
             plot = repository.save(plot);
         }
         // Prepare the response DTO
-        return (PlotInputMapper.toDTO(dbEntity));
+        PlotInputDTO dto = PlotInputMapper.toDTO(dbEntity);
+        dto.setRequests(getRequests(dto.getId()));
+
+        return dto;
     }
 
     @Override
@@ -1017,7 +1051,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                     entity.getMinistryId(),
                     entity.getRajyaSabhaSessionNo());
         }
+        System.out.println("@@@@@@@@@@@@");
+
         if (optionalEntity.isPresent()) {
+            System.out.println(optionalEntity.get());
+
             PlotDateChart existingEntity = optionalEntity.get();
             Field[] fields = entity.getClass().getDeclaredFields();
             for (Field field : fields) {
@@ -1034,6 +1072,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
 
+            System.out.println("Existing entity");
+            System.out.println(existingEntity);
             existingEntity = plotDateChartRepository.save(existingEntity);
             return PlotInputMapper.dateChartMapToDTO(existingEntity);
         } else {
@@ -1129,7 +1169,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
             if (shouldAdd) {
                 dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
-                 // Stop checking further dates for this entity once added
+                // Stop checking further dates for this entity once added
             }
         }
         return dtoList;
@@ -1347,7 +1387,6 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     private void updateAppNo(List<Map<String, Object>> docs, String applicationNo) {
-        
 
         if (docs != null && docs.size() > 0) {
             for (Map<String, Object> doc : docs) {
@@ -1385,5 +1424,14 @@ public class PlotInputServiceImpl implements PlotInputService {
     public List<PlotInputDTO> getAll() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+    }
+
+    public List<RequestDTO> getRequests(Long plotId) {
+        List<RequestDTO> dtos = new ArrayList<>();
+        List<Request> entity = requestRepository.findByPlotInputIdAndIsActive(plotId, true);
+        if (entity != null) {
+            dtos = entity.stream().map(RequestMapper::toDTO).collect(Collectors.toList());
+        }
+        return dtos;
     }
 }
