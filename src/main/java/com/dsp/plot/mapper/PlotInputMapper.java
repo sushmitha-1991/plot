@@ -8,6 +8,7 @@ import com.dsp.plot.dto.MastersLokSabhaDTO;
 import com.dsp.plot.dto.MastersLokSabhaSessionDTO;
 import com.dsp.plot.dto.MastersRajyaSabhaSessionDTO;
 import com.dsp.plot.dto.MinistriesDTO;
+import com.dsp.plot.dto.MinistryAuthorityDTO;
 import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.entity.PlotDateChart;
@@ -122,33 +123,40 @@ public class PlotInputMapper {
                                                 .applicationInstanceId(entity.getApplicationInstanceId())
                                                 .build())
                                 .build();
-                
-                // if (entity.getLokSabhaDetails() != null) {
-                //         dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
-                //                         .id(entity.getLokSabhaDetails().getId())
-                //                         .lokSabhaNumber(entity.getLokSabhaDetails().getLokSabhaNumber())
-                //                         .build());
-                // }
-                // if (entity.getLokSabhaSessionDetails() != null) {
 
-                //         dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
-                //                         .id(entity.getLokSabhaSessionDetails().getId())
-                //                         .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
-                //                         .build());
-                // }
-                // if (entity.getRajyaSabhaSessionDetails() != null) {
-                //         dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
-                //                         .id(entity.getRajyaSabhaSessionDetails().getId())
-                //                         .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())
-                //                         .build());
-                // }
+                if (entity.getLokSabhaDetails() != null) {
+                        dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
+                                        .id(entity.getLokSabhaDetails().getId())
+                                        .lokSabhaNumber(entity.getLokSabhaDetails().getLokSabhaNumber())
+                                        .build());
+                }
+                if (entity.getLokSabhaSessionDetails() != null) {
+
+                        dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
+                                        .id(entity.getLokSabhaSessionDetails().getId())
+                                        .sessionNumber(entity.getLokSabhaSessionDetails().getSessionNumber())
+                                        .build());
+                }
+                if (entity.getRajyaSabhaSessionDetails() != null) {
+                        dto.setRajyaSabhaSessionDTO(MastersRajyaSabhaSessionDTO.builder()
+                                        .id(entity.getRajyaSabhaSessionDetails().getId())
+                                        .sessionNumber(entity.getRajyaSabhaSessionDetails().getSessionNumber())
+                                        .build());
+                }
                 if (entity.getDepartments() != null) {
                         dto.setDepartmentName(entity.getDepartments().getDepartmentName());
                         dto.setDepartmentCode(entity.getDepartments().getDepartmentCode());
-                       
+                        dto.setDepartments(DepartmentDTO.builder()
+                                        .departmentName(entity.getDepartments().getDepartmentName())
+                                        .departmentCode(entity.getDepartments().getDepartmentCode())
+                                        .build());
+
                 }
                 if (entity.getMinistries() != null) {
 
+                        dto.setMinisties(MinistriesDTO.builder()
+                                        .ministryName(entity.getMinistries().getMinistryName())
+                                        .build());
                         dto.setMinistryName(entity.getMinistries().getMinistryName());
                 }
                 if (entity.getPaperTypes() != null) {
@@ -162,14 +170,31 @@ public class PlotInputMapper {
                 }
                 if (entity.getAuthenticatorDetails() != null) {
                         dto.setAuthenticatorName(entity.getAuthenticatorDetails().getAuthorityName());
+                        dto.setAuthenticatorDTO(MinistryAuthorityDTO.builder()
+                        .ministryCode(entity.getAuthenticatorDetails().getMinistryCode())
+                        .id(entity.getAuthenticatorDetails().getId())
+                        .ministryId(entity.getAuthenticatorDetails().getMinistryId())
+                        .authorityName(entity.getAuthenticatorDetails().getAuthorityName())
+                        .build());
+
+                }
+                if (entity.getNodalOfficerDetails() != null) {
+                        dto.setNodalOfficerName(entity.getNodalOfficerDetails().getFirstName() + " "
+                                        + entity.getNodalOfficerDetails().getMiddleName() + " "
+                                        + entity.getNodalOfficerDetails().getLastName());
+                        if (entity.getNodalOfficerDetails().getDesignation() != null) {
+                                dto.setNodalOfficerDesignation(
+                                                entity.getNodalOfficerDetails().getDesignation().getAbbr());
+                        }
+
+                        dto.setNodalOfficerDTO(ApproverDTO.builder()
+                                        .id(entity.getNodalOfficerDetails().getId())
+                                        .username(entity.getNodalOfficerDetails().getFirstName()
+                                                        + " " + entity.getNodalOfficerDetails().getMiddleName()
+                                                        + " " + entity.getNodalOfficerDetails().getLastName())
+                                        .build());
                 }
 
-                if (entity.getNodalOfficerDetails() != null) {
-dto.setNodalOfficerName(entity.getNodalOfficerDetails().getFirstName()+" "+entity.getNodalOfficerDetails().getMiddleName()+" "+entity.getNodalOfficerDetails().getLastName());
-                        // if (entity.getNodalOfficerDetails().getDesignation() != null) {
-                        //         dto.setNodalOfficerDesignation(entity.getNodalOfficerDetails().getDesignation().getAbbr());
-                        // }
-                }
                 return dto;
 
                 // .paperTiltle(entity.getPaperTiltle())
@@ -205,14 +230,14 @@ dto.setNodalOfficerName(entity.getNodalOfficerDetails().getFirstName()+" "+entit
                                         .ministryName(entity.getMinistries().getMinistryName())
                                         .build());
                 }
-                
+
                 if (entity.getLokSabhaSessionDetails() != null) {
-                        if(entity.getLokSabhaSessionDetails().getLokSabha()!=null)
-                        {
+                        if (entity.getLokSabhaSessionDetails().getLokSabha() != null) {
                                 dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
-                                        .id(entity.getLokSabhaSessionDetails().getLokSabha().getId())
-                                        .lokSabhaNumber(entity.getLokSabhaSessionDetails().getLokSabha().getLokSabhaNumber())
-                                        .build());
+                                                .id(entity.getLokSabhaSessionDetails().getLokSabha().getId())
+                                                .lokSabhaNumber(entity.getLokSabhaSessionDetails().getLokSabha()
+                                                                .getLokSabhaNumber())
+                                                .build());
                         }
                         dto.setLokSabhaSessionDTO(MastersLokSabhaSessionDTO.builder()
                                         .id(entity.getLokSabhaSessionDetails().getId())

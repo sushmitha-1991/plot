@@ -489,11 +489,10 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
-        Object paperNameData = paper.get("paperName");
-
+        // Object paperNameData = paper.get("paperName");
+        Object paperNameData = paper.get("otherPaperName");
         Long paperType = null;
         String paperTitle = "";
-
         if (paperNameData instanceof Map<?, ?> paperNameMap) {
             Object valueObj = paperNameMap.get("value");
             Object labelObj = paperNameMap.get("label"); // Extract "value" field
@@ -1102,7 +1101,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             List<Map<String, Object>> dateList = entity.getDates();
             List<String> existingDOS = new ArrayList<>();
             List<String> existingADL = new ArrayList<>();
-
             // Extracts list of date mappings
             for (Map<String, Object> dateEntry : dateList) {
                 String existingdateofSubmissionOfPapers = (String) dateEntry.get("dateofSubmissionOfPapers");

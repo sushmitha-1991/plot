@@ -61,15 +61,15 @@ public class PlotInputDTO {
     private String ministryName;
     private String departmentName;
     private Integer departmentCode;
-    // private ApproverDTO nodalOfficerDTO;
+    private ApproverDTO nodalOfficerDTO;
 
-    // private MinistryAuthorityDTO authenticatorDTO;
-    // private MinistriesDTO ministies;
+    private MinistryAuthorityDTO authenticatorDTO;
+    private MinistriesDTO ministies;
     private MasterCodeDTO paperTypes;
-    // private DepartmentDTO departments;
-    // private MastersLokSabhaDTO lokSabhaDTO;
-    // private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
-    // private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
+    private DepartmentDTO departments;
+    private MastersLokSabhaDTO lokSabhaDTO;
+    private MastersLokSabhaSessionDTO lokSabhaSessionDTO;
+    private MastersRajyaSabhaSessionDTO rajyaSabhaSessionDTO;
     // requests
     private List<RequestDTO> requests;
 }
