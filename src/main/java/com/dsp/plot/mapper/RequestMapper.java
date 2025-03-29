@@ -1,8 +1,6 @@
 package com.dsp.plot.mapper;
 
-import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.dto.RequestDTO;
-import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
 
 public class RequestMapper {
@@ -11,6 +9,7 @@ public class RequestMapper {
                 .id(dto.getId())
                 .plotInputId(dto.getPlotInputId())
                 .request(dto.getRequest())
+
                 .build();
     }
 
@@ -19,6 +18,8 @@ public class RequestMapper {
                 .id(entity.getId())
                 .plotInputId(entity.getPlotInputId())
                 .request(entity.getRequest())
+                .createdAt(entity.getCreatedAt())
+                .createdAtWithOutTime(entity.getCreatedAt().toLocalDate())
                 .build();
     }
 }

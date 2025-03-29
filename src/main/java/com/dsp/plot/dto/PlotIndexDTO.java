@@ -1,5 +1,7 @@
 package com.dsp.plot.dto;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,8 @@ public class PlotIndexDTO {
     private String content;
     private List<Map<String, Object>> indexDetails;
     private Long createdById;
+    private LocalDateTime createdAt;
+    private LocalDate createdAtWithoutTime;
     private String createdBy;
     private MastersLokSabhaDTO lokSabhaDTO;
     private MastersLokSabhaSessionDTO lokSabhaSessionDTO;

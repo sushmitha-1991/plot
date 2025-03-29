@@ -148,6 +148,8 @@ public class PlotGenerateMapper {
                                 .reportName(entity.getReportName())
                                 .indexDetails(entity.getIndexDetails())
                                 .createdById(entity.getCreatedBy())
+                                .createdAt(entity.getCreatedAt())
+                                .createdAtWithoutTime(entity.getCreatedAt().toLocalDate())
                                 .build();
                 if (entity.getLokSabhaSessionDetails() != null) {
                         if (entity.getLokSabhaSessionDetails().getLokSabha() != null) {

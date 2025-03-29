@@ -512,8 +512,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         if (rajyaSabhaSessionNo != null) {
             spec = spec.and(PlotIndexSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
         }
-        List<PlotIndex> response = plotIndexRepo.findAll(spec);
+        //sorting
+        Sort sort=Sort.by(Sort.Direction.DESC, "createdAt");
+        List<PlotIndex> response = plotIndexRepo.findAll(spec,sort);
 
+        // List<PlotIndex> response = plotIndexRepo.findAll(spec);
+        
         List<PlotIndexDTO> responseDTO = new ArrayList<>();
         for (PlotIndex entity : response) {
             Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
