@@ -86,6 +86,9 @@ public class PlotInput extends InputInstance {
     @Column(name = "act_id")
     private Long actId;
 
+@Column(name = "act_under")
+    private String actUnder;
+    
     @Column(name = "draft_flag", columnDefinition = "boolean default false")
     private Boolean draftFlag;
 

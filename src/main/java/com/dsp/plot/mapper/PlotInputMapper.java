@@ -2,11 +2,8 @@ package com.dsp.plot.mapper;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.hibernate.envers.Audited;
 
 import com.dsp.plot.dto.ApproverDTO;
 import com.dsp.plot.dto.DepartmentDTO;
@@ -22,7 +19,6 @@ import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotInput;
-import com.dsp.plot.util.JsonNodeConverter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -39,6 +35,7 @@ public class PlotInputMapper {
                                 .prevPaperLaidDate(dto.getPrevPaperLaidDate())
                                 .authenticatedById(dto.getAuthenticatedById())
                                 .digitallySigned(dto.getDigitallySigned())
+                                .actUnder(dto.getActUnder())
                                 .actId(dto.getActId())
                                 .paperTypeId(dto.getPaperTypeId())
                                 .sendToLibrary(dto.getSendToLibrary())
@@ -94,6 +91,7 @@ public class PlotInputMapper {
                                 .authenticatedById(entity.getAuthenticatedById())
                                 .digitallySigned(entity.getDigitallySigned())
                                 .actId(entity.getActId())
+                                .actUnder(entity.getActUnder())
                                 .paperTypeId(entity.getPaperTypeId())
                                 .content(entity.getContent())
                                 .draftFlag(entity.getDraftFlag())
@@ -301,6 +299,7 @@ public class PlotInputMapper {
                         entity.setContent(getStringValue(dataMap, "content"));
                         entity.setDigitallySigned(getBooleanValue(dataMap, "digitallySigned"));
                         entity.setActId(getLongValue(dataMap, "actId"));
+                        entity.setActUnder(getStringValue(dataMap, "actUnder"));
                         entity.setDraftFlag(getBooleanValue(dataMap, "draftFlag"));
                         entity.setStatus(getStringValue(dataMap, "status"));
                         entity.setRemarks(getStringValue(dataMap, "remarks"));
