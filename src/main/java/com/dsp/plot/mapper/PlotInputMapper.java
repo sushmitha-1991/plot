@@ -1,7 +1,16 @@
 package com.dsp.plot.mapper;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.hibernate.envers.Audited;
+
 import com.dsp.plot.dto.ApproverDTO;
 import com.dsp.plot.dto.DepartmentDTO;
+import com.dsp.plot.dto.DraftDataDTO;
 import com.dsp.plot.dto.InputInstanceDTO;
 import com.dsp.plot.dto.MasterCodeDTO;
 import com.dsp.plot.dto.MastersLokSabhaDTO;
@@ -13,8 +22,13 @@ import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
 import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotInput;
+import com.dsp.plot.util.JsonNodeConverter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PlotInputMapper {
+
+        private static final ObjectMapper objectMapper = new ObjectMapper();
 
         public static PlotInput toEntity(PlotInputDTO dto) {
                 return PlotInput.builder()
@@ -71,7 +85,6 @@ public class PlotInputMapper {
         }
 
         public static PlotInputDTO toDTO(PlotInput entity) {
-               
                 PlotInputDTO dto = PlotInputDTO.builder()
                                 .id(entity.getId())
                                 .ministryId(entity.getMinistryId())
@@ -224,7 +237,6 @@ public class PlotInputMapper {
                                         .ministryName(entity.getMinistries().getMinistryName())
                                         .build());
                 }
-
                 if (entity.getLokSabhaSessionDetails() != null) {
                         if (entity.getLokSabhaSessionDetails().getLokSabha() != null) {
                                 dto.setLokSabhaDTO(MastersLokSabhaDTO.builder()
@@ -258,5 +270,107 @@ public class PlotInputMapper {
                                 .dates(dto.getDates())
                                 .build();
         }
-       
+
+        public static PlotInput mapDraftToEntity(DraftDataDTO dto) {
+                // TODO Auto-generated method stub
+                if (dto == null) {
+                        return null;
+                }
+                // System.out.println("draft");
+                PlotInput entity = PlotInput.builder()
+                                .applicationId(dto.getApplicationId())
+                                .applicationNo(dto.getApplicationNo())
+                                // .status("Draft")
+                                .id(dto.getDraftId())
+                                .build();
+                if (dto.getData() == null || dto.getData().isNull()) {
+
+                } else {
+                        JsonNode jsonData = dto.getData(); // JsonNode
+                        Map<String, Object> dataMap = convertToEntityAttribute(jsonData);
+                        entity.setLokSabhaNo(getLongValue(dataMap, "lokSabhaNo"));
+                        entity.setLokSabhaSessionNo(getLongValue(dataMap, "lokSabhaSessionNo"));
+                        entity.setRajyaSabhaSessionNo(getLongValue(dataMap, "rajyaSabhaSessionNo"));
+                        entity.setSubmissionDate(getLocalDateValue(dataMap, "submissionDate"));
+                        entity.setDepartmentId(getLongValue(dataMap, "departmentId"));
+                        entity.setAuthenticatedById(getLongValue(dataMap, "authenticatedById"));
+                        entity.setPaperTypeId(getLongValue(dataMap, "paperTypeId"));
+                        entity.setPaperName(getStringValue(dataMap, "paperName"));
+                        entity.setMinistryId(getLongValue(dataMap, "ministryId"));
+                        entity.setGeneratedPlotId(getLongValue(dataMap, "generatedPlotId"));
+                        entity.setContent(getStringValue(dataMap, "content"));
+                        entity.setDigitallySigned(getBooleanValue(dataMap, "digitallySigned"));
+                        entity.setActId(getLongValue(dataMap, "actId"));
+                        entity.setDraftFlag(getBooleanValue(dataMap, "draftFlag"));
+                        entity.setStatus(getStringValue(dataMap, "status"));
+                        entity.setRemarks(getStringValue(dataMap, "remarks"));
+                        entity.setRefNo(dto.getApplicationNo());
+                        entity.setProposedDateOfLaying(getLocalDateValue(dataMap, "proposedDateOfLaying"));
+                        entity.setActualDateOfLaying(getLocalDateValue(dataMap, "actualDateOfLaying"));
+                        entity.setPrevPaperLaidDate(getLocalDateValue(dataMap, "prevPaperLaidDate"));
+                        entity.setNodalOfficerId(getLongValue(dataMap, "nodalOfficerId"));
+                        entity.setNodalOfficerDesignation(getStringValue(dataMap, "nodalOfficerDesignation"));
+                        entity.setNodalOfficerPhoneNo(getStringValue(dataMap, "nodalOfficerPhoneNo"));
+                        entity.setSendToLibrary(getBooleanValue(dataMap, "sendToLibrary"));
+                        entity.setNodalOfficerMobileNo(getStringValue(dataMap, "nodalOfficerMobileNo"));
+                }
+                return entity;
+        }
+
+        private static Long getLongValue(Map<String, Object> map, String key) {
+                return Optional.ofNullable(map.get(key))
+                                .filter(value -> value instanceof Number)
+                                .map(value -> ((Number) value).longValue())
+                                .orElse(null);
+        }
+
+        private static String getStringValue(Map<String, Object> map, String key) {
+                return Optional.ofNullable(map.get(key))
+                                .map(Object::toString)
+                                .orElse(null);
+        }
+
+        private static Boolean getBooleanValue(Map<String, Object> map, String key) {
+                return Optional.ofNullable(map.get(key))
+                                .filter(value -> value instanceof Boolean)
+                                .map(value -> (Boolean) value)
+                                .orElse(null);
+        }
+
+        private static LocalDate getLocalDateValue(Map<String, Object> map, String key) {
+                // return Optional.ofNullable(map.get(key))
+                // .map(value -> {
+                // if (value instanceof LocalDate) {
+                // return (LocalDate) value;
+                // } else if (value instanceof String) {
+                // return LocalDate.parse((String) value);
+                // }
+                // return null;
+                // })
+                // .orElse(null);
+
+                return Optional.ofNullable(map.get(key))
+                                .map(value -> {
+                                        try {
+                                                if (value instanceof LocalDate) {
+                                                        return (LocalDate) value;
+                                                } else if (value instanceof String) {
+                                                        return LocalDate.parse((String) value);
+                                                }
+                                        } catch (Exception e) {
+                                                System.err.println("Error parsing date for key: " + key + " - "
+                                                                + e.getMessage());
+                                        }
+                                        return null;
+                                })
+                                .orElse(null);
+        }
+
+        public static Map<String, Object> convertToEntityAttribute(JsonNode jsonNode) {
+                if (jsonNode == null || jsonNode.isNull()) {
+                        return new HashMap<>(); // Return an empty map if JsonNode is null
+                }
+                return objectMapper.convertValue(jsonNode, Map.class);
+        }
+
 }

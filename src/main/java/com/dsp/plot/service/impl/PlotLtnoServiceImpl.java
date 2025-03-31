@@ -128,7 +128,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             entity.setDocumentDate(entity.getLtnoDate());
             entity = ltnoRepo.save(entity);
             entity.setRefId(entity.getId());
-            log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
+            // log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
             // entity = plotRepository.save(entity);
             // Convert saved entity back to DTO
             PlotLtnoDto responseDTO = LtnoMapper.toDTO(entity);
@@ -143,7 +143,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
     @Override
     public List<PlotLtnoDto> getAll(Boolean isActive, Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
             LocalDate startDate, LocalDate endDate, String status, Long ministryId, String ltnoNo, String paperType) {
-        log.debug("Entering getAll Plots");
+        // log.debug("Entering getAll Plots");
         List<PlotLtnoDto> dtoList = new ArrayList<>();
         List<PlotLtno> entitys;
         // if (draftStatus == null) {
@@ -193,9 +193,9 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
                 }
             }
         }
-        log.debug("Returning list of PlotDTOs: {}", dtoList);
-        log.info("Returning list of PlotDTOs: {}", dtoList);
-        log.error("Returning list of PlotDTOs: {}", dtoList);
+        // log.debug("Returning list of PlotDTOs: {}", dtoList);
+        // log.info("Returning list of PlotDTOs: {}", dtoList);
+        // log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
     }
 
@@ -262,7 +262,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             }
         }
         log.debug("Returning list of PlotDTOs: {}", dtoList);
-        log.info("Returning list of PlotDTOs: {}", dtoList);
+        // log.info("Returning list of PlotDTOs: {}", dtoList);
         log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
     }
@@ -289,7 +289,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
             entity.setRefNo(applicationNo.getId());
             entity = titleRepo.save(entity);
-            log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
+            // log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
             // entity = plotRepository.save(entity);
             // Convert saved entity back to DTO
             PlotLaidOnTableDTO responseDTO = LtnoMapper.titleToDTO(entity);

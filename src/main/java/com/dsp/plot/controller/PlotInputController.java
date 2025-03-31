@@ -76,10 +76,8 @@ public class PlotInputController {
                                 lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
                                 departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying,
                                 ministryId, sendToLibrary);
-
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
-
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
