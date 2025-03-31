@@ -199,15 +199,19 @@ public class PlotInputServiceImpl implements PlotInputService {
             entity.setDocumentDate(entity.getSubmissionDate());
             log.debug("entity: {}", entity);
             // set content
-            Optional<MinistryAuthority> optionalAuthority = authorityRepository.findById(entity.getAuthenticatedById());
+            String departmentName="";
+            if(entity.getDepartmentId()!=null)
+            {
             Optional<Departments> optionalDepartment = departmentRepo.findById(entity.getDepartmentId());
-
+            departmentName=optionalDepartment.get().getDepartmentName();
+            }
+            Optional<MinistryAuthority> optionalAuthority = authorityRepository.findById(entity.getAuthenticatedById());
             Optional<MasterCode> paperAbbr = codeRepository.findById(entity.getPaperTypeId());
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
             String contentText = formatPaperDetails(entity.getPaperDetails(),
-                    optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
+                    optionalAuthority.get().getAuthorityName(), departmentName, abbr,
                     entity.getApplicationNo());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
@@ -216,7 +220,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             log.info("before plot Input Saved: ID={},  Status={}", entity.getId(), entity.getStatus());
             entity = plotinputRepository.save(entity);
             log.info("after plot Input Saved: ID={},  Status={}", entity.getId(), entity.getStatus());
-
             // update Application No in DocumentMetadata table using Uuid
             updateAppNo(entity.getDocuments(), entity.getApplicationNo());
             // Convert saved entity back to DTO
@@ -938,14 +941,19 @@ public class PlotInputServiceImpl implements PlotInputService {
             // userRepository.findById(dbEntity.getAuthenticatedById());
             Optional<MinistryAuthority> optionalAuthority = authorityRepository
                     .findById(dbEntity.getAuthenticatedById());
-            Optional<Departments> optionalDepartment = departmentRepo.findById(dbEntity.getDepartmentId());
-
+                    String departmentName="";
+                    if(dbEntity.getDepartmentId()!=null)
+                    {
+                    Optional<Departments> optionalDepartment = departmentRepo.findById(dbEntity.getDepartmentId());
+                    departmentName=optionalDepartment.get().getDepartmentName();
+                    }
+            // Optional<Departments> optionalDepartment = departmentRepo.findById(dbEntity.getDepartmentId());
             Optional<MasterCode> paperAbbr = codeRepository.findById(dbEntity.getPaperTypeId());
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
             String contentText = formatPaperDetails(dbEntity.getPaperDetails(),
-                    optionalAuthority.get().getAuthorityName(), optionalDepartment.get().getDepartmentName(), abbr,
+                    optionalAuthority.get().getAuthorityName(), departmentName, abbr,
                     dbEntity.getApplicationNo());
             dbEntity.setContent(contentText);
             dbEntity.setHtmlContentEnglish(contentText);
