@@ -682,11 +682,12 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setCurrentStatus("In Progress");
                             }
                         }
-                    } else {
-                        entity.setPendingAt("Table Office");
-                        entity.setStatus("Submitted");
-                        entity.setCurrentStatus("Submitted");
                     }
+                    // else {
+                    //     entity.setPendingAt("Table Office");
+                    //     entity.setStatus("Submitted");
+                    //     entity.setCurrentStatus("Submitted");
+                    // }
                     entity = plotinputRepository.save(entity);
                     System.out.println("entity:::" + entity);
 
@@ -712,11 +713,12 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setCurrentStatus("In Progress");
                             }
                         }
-                    } else {
-                        entity.setPendingAt("Table Office A");
-                        entity.setStatus("Submitted");
-                        entity.setCurrentStatus("Submitted");
                     }
+                    //  else {
+                    //     entity.setPendingAt("Table Office A");
+                    //     entity.setStatus("Submitted");
+                    //     entity.setCurrentStatus("Submitted");
+                    // }
                     entity = plotinputRepository.save(entity);
 
                     System.out.println("entity:::" + entity);
@@ -727,12 +729,12 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
         }
+
         log.debug("Returning list of PlotDTOs: {}", dtoList);
         log.info("Returning list of PlotDTOs: {}", dtoList);
         log.error("Returning list of PlotDTOs: {}", dtoList);
         return dtoList;
     }
-
     @Override
     public List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
@@ -801,10 +803,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setCurrentStatus("In Progress");
                             }
                         }
-                    } else {
-                        entity.setStatus("Submitted");
-                        entity.setCurrentStatus("Submitted");
-                    }
+                    } 
+                    // else {
+                    //     entity.setStatus("Submitted");
+                    //     entity.setCurrentStatus("Submitted");
+                    // }
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     dto.setRequests(getRequests(dto.getId()));
 
@@ -835,10 +838,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setCurrentStatus("In Progress");
                             }
                         }
-                    } else {
-                        entity.setStatus("Submitted");
-                        entity.setCurrentStatus("Submitted");
-                    }
+                    } 
+                    // else {
+                    //     entity.setStatus("Submitted");
+                    //     entity.setCurrentStatus("Submitted");
+                    // }
                     PlotInputDTO dto = PlotInputMapper.toDTO(entity);
                     List<PlotHistory> histories = plotHistoryRepository
                             .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
