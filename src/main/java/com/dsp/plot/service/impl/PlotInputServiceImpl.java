@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -660,7 +661,9 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (paperName != null) {
             spec = spec.and(PlotInputSpec.hasPaperName(paperName));
         }
-        entitys = plotinputRepository.findAll(spec);
+        Sort sort=Sort.by(Sort.Direction.DESC, "submissionDate");
+        entitys = plotinputRepository.findAll(spec,sort);
+        // entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
 
@@ -782,7 +785,9 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (paperName != null) {
             spec = spec.and(PlotInputSpec.hasPaperName(paperName));
         }
-        entitys = plotinputRepository.findAll(spec);
+        Sort sort=Sort.by(Sort.Direction.DESC, "submissionDate");
+        entitys = plotinputRepository.findAll(spec,sort);
+        // entitys = plotinputRepository.findAll(spec);
         Long houseId = getHouseId();
         for (PlotInput entity : entitys) {
             if (houseId == 1) {
