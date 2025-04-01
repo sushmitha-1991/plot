@@ -1,15 +1,8 @@
 package com.dsp.plot.entity.specification;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
 import org.springframework.data.jpa.domain.Specification;
-
-import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotInput;
-
 import jakarta.persistence.criteria.Expression;
-
 public class PlotInputSpec 
 {
     public static Specification<PlotInput> isActive(boolean isActive) {
