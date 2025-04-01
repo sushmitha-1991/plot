@@ -65,7 +65,7 @@ public class PlotInput extends InputInstance {
     private String paperName;
 
     @Column(name = "ministry_id")
-    private Long ministryId;
+    private Integer ministryId;
 
     @Column(name = "generated_plot_id")
     private Long generatedPlotId;
@@ -142,7 +142,7 @@ public class PlotInput extends InputInstance {
     @JoinColumn(name = "rajya_sabha_session_no", referencedColumnName = "id", insertable = false, updatable = false)
     private MastersRajyaSabha rajyaSabhaSessionDetails;
     @ManyToOne
-    @JoinColumn(name = "ministry_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "ministry_id", referencedColumnName = "ministry_code", insertable = false, updatable = false)
     private Ministries ministries;
     @ManyToOne
     @JoinColumn(name = "paper_type_id", referencedColumnName = "id", insertable = false, updatable = false)

@@ -14,6 +14,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MinistriesDTO {
+    private Long id;
+    private Long code;
     private String ministryName;
+
 
 }

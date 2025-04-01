@@ -98,7 +98,7 @@ public class PlotInputSpec
         return (root, query, criteriaBuilder) -> 
         paperTypeId != null ? criteriaBuilder.equal(root.get("paperTypeId"), paperTypeId) : null;
     }
-    public static Specification<PlotInput> hasMinistryId(Long ministryId) {
+    public static Specification<PlotInput> hasMinistryId(Integer ministryId) {
         return (root, query, criteriaBuilder) -> 
         ministryId != null ? criteriaBuilder.equal(root.get("ministryId"), ministryId) : null;
     }

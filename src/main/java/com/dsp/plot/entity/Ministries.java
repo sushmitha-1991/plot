@@ -28,6 +28,8 @@ public class Ministries {
 
     @Id
     private Long id;
+    @Column(name = "ministry_code")
+    private Integer ministryCode;
     @Column(name = "ministry_name")
     private String ministryName;
 }

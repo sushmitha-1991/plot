@@ -70,12 +70,13 @@ public class PlotInputController {
                         @RequestParam(required = false) String paperName,
                         @RequestParam(required = false) LocalDate proposedDateOfLaying,
                         @RequestParam(required = false) LocalDate actualDateOfLaying,
-                        @RequestParam(required = false) Long ministryId,
-                        @RequestParam(required = false) Boolean sendToLibrary) {
+                        @RequestParam("ministryId") Integer ministryId,
+                        @RequestParam(required = false) Boolean sendToLibrary,
+                        @RequestParam("appId") Long applicationId) {
                 List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive, draftStatus, lokSabhaNo,
                                 lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
                                 departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying,
-                                ministryId, sendToLibrary);
+                                ministryId, sendToLibrary,applicationId);
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
                 return new ResponseEntity<>(response, HttpStatus.OK);
@@ -101,7 +102,7 @@ public class PlotInputController {
                         @RequestParam(required = false) String paperName,
                         @RequestParam(required = false) LocalDate proposedDateOfLaying,
                         @RequestParam(required = false) LocalDate actualDateOfLaying,
-                        @RequestParam(required = false) Long ministryId) {
+                        @RequestParam(required=false) Integer ministryId) {
 
                 List<PlotInputDTO> fectchedEntities = plotinputService.getHistories(isActive, draftStatus, lokSabhaNo,
                                 lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,

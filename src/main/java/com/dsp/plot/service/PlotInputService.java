@@ -18,9 +18,9 @@ public interface PlotInputService {
 
         List<PlotInputDTO> getAll(Boolean isActive, Boolean draftStatus, Long lokSabhaNo, Long lokSabhaSessionNo,
                         Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
-                        LocalDate dateOfSubmission,
-                        Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
-                        LocalDate actualDateOfLaying, Long ministry, Boolean sendToLibrary);
+                        LocalDate submissionDate, Long department, Long paperType, String paperName,
+                        LocalDate proposedDateOfLaying, LocalDate actualDateOfLaying, Integer ministry,
+                        Boolean sendToLibrary, Long applicationId);
 
         PlotInputDTO getById(Long id);
 
@@ -43,7 +43,7 @@ public interface PlotInputService {
                         Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
                         LocalDate dateOfSubmission,
                         Long department, Long paperType, String paperName, LocalDate proposedDateOfLaying,
-                        LocalDate actualDateOfLaying, Long ministry);
+                        LocalDate actualDateOfLaying, Integer ministry);
 
         PlotDateChartDTO getDateChartById(Long id);
 
