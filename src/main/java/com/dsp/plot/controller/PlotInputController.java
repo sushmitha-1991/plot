@@ -70,13 +70,13 @@ public class PlotInputController {
                         @RequestParam(required = false) String paperName,
                         @RequestParam(required = false) LocalDate proposedDateOfLaying,
                         @RequestParam(required = false) LocalDate actualDateOfLaying,
-                        @RequestParam("ministryId") Integer ministryId,
+                        @RequestParam(required = false) Integer ministryId,
                         @RequestParam(required = false) Boolean sendToLibrary,
-                        @RequestParam("appId") Long applicationId) {
+                        @RequestParam(required = false) Long appId) {
                 List<PlotInputDTO> fectchedEntities = plotinputService.getAll(isActive, draftStatus, lokSabhaNo,
                                 lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
                                 departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying,
-                                ministryId, sendToLibrary,applicationId);
+                                ministryId, sendToLibrary,appId);
                 GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "PlotInputs retrieved successfully", fectchedEntities);
                 return new ResponseEntity<>(response, HttpStatus.OK);

@@ -627,7 +627,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         // log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
         if (status != null && status.equalsIgnoreCase("draft")) {
-
             List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo, lokSabhaSessionNo,
                     rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType, paperName,
                     proposedDateOfLaying, actualDateOfLaying, ministry);
@@ -740,7 +739,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // List<PlotInput> plotInputs=new ArrayList<>();
             if (status != null) {
                 if (!status.equalsIgnoreCase("draft")) {
-                    List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo, lokSabhaSessionNo,
+                    List<PlotInput> plotInputs = getDraftedData(dtoList.get(0).getApplicationId(), lokSabhaNo, lokSabhaSessionNo,
                             rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType,
                             paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
                     for (PlotInput input : plotInputs) {
@@ -750,7 +749,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                 }
             } else {
-                List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo, lokSabhaSessionNo,
+                List<PlotInput> plotInputs = getDraftedData(dtoList.get(0).getApplicationId(), lokSabhaNo, lokSabhaSessionNo,
                         rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType,
                         paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
                 for (PlotInput input : plotInputs) {
