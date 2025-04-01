@@ -83,12 +83,12 @@ public class PlotInput extends InputInstance {
     @Column(name = "digitally_signed")
     private Boolean digitallySigned;
 
-    @Column(name = "act_id")
-    private Long actId;
+    @Column(name = "under_act")
+    private String underAct;
 
-@Column(name = "act_under")
-    private String actUnder;
-    
+    @Column(name = "act")
+    private String act;
+
     @Column(name = "draft_flag", columnDefinition = "boolean default false")
     private Boolean draftFlag;
 
@@ -150,6 +150,5 @@ public class PlotInput extends InputInstance {
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Departments departments;
-
 
 }

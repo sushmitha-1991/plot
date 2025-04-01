@@ -29,8 +29,8 @@ public class PlotInputDTO {
     private String paperName;
     private Integer ministryId;
     private Boolean digitallySigned;
-    private Long actId;
-    private String actUnder;
+    private String underAct;
+    private String act;
     private Boolean draftFlag;
     private String status;
     private String remarks;

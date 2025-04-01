@@ -499,7 +499,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
         // Object paperNameData = paper.get("paperName");
-        Object paperNameData = paper.get("otherPaperName");
+        Object paperNameData = paper.get("othersPaperName");
         Long paperType = null;
         String paperTitle = "";
         if (paperNameData instanceof Map<?, ?> paperNameMap) {
@@ -698,11 +698,12 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
-                                } else {
-                                    entity.setPendingAt("Table Office");
-                                    entity.setStatus("In Progress");
-                                    entity.setCurrentStatus("In Progress");
-                                }
+                                } 
+                                // else {
+                                //     entity.setPendingAt("Table Office");
+                                //     entity.setStatus("In Progress");
+                                //     entity.setCurrentStatus("In Progress");
+                                // }
                             }
                         }
                         entity = plotinputRepository.save(entity);
@@ -722,11 +723,12 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
-                                } else {
-                                    entity.setPendingAt("Table Office A");
-                                    entity.setStatus("In Progress");
-                                    entity.setCurrentStatus("In Progress");
                                 }
+                                // else {
+                                //     entity.setPendingAt("Table Office A");
+                                //     entity.setStatus("In Progress");
+                                //     entity.setCurrentStatus("In Progress");
+                                // }
                             }
                         }
                         entity = plotinputRepository.save(entity);
