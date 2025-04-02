@@ -626,6 +626,8 @@ public class PlotInputServiceImpl implements PlotInputService {
             LocalDate actualDateOfLaying, Integer ministry, Boolean sendToLibrary, Long applicationId) {
         // log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
+        Long houseId = getHouseId();
+
         if (status != null && status.equalsIgnoreCase("draft")) {
             List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo, lokSabhaSessionNo,
                     rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType, paperName,
@@ -634,6 +636,42 @@ public class PlotInputServiceImpl implements PlotInputService {
                 System.out.println("entity");
                 System.out.println(input);
                 if (input != null) {
+                    System.out.println("@@@" + input);
+                    if (houseId == 1) {
+                        if (input.getRajyaSabhaSessionNo() == null) {
+                            input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
+                        }
+                        Optional<MastersRajyaSabha> session = mastersRSSRepository
+                                .findById(input.getRajyaSabhaSessionNo());
+                        if (session.isPresent())
+                            input.setRajyaSabhaSession(session.get().getSessionNumber());
+                    }
+                    if (houseId == 2) {
+                        if (input.getLokSabhaSessionNo() == null) {
+                            input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
+                        }
+                        Optional<MastersLokSabhaSession> session = masterLSSRepository
+                                .findById(input.getLokSabhaSessionNo());
+                        if (session.isPresent()) {
+                            input.setLokSabhaSession(session.get().getLokSabha().getLokSabhaNumber());
+                            input.setLokSabhaSessionNumber(session.get().getSessionNumber());
+                        }
+                    }
+                    System.out.println("@@@" + input);
+                    if (input.getMinistryId() != null) {
+                        Optional<Ministries> ministriesOptional = ministriesRepository
+                                .findByMinistryCode(input.getMinistryId());
+                        input.setMinistries(ministriesOptional.get());
+                    }
+                    if (input.getDepartmentId() != null) {
+                        Optional<Departments> departmentOptional = departmentRepo.findById(input.getDepartmentId());
+                        input.setDepartments(departmentOptional.get());
+                    }
+                    if (input.getPaperTypeId() != null) {
+                        Optional<MasterCode> paperTypeOptional = codeRepository.findById(input.getPaperTypeId());
+                        input.setPaperTypes(paperTypeOptional.get());
+                    }
+                    System.out.println("@@@" + input);
                     PlotInputDTO draftDto = PlotInputMapper.toDTO(input);
                     dtoList.add(draftDto);
                 }
@@ -684,7 +722,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             Sort sort = Sort.by(Sort.Direction.DESC, "submissionDate");
             entitys = plotinputRepository.findAll(spec, sort);
             // entitys = plotinputRepository.findAll(spec);
-            Long houseId = getHouseId();
             for (PlotInput entity : entitys) {
                 if (houseId == 1) {
                     if (entity.getRajyaSabhaSessionNo() != null) {
@@ -698,12 +735,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
-                                } 
-                                // else {
-                                //     entity.setPendingAt("Table Office");
-                                //     entity.setStatus("In Progress");
-                                //     entity.setCurrentStatus("In Progress");
-                                // }
+                                }
+
                             }
                         }
                         entity = plotinputRepository.save(entity);
@@ -724,11 +757,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
                                 }
-                                // else {
-                                //     entity.setPendingAt("Table Office A");
-                                //     entity.setStatus("In Progress");
-                                //     entity.setCurrentStatus("In Progress");
-                                // }
+
                             }
                         }
                         entity = plotinputRepository.save(entity);
@@ -738,20 +767,56 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                 }
             }
-            // List<PlotInput> plotInputs=new ArrayList<>();
             if (status != null) {
                 if (!status.equalsIgnoreCase("draft")) {
-                    List<PlotInput> plotInputs = getDraftedData(dtoList.get(0).getApplicationId(), lokSabhaNo, lokSabhaSessionNo,
+                    List<PlotInput> plotInputs = getDraftedData(dtoList.get(0).getApplicationId(), lokSabhaNo,
+                            lokSabhaSessionNo,
                             rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType,
                             paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
                     for (PlotInput input : plotInputs) {
                         if (input != null) {
+                            if (houseId == 1) {
+                                if (input.getRajyaSabhaSessionNo() == null) {
+                                    input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
+                                }
+                                Optional<MastersRajyaSabha> session = mastersRSSRepository
+                                        .findById(input.getRajyaSabhaSessionNo());
+                                if (session.isPresent())
+                                    input.setRajyaSabhaSession(session.get().getSessionNumber());
+                            }
+                            if (houseId == 2) {
+                                if (input.getLokSabhaSessionNo() == null) {
+                                    input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
+                                }
+                                Optional<MastersLokSabhaSession> session = masterLSSRepository
+                                        .findById(input.getLokSabhaSessionNo());
+                                if (session.isPresent()) {
+                                    input.setLokSabhaSession(session.get().getLokSabha().getLokSabhaNumber());
+                                    input.setLokSabhaSessionNumber(session.get().getSessionNumber());
+                                }
+                            }
+                            if (input.getMinistryId() != null) {
+                                Optional<Ministries> ministriesOptional = ministriesRepository
+                                        .findByMinistryCode(input.getMinistryId());
+                                input.setMinistries(ministriesOptional.get());
+                            }
+                            if (input.getDepartmentId() != null) {
+                                Optional<Departments> departmentOptional = departmentRepo
+                                        .findById(input.getDepartmentId());
+                                input.setDepartments(departmentOptional.get());
+                            }
+                            if (input.getPaperTypeId() != null) {
+                                Optional<MasterCode> paperTypeOptional = codeRepository
+                                        .findById(input.getPaperTypeId());
+                                input.setPaperTypes(paperTypeOptional.get());
+                            }
                             dtoList.add(PlotInputMapper.toDTO(input));
                         }
                     }
                 }
             } else {
-                List<PlotInput> plotInputs = getDraftedData(dtoList.get(0).getApplicationId(), lokSabhaNo, lokSabhaSessionNo,
+                List<PlotInput> plotInputs = getDraftedData(dtoList.get(0).getApplicationId(), lokSabhaNo,
+                        lokSabhaSessionNo,
                         rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType,
                         paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
                 for (PlotInput input : plotInputs) {
@@ -807,8 +872,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 department, paperType, paperName, proposedDateOfLaying,
                                 actualDateOfLaying, ministry);
                         System.out.println(inputEntity);
-                        if(inputEntity!=null)
-                        plotInputs.add(inputEntity);
+                        if (inputEntity != null)
+                            plotInputs.add(inputEntity);
                     }
                 }
             }

@@ -1,7 +1,9 @@
 package com.dsp.plot.mapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -300,7 +302,7 @@ public class PlotInputMapper {
                                         .equals(getLongValue(dataMap, "lokSabhaSessionNo")))
                                 return null;
                         if (rajyaSabhaSessionNo != null
-                                && !rajyaSabhaSessionNo.equals(getLongValue(dataMap, "rajyaSabhaSessionNo")))
+                                        && !rajyaSabhaSessionNo.equals(getLongValue(dataMap, "rajyaSabhaSessionNo")))
                                 return null;
                         if (submissionDate != null && !submissionDate
                                         .isEqual(getLocalDateValue(dataMap, "submissionDate")))
@@ -310,7 +312,8 @@ public class PlotInputMapper {
                                 return null;
                         if (paperType != null && !paperType.equals(getLongValue(dataMap, "paperTypeId")))
                                 return null;
-                        if (paperName != null && !((getStringValue(dataMap, "paperName").toLowerCase()).contains(paperName.toLowerCase())))
+                        if (paperName != null && !((getStringValue(dataMap, "paperName").toLowerCase())
+                                        .contains(paperName.toLowerCase())))
                                 return null;
                         if (ministry != null && !ministry.equals(getIntegerValue(dataMap, "ministryId")))
                                 return null;
@@ -346,8 +349,25 @@ public class PlotInputMapper {
                         entity.setNodalOfficerPhoneNo(getStringValue(dataMap, "nodalOfficerPhoneNo"));
                         entity.setSendToLibrary(getBooleanValue(dataMap, "sendToLibrary"));
                         entity.setNodalOfficerMobileNo(getStringValue(dataMap, "nodalOfficerMobileNo"));
+                        List<Map<String, Object>> paperDetailsList = getListOfMapValue(dataMap, "paperDetails");
+                        if (paperDetailsList != null) {
+                                entity.setPaperDetails(paperDetailsList);
+                        }
+                        List<Map<String, Object>> documents = getListOfMapValue(dataMap, "documents");
+                        if (documents != null) {
+                                entity.setDocuments(documents);
+                        }
+
                 }
                 return entity;
+        }
+
+        private static List<Map<String, Object>> getListOfMapValue(Map<String, Object> map, String key) {
+                Object value = map.get(key);
+                if (value instanceof List) {
+                        return (List<Map<String, Object>>) value;
+                }
+                return new ArrayList<>();
         }
 
         private static Long getLongValue(Map<String, Object> map, String key) {
@@ -356,13 +376,13 @@ public class PlotInputMapper {
                                 .map(value -> ((Number) value).longValue())
                                 .orElse(null);
         }
+
         private static Integer getIntegerValue(Map<String, Object> map, String key) {
                 return Optional.ofNullable(map.get(key))
-                        .filter(value -> value instanceof Number)
-                        .map(value -> ((Number) value).intValue()) // Use intValue() instead
-                        .orElse(null);
-            }
-            
+                                .filter(value -> value instanceof Number)
+                                .map(value -> ((Number) value).intValue()) // Use intValue() instead
+                                .orElse(null);
+        }
 
         private static String getStringValue(Map<String, Object> map, String key) {
                 return Optional.ofNullable(map.get(key))

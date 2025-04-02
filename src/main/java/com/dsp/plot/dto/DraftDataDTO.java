@@ -27,9 +27,9 @@ public class DraftDataDTO {
 	private Long draftId;
 	private JsonNode data;
 	private Long applicationId;
-	private Long rajyaSabhaSession;
-	private Long lokSabhaSessionNumber;
-	private Long lokSabhaSession;
+	private String rajyaSabhaSession;
+	private String lokSabhaSessionNumber;
+	private String lokSabhaSession;
 	private String applicationNo;
     
 
