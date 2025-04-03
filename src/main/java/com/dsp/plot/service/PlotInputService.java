@@ -22,6 +22,13 @@ public interface PlotInputService {
                         LocalDate proposedDateOfLaying, LocalDate actualDateOfLaying, Integer ministry,
                         Boolean sendToLibrary, Long applicationId);
 
+        List<PlotInputDTO> ministryInputs(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
+                        Long lokSabhaSessionNo,
+                        Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
+                        LocalDate submissionDate, Long department, Long paperType, String paperName,
+                        LocalDate proposedDateOfLaying, LocalDate actualDateOfLaying, Integer ministry,
+                        Boolean sendToLibrary, Long applicationId);
+
         PlotInputDTO getById(Long id);
 
         PlotInputDTO update(Long id, PlotInputDTO plotinputDTO);

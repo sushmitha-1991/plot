@@ -82,6 +82,34 @@ public class PlotInputController {
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
+        @GetMapping("/getAll/inputs")
+        public ResponseEntity<GenericResponse<List<PlotInputDTO>>> ministryInputs(
+                        @RequestParam(required = false) Boolean isActive,
+                        @RequestParam(required = false) Boolean draftStatus,
+                        @RequestParam(required = false) Long lokSabhaNo,
+                        @RequestParam(required = false) Long lokSabhaSessionNo,
+                        @RequestParam(required = false) Long rajyaSabhaSessionNo,
+                        @RequestParam(required = false) LocalDate startDate,
+                        @RequestParam(required = false) LocalDate endDate,
+                        @RequestParam(required = false) String status,
+                        @RequestParam(required = false) LocalDate submissionDate,
+                        @RequestParam(required = false) Long departmentId,
+                        @RequestParam(required = false) Long paperTypeId,
+                        @RequestParam(required = false) String paperName,
+                        @RequestParam(required = false) LocalDate proposedDateOfLaying,
+                        @RequestParam(required = false) LocalDate actualDateOfLaying,
+                        @RequestParam(required = false) Integer ministryId,
+                        @RequestParam(required = false) Boolean sendToLibrary,
+                        @RequestParam(required = false) Long appId) {
+                List<PlotInputDTO> fectchedEntities = plotinputService.ministryInputs(isActive, draftStatus, lokSabhaNo,
+                                lokSabhaSessionNo, rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
+                                departmentId, paperTypeId, paperName, proposedDateOfLaying, actualDateOfLaying,
+                                ministryId, sendToLibrary,appId);
+                GenericResponse<List<PlotInputDTO>> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "PlotInputs retrieved successfully", fectchedEntities);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
         @Operation(summary = "Get all PlotInputs", description = "Retrieves a list of all PlotInputs.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "PlotInputs retrieved successfully"),
