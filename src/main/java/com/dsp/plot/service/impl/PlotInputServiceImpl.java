@@ -661,52 +661,55 @@ public class PlotInputServiceImpl implements PlotInputService {
         Long houseId = getHouseId();
 
         if (status != null && status.equalsIgnoreCase("draft")) {
-            List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo, lokSabhaSessionNo,
-                    rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType, paperName,
-                    proposedDateOfLaying, actualDateOfLaying, ministry);
-            for (PlotInput input : plotInputs) {
-                System.out.println("entity");
-                System.out.println(input);
-                if (input != null) {
-                    System.out.println("@@@" + input);
-                    if (houseId == 1) {
-                        if (input.getRajyaSabhaSessionNo() == null) {
-                            input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
+            if (applicationId != null) {
+                List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo, lokSabhaSessionNo,
+                        rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType,
+                        paperName,
+                        proposedDateOfLaying, actualDateOfLaying, ministry);
+                for (PlotInput input : plotInputs) {
+                    System.out.println("entity");
+                    System.out.println(input);
+                    if (input != null) {
+                        System.out.println("@@@" + input);
+                        if (houseId == 1) {
+                            if (input.getRajyaSabhaSessionNo() == null) {
+                                input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
+                            }
+                            Optional<MastersRajyaSabha> session = mastersRSSRepository
+                                    .findById(input.getRajyaSabhaSessionNo());
+                            if (session.isPresent())
+                                input.setRajyaSabhaSession(session.get().getSessionNumber());
                         }
-                        Optional<MastersRajyaSabha> session = mastersRSSRepository
-                                .findById(input.getRajyaSabhaSessionNo());
-                        if (session.isPresent())
-                            input.setRajyaSabhaSession(session.get().getSessionNumber());
-                    }
-                    if (houseId == 2) {
-                        if (input.getLokSabhaSessionNo() == null) {
-                            input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
+                        if (houseId == 2) {
+                            if (input.getLokSabhaSessionNo() == null) {
+                                input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
+                            }
+                            Optional<MastersLokSabhaSession> session = masterLSSRepository
+                                    .findById(input.getLokSabhaSessionNo());
+                            System.out.println(":::::::" + session.get());
+                            if (session.isPresent()) {
+                                input.setLokSabhaSession(session.get().getLokSabha().getLokSabhaNumber());
+                                input.setLokSabhaSessionNumber(session.get().getSessionNumber());
+                            }
                         }
-                        Optional<MastersLokSabhaSession> session = masterLSSRepository
-                                .findById(input.getLokSabhaSessionNo());
-                        System.out.println(":::::::" + session.get());
-                        if (session.isPresent()) {
-                            input.setLokSabhaSession(session.get().getLokSabha().getLokSabhaNumber());
-                            input.setLokSabhaSessionNumber(session.get().getSessionNumber());
+                        System.out.println("@@@" + input);
+                        if (input.getMinistryId() != null) {
+                            Optional<Ministries> ministriesOptional = ministriesRepository
+                                    .findByMinistryCode(input.getMinistryId());
+                            input.setMinistries(ministriesOptional.get());
                         }
+                        if (input.getDepartmentId() != null) {
+                            Optional<Departments> departmentOptional = departmentRepo.findById(input.getDepartmentId());
+                            input.setDepartments(departmentOptional.get());
+                        }
+                        if (input.getPaperTypeId() != null) {
+                            Optional<MasterCode> paperTypeOptional = codeRepository.findById(input.getPaperTypeId());
+                            input.setPaperTypes(paperTypeOptional.get());
+                        }
+                        System.out.println("@@@" + input);
+                        PlotInputDTO draftDto = PlotInputMapper.toDTO(input);
+                        dtoList.add(draftDto);
                     }
-                    System.out.println("@@@" + input);
-                    if (input.getMinistryId() != null) {
-                        Optional<Ministries> ministriesOptional = ministriesRepository
-                                .findByMinistryCode(input.getMinistryId());
-                        input.setMinistries(ministriesOptional.get());
-                    }
-                    if (input.getDepartmentId() != null) {
-                        Optional<Departments> departmentOptional = departmentRepo.findById(input.getDepartmentId());
-                        input.setDepartments(departmentOptional.get());
-                    }
-                    if (input.getPaperTypeId() != null) {
-                        Optional<MasterCode> paperTypeOptional = codeRepository.findById(input.getPaperTypeId());
-                        input.setPaperTypes(paperTypeOptional.get());
-                    }
-                    System.out.println("@@@" + input);
-                    PlotInputDTO draftDto = PlotInputMapper.toDTO(input);
-                    dtoList.add(draftDto);
                 }
             }
         } else {
@@ -849,13 +852,15 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
 
             } else {
-                List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo,
-                        lokSabhaSessionNo,
-                        rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType,
-                        paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
-                for (PlotInput input : plotInputs) {
-                    if (input != null) {
-                        dtoList.add(PlotInputMapper.toDTO(input));
+                if (applicationId != null) {
+                    List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo,
+                            lokSabhaSessionNo,
+                            rajyaSabhaSessionNo, startDate, endDate, status, submissionDate, department, paperType,
+                            paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
+                    for (PlotInput input : plotInputs) {
+                        if (input != null) {
+                            dtoList.add(PlotInputMapper.toDTO(input));
+                        }
                     }
                 }
             }
