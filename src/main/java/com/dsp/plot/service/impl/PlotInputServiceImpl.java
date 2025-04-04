@@ -408,16 +408,24 @@ public class PlotInputServiceImpl implements PlotInputService {
                 updateAppNo(docs, applicationNo);
             }
         }
-        String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
+        // String template = "A copy of the Notification No. S.O.3508(E) (Hindi and
+        // English versions) published
+        // in Gazette of India dated 7th August, 2023 establishing a Committee on
+        // Antarctic
+        // Governance and Environmental Protection consisting of the ex-officio
+        // Chairperson, ex-officio members and expert members, mentioned therein, issued
+        // under sub-section (1) of Section 23 of the Indian Antarctic Act, 2022."
+        // String template = "A copy of the {0} (Hindi and English versions) of the {1},
+        // for the year {2}";
+        String template = "A copy of the Notification No. {0} (Hindi and English versions) published in {1} dated {2}"
+                + " establishing a Committee on {3} Protection consisting of the ex-officio Chairperson, ex-officio members and expert members, "
+                + "mentioned therein, issued under sub-section {4} of {5} of the {6} Act,{7}.";
         Object paperNameData = paper.get("paperName");
-
         Long paperType = null;
         String paperTitle = "";
-
         if (paperNameData instanceof Map<?, ?> paperNameMap) {
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
             Object labelObj = paperNameMap.get("label"); // Extract "value" field
-
             if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
                 paperType = numberValue.longValue();
             }
@@ -425,37 +433,33 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperTitle = stringValue;
             }
         }
+        Long publishedId = Long.parseLong(paper.get("publishedIn").toString());
+        Long gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
+        LocalDate dateOfPublication = LocalDate.parse(paper.get("dateOfPublication").toString());
+        String publicationDate = formatDateWithSuffix(dateOfPublication);
+        System.out.println(publicationDate);
+        String publishedIn = "";
+        String gazetteDetails = "";
+        if (publishedId != null) {
+            Optional<MasterCode> publishedAbbr = codeRepository.findById(publishedId);
+            if (publishedAbbr.isPresent())
+                publishedIn = publishedAbbr.get().getCode();
+        }
+        if (gazetteDetailsId != null) {
+            Optional<MasterCode> publishedAbbr = codeRepository.findById(gazetteDetailsId);
+            if (publishedAbbr.isPresent())
+                gazetteDetails = publishedAbbr.get().getCode();
+        }
 
-        // Object paperNameId = paper.get("notificationId");
-        // Long paperType = null;
-        // if (paperNameId instanceof Long) {
-        // paperType = (Long) paperNameId;
-        // } else if (paperNameId instanceof Integer) {
-        // paperType = ((Integer) paperNameId).longValue(); // Convert Integer to Long
-        // } else if (paperNameId instanceof String) {
-        // try {
-        // paperType = Long.parseLong((String) paperNameId); // Convert String to Long
-        // } catch (NumberFormatException e) {
-        // paperType = null; // Handle invalid string cases
-        // }
-        // }
-        // if (paperType == null) {
-        // return "";
-        // }
-        // MasterCode codeAbbr;
-        // try {
-        // codeAbbr = codeRepository.findById(paperType).get();
-        // } catch (Exception e) {
-        // return "";
-        // }
-        // String abbr = codeAbbr.getAbbr();
-        // switch (abbr) {
-        // case "PLOT_NF_GEN":
         String formattedString = MessageFormat.format(template,
-                escapeHtml(paper.get("publishedIn")),
+                escapeHtml(paperTitle),
+                escapeHtml(publishedIn),
+                escapeHtml(publicationDate),
+                escapeHtml(gazetteDetails),
+                escapeHtml(paper.get("layingSection")),
+                escapeHtml(paper.get("issuingSection")),
                 escapeHtml(paper.get("laidUnderAct")),
-                escapeHtml(paper.get("issuingSection"))
-                );
+                escapeHtml(paper.get("year")));
         // break;
         // case "PLOT_NF_SON":
         // formattedString = MessageFormat.format(template,
@@ -482,6 +486,33 @@ public class PlotInputServiceImpl implements PlotInputService {
         // }
         // System.out.println(formattedString);
         return formattedString;
+    }
+
+    // additional method for changing date format
+    public static String formatDateWithSuffix(LocalDate date) {
+        int day = date.getDayOfMonth();
+        String dayWithSuffix = day + getDaySuffix(day);
+
+        DateTimeFormatter monthYearFormatter = DateTimeFormatter.ofPattern("MMMM, yyyy");
+        String monthYear = date.format(monthYearFormatter);
+
+        return dayWithSuffix + " " + monthYear;
+    }
+
+    private static String getDaySuffix(int day) {
+        if (day >= 11 && day <= 13) {
+            return "th";
+        }
+        switch (day % 10) {
+            case 1:
+                return "st";
+            case 2:
+                return "nd";
+            case 3:
+                return "rd";
+            default:
+                return "th";
+        }
     }
 
     // other paper
@@ -816,6 +847,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         }
                     }
                 }
+
             } else {
                 List<PlotInput> plotInputs = getDraftedData(applicationId, lokSabhaNo,
                         lokSabhaSessionNo,
@@ -933,7 +965,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
         }
-    return dtoList;
+        return dtoList;
 
     }
 
