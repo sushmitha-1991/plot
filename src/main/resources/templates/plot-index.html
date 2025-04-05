@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Printable Papers to be Laid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        @page {
+            size: A4 Landscape;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+            }
+        }
+
+        .plot-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .plot-table th, .plot-table td {
+            border: 1px solid #ddd;
+            padding: 1px;
+            text-align: left;
+        }
+
+        .plot-table th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Papers to be Laid on the Table</h2>
+<br>
+<h4>${dto.createdBy}</h4>
+<table class="plot-table">
+    <thead>
+    <tr>
+        <th>Sl. No</th>
+        <th>Year of Report</th>
+        <th>Date of Laying/Placing in Library</th>
+        <th>No. of Papers Laid</th>
+    </tr>
+    </thead>
+    
+    <tbody>
+    <tr th:each="row : ${dto.indexDetails}">
+        <td th:text="${row.indexId}"></td>
+        <td th:text="date : ${row.dateOfLaying}"></td>
+        <td th:text="${row.yearOfReport}"></td>
+        <td th:text="${row.numberOfPapersLaid}"></td>
+    </tr>
+    </tbody>
+    
+</table>
+
+
+</body>
+</html>
