@@ -5,6 +5,7 @@ import com.dsp.plot.dto.UserDetailsDTO;
 import java.io.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.thymeleaf.context.Context;
@@ -14,6 +15,7 @@ import org.thymeleaf.context.Context;
  *
  * @author
  */
+@Component
 public class Utility {
     
     @Autowired
