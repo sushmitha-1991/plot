@@ -2,7 +2,13 @@ package com.dsp.plot.util;
 
 import com.dsp.plot.dto.HouseDTO;
 import com.dsp.plot.dto.UserDetailsDTO;
+import java.io.ByteArrayOutputStream;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.thymeleaf.TemplateEngine;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.thymeleaf.context.Context;
+
 
 /**
  *
@@ -10,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class Utility {
     
+    @Autowired
+    private TemplateEngine templateEngine;
+        
     public static HouseDTO getHouse() {
         
 	HouseDTO hdto = new HouseDTO(); 
@@ -25,4 +34,16 @@ public class Utility {
         }
         return hdto;
     }
+    
+    public byte[] generatePdf(String templateName, Context context) throws Exception {
+        String html = templateEngine.process(templateName, context);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(html);
+        renderer.layout();
+        renderer.createPDF(outputStream, true);
+        byte[] pdfBytes = outputStream.toByteArray();
+        outputStream.close();
+        return pdfBytes;
+    }    
 }

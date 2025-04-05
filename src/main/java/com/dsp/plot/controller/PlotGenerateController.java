@@ -21,16 +21,24 @@ import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotGenerateService;
+import com.dsp.plot.util.Utility;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.thymeleaf.context.Context;
 
 @RestController
 @RequestMapping("/plot-generate")
 public class PlotGenerateController {
 
         private final PlotGenerateService plotService;
+        
+        @Autowired
+        Utility util;
 
         @Autowired
         public PlotGenerateController(PlotGenerateService plotService) {
@@ -223,5 +231,28 @@ public class PlotGenerateController {
                                 "Updated Index By Id", fetchedEntity);
 
                 return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+
+        @Operation(summary = "Generates Plot Index PDF", description = "Generates Plot Index PDF")
+        @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "PlotGenerate retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "PlotGenerate not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error") })
+        @GetMapping("/print-index/{id}")
+        public ResponseEntity<byte[]> downloadIndexPdfById (
+                HttpServletResponse response, 
+                @PathVariable Long id) throws Exception {
+
+            PlotIndexDTO fetchedEntity = plotService.getIndexById(id);
+
+            Context context = new Context();
+            context.setVariable("dto", fetchedEntity);
+
+            byte[] pdfBytes = util.generatePdf("plot-index.html", context);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("inline", "synopsis_roster.pdf");
+            return ResponseEntity.ok().headers(headers).contentLength(pdfBytes.length).body(pdfBytes);
         }
 }
