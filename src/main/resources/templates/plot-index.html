@@ -55,7 +55,7 @@
     <tbody>
     <tr th:each="row : ${dto.indexDetails}">
         <td th:text="${row.indexId}"></td>
-        <td th:text="date : ${row.dateOfLaying}"></td>
+        <td th:text="${row.dateOfLaying}"></td>
         <td th:text="${row.yearOfReport}"></td>
         <td th:text="${row.numberOfPapersLaid}"></td>
     </tr>
