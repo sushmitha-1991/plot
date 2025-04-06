@@ -41,7 +41,7 @@
 
 <h2>Papers to be Laid on the Table</h2>
 <br> </br>
-<h4>${dto.createdBy}</h4>
+<h4>th:text="${dto.createdBy}"</h4>
 <table class="plot-table">
     <thead>
     <tr>
@@ -55,8 +55,8 @@
     <tbody>
     <tr th:each="row : ${dto.indexDetails}">
         <td th:text="${row.indexId}"></td>
-        <td th:text="${row.dateOfLaying}"></td>
         <td th:text="${row.yearOfReport}"></td>
+        <td th:text="${row.dateOfLaying}"></td>
         <td th:text="${row.numberOfPapersLaid}"></td>
     </tr>
     </tbody>
