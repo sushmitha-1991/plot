@@ -262,11 +262,16 @@ public class PlotInputServiceImpl implements PlotInputService {
         StringBuilder contentBuilder = new StringBuilder();
         contentBuilder.append("<html><body>");
         // Authenticator details (always included)
-        // contentBuilder.append("<b>")
-        //         .append(escapeHtml(Authenticator))
-        //         .append(" (")
-        //         .append(escapeHtml(department))
-        //         .append(")</b> to lay on the Table:<br>");
+
+        contentBuilder.append("<b>")
+                .append(escapeHtml(Authenticator));
+        if (!department.isBlank()) {
+            contentBuilder.append(" (")
+                    .append(escapeHtml(department))
+                    .append(")");
+        }
+        contentBuilder.append("</b> to lay on the Table:<br>");
+
         // Check if paper details exist
         if (paperDetails == null || paperDetails.isEmpty()) {
             // System.out.println("<b>No paper details available.</b> Details");
@@ -304,7 +309,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                     contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
                 }
-
             }
         }
         contentBuilder.append("</body></html>");

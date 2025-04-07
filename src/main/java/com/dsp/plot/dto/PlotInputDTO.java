@@ -54,7 +54,7 @@ public class PlotInputDTO {
     private Long refId;
     private LocalDate documentDate;
     private InputInstanceDTO inputInstanceDTO;
-
+    private Integer seqOfMinistryContent;
 
     private String nodalOfficerName;
     private String authenticatorName;
