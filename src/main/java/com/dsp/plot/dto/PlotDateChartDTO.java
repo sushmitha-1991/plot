@@ -19,6 +19,7 @@ public class PlotDateChartDTO {
     private Long lokSabhaSessionNo;
     private Long rajyaSabhaSessionNo;
     private Long ministryId;
+    private Integer ministryCode;
     private Long inputId;
     private String groupName;
     private List<Map<String, Object>> dates;

@@ -10,12 +10,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -57,9 +55,7 @@ import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.entity.PlotInput;
 import com.dsp.plot.entity.Request;
-import com.dsp.plot.util.JwtUtil;
 import com.dsp.plot.entity.specification.DateChartSpec;
-import com.dsp.plot.entity.specification.PlotGenerateSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.ResourceNotFoundException;
@@ -318,28 +314,42 @@ public class PlotInputServiceImpl implements PlotInputService {
     // Report
     private String getFormattedReportDetails(Map<String, Object> paper, String applicationNo) {
         Object paperDocs = paper.get("documents");
+        List<String> docLangType = new ArrayList<>();
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
             // Ensure all elements are of type Map
             boolean allMaps = tempList.stream().allMatch(item -> item instanceof Map);
             if (allMaps) {
+
                 List<Map<String, Object>> docs = tempList.stream()
                         .map(item -> (Map<String, Object>) item)
                         .toList();
+                docLangType = docs.stream()
+                        .map(doc -> (String) doc.get("fieldName"))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
                 updateAppNo(docs, applicationNo);
             }
         }
+        boolean containsHindi = docLangType.stream()
+                .anyMatch(name -> name.toLowerCase().contains("hindi"));
+        boolean containsEnglish = docLangType.stream()
+                .anyMatch(name -> name.toLowerCase().contains("english"));
 
-        String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
+        if (containsEnglish) {
+            System.out.println("Document contains English field.");
+            // Add your logic here
+        }
+        if (containsHindi) {
+            System.out.println("Document contains Hindi field.");
+            // Add your logic here
+        }
         Object paperNameData = paper.get("paperName");
-
         Long paperType = null;
         String paperTitle = "";
-
         if (paperNameData instanceof Map<?, ?> paperNameMap) {
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
             Object labelObj = paperNameMap.get("label"); // Extract "value" field
-
             if (valueObj instanceof Number numberValue) { // Ensure it's a number before parsing
                 paperType = numberValue.longValue();
             }
@@ -347,7 +357,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperTitle = stringValue;
             }
         }
-
         String formattedString = "";
         MasterCode codeAbbr;
         try {
@@ -356,38 +365,84 @@ public class PlotInputServiceImpl implements PlotInputService {
             return "";
         }
         String abbr = codeAbbr.getAbbr();
+        String template = "";
+        String languageType = "";
+        if (containsEnglish) {
+            if (languageType.length() < 1) {
+                languageType += "( ";
+            }
+            languageType += "English";
+            if (!containsHindi) {
+                languageType += " Versions )";
+            }
+        }
+        if (containsHindi) {
+            if (!containsHindi) {
+                languageType += "( ";
+            } else {
+                languageType += " And ";
+            }
+            languageType += "Hindi Versions )";
+        }
         switch (abbr) {
             case "PLOT_RPT_1":
+                template = "A copy of the Report Type {0} {1} of the {2}, laid under {3},{4} for the {5} year {6}";
                 String nameAndPlace = escapeHtml(paper.get("constitutionalBody")) + ", "
                         + escapeHtml(paper.get("headquarters"));
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
+                        escapeHtml(paper.get("paperTitle")),
+                        escapeHtml(paper.get("section")),
+                        escapeHtml(paper.get("laidUnderArticle")),
                         nameAndPlace,
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_RPT_2":
-                // Map<String, Object> ministry = (Map<String, Object>)
-                // paper.get("ministryDepartmentPSU");
+                template = "A copy of the Report Type {0} {10} of the {1}, for the type of {2} and No. {3}, {4}, Laying under {5},of Act {6} in the year {7}, informed in Office on {8}, and forwarded to LS Secretariat on {9}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(paper.get("paperTiltle")),
+                        escapeHtml(paper.get("reportType")),
+                        escapeHtml(paper.get("reportNumber")),
                         escapeHtml(paper.get("ministryOrDepartment")),
-                        escapeHtml(paper.get("year")));
+                        escapeHtml(paper.get("section")),
+                        escapeHtml(paper.get("laidUnderArticle")),
+                        escapeHtml(paper.get("year")),
+                        escapeHtml(paper.get("informedToMinistryOfParliamentaryAffarisOnDate")),
+                        escapeHtml(paper.get("DateOnWhichforwardedToLSSecretariat")),
+                        escapeHtml(languageType));
+
                 break;
             case "PLOT_RPT_3":
+                template = "A copy of the {0} {1} of the {2}, {3} for the year {4}, under Section {5}, of the {6} ";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
+                        escapeHtml(paper.get("paperTitle")),
                         escapeHtml(paper.get("companyHeadquarters")),
-                        escapeHtml(paper.get("financialYear")));
+                        escapeHtml(paper.get("financialYear")),
+                        escapeHtml(paper.get("subSection")),
+                        escapeHtml(paper.get("layingSection")));
                 break;
             case "PLOT_RPT_4":
+                template = "A copy of the {0} {1} of the {2}, in {3} for the year {4}, laid under {5}, {6}, under Act {7}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
+                        escapeHtml(paper.get("paperTitle")),
                         escapeHtml(paper.get("bankHeadquarters")),
-                        escapeHtml(paper.get("financialYear")));
+                        escapeHtml(paper.get("financialYear")),
+                        escapeHtml(paper.get("subSection")),
+                        escapeHtml(paper.get("layingSection")),
+                        escapeHtml(paper.get("laidUnderAct")));
                 break;
             case "PLOT_RPT_5":
+                template = "A copy of the {0} {1} of the {2}, in the {3}, for the year {4}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
+                        escapeHtml(paper.get("paperTitle")),
                         escapeHtml(paper.get("headquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
@@ -396,34 +451,52 @@ public class PlotInputServiceImpl implements PlotInputService {
                 break;
         }
         return formattedString;
+
     }
 
     // notification
     private String getFormattedNotificationDetails(Map<String, Object> paper, String applicationNo) {
         Object paperDocs = paper.get("documents");
+        List<String> docLangType = new ArrayList<>();
+
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
+
             // Ensure all elements are of type Map
             boolean allMaps = tempList.stream().allMatch(item -> item instanceof Map);
             if (allMaps) {
                 List<Map<String, Object>> docs = tempList.stream()
                         .map(item -> (Map<String, Object>) item)
                         .toList();
+                docLangType = docs.stream()
+                        .map(doc -> (String) doc.get("fieldName"))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
                 updateAppNo(docs, applicationNo);
             }
         }
-        // String template = "A copy of the Notification No. S.O.3508(E) (Hindi and
-        // English versions) published
-        // in Gazette of India dated 7th August, 2023 establishing a Committee on
-        // Antarctic
-        // Governance and Environmental Protection consisting of the ex-officio
-        // Chairperson, ex-officio members and expert members, mentioned therein, issued
-        // under sub-section (1) of Section 23 of the Indian Antarctic Act, 2022."
-        // String template = "A copy of the {0} (Hindi and English versions) of the {1},
-        // for the year {2}";
-        String template = "A copy of the Notification No. {0} (Hindi and English versions) published in {1} dated {2}"
-                + " establishing a Committee on {3} Protection consisting of the ex-officio Chairperson, ex-officio members and expert members, "
-                + "mentioned therein, issued under sub-section {4} of {5} of the {6} Act,{7}.";
+        boolean containsHindi = docLangType.stream()
+                .anyMatch(name -> name.toLowerCase().contains("hindi"));
+        boolean containsEnglish = docLangType.stream()
+                .anyMatch(name -> name.toLowerCase().contains("english"));
+        String languageType = "";
+        if (containsEnglish) {
+            if (languageType.length() < 1) {
+                languageType += "( ";
+            }
+            languageType += "English";
+            if (!containsHindi) {
+                languageType += " Versions )";
+            }
+        }
+        if (containsHindi) {
+            if (!containsHindi) {
+                languageType += "( ";
+            } else {
+                languageType += " And ";
+            }
+            languageType += "Hindi Versions )";
+        }
         Object paperNameData = paper.get("paperName");
         Long paperType = null;
         String paperTitle = "";
@@ -437,6 +510,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperTitle = stringValue;
             }
         }
+        String template = "A copy of the Notification No. {0} of the {1} {2} of {3}, published in {4} on {5}"
+                + "  {6},  for the period of {10}, under sub-section {7} of {8} of the {9} Act.";
         Long publishedId = Long.parseLong(paper.get("publishedIn").toString());
         Long gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
         LocalDate dateOfPublication = LocalDate.parse(paper.get("dateOfPublication").toString());
@@ -456,39 +531,17 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
 
         String formattedString = MessageFormat.format(template,
+                escapeHtml(paper.get("notificationNumber")),
                 escapeHtml(paperTitle),
+                escapeHtml(languageType),
+                escapeHtml(paper.get("paperTitle")),
                 escapeHtml(publishedIn),
                 escapeHtml(publicationDate),
                 escapeHtml(gazetteDetails),
+                escapeHtml(paper.get("periodSpecified")),
                 escapeHtml(paper.get("layingSection")),
                 escapeHtml(paper.get("issuingSection")),
-                escapeHtml(paper.get("laidUnderAct")),
-                escapeHtml(paper.get("year")));
-        // break;
-        // case "PLOT_NF_SON":
-        // formattedString = MessageFormat.format(template,
-        // escapeHtml(paper.get("notificationType")),
-        // escapeHtml(paper.get("publishedIn")),
-        // escapeHtml(paper.get("actUnderWhichLaid")));
-        // break;
-        // case "PLOT_NF_NO":
-
-        // formattedString = MessageFormat.format(template,
-        // escapeHtml(paper.get("notificationType")),
-        // escapeHtml(paper.get("publishedIn")),
-        // escapeHtml(paper.get("actUnderWhichLaid")));
-        // break;
-        // case "PLOT_NF_ON":
-        // formattedString = MessageFormat.format(template,
-        // escapeHtml(paper.get("notificationType")),
-        // escapeHtml(paper.get("publishedIn")),
-        // escapeHtml(paper.get("actUnderWhichLaid")));
-        // break;
-        // default:
-        // formattedString = ""; // Default empty value if paper type is not recognized
-        // break;
-        // }
-        // System.out.println(formattedString);
+                escapeHtml(paper.get("laidUnderAct")));
         return formattedString;
     }
 
@@ -496,10 +549,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     public static String formatDateWithSuffix(LocalDate date) {
         int day = date.getDayOfMonth();
         String dayWithSuffix = day + getDaySuffix(day);
-
         DateTimeFormatter monthYearFormatter = DateTimeFormatter.ofPattern("MMMM, yyyy");
         String monthYear = date.format(monthYearFormatter);
-
         return dayWithSuffix + " " + monthYear;
     }
 
@@ -522,6 +573,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     // other paper
     private String getFormattedOtherPaperDetails(Map<String, Object> paper, String applicationNo) {
         Object paperDocs = paper.get("documents");
+        List<String> docLangType = new ArrayList<>();
         if (paperDocs instanceof List<?>) {
             List<?> tempList = (List<?>) paperDocs;
             // Ensure all elements are of type Map
@@ -530,10 +582,44 @@ public class PlotInputServiceImpl implements PlotInputService {
                 List<Map<String, Object>> docs = tempList.stream()
                         .map(item -> (Map<String, Object>) item)
                         .toList();
+                docLangType = docs.stream()
+                        .map(doc -> (String) doc.get("fieldName"))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
                 updateAppNo(docs, applicationNo);
             }
         }
-        String template = "A copy of the {0} (Hindi and English versions) of the {1}, for the year {2}";
+        boolean containsHindi = docLangType.stream()
+                .anyMatch(name -> name.toLowerCase().contains("hindi"));
+        boolean containsEnglish = docLangType.stream()
+                .anyMatch(name -> name.toLowerCase().contains("english"));
+        if (containsEnglish) {
+            System.out.println("Document contains English field.");
+            // Add your logic here
+        }
+        if (containsHindi) {
+            System.out.println("Document contains Hindi field.");
+            // Add your logic here
+        }
+        String languageType = "";
+        if (containsEnglish) {
+            if (languageType.length() < 1) {
+                languageType += "( ";
+            }
+            languageType += "English";
+            if (!containsHindi) {
+                languageType += " Versions )";
+            }
+        }
+        if (containsHindi) {
+            if (!containsHindi) {
+                languageType += "( ";
+            } else {
+                languageType += " And ";
+            }
+            languageType += "Hindi Versions )";
+        }
+        String template = "";
         // Object paperNameData = paper.get("paperName");
         Object paperNameData = paper.get("othersPaperName");
         Long paperType = null;
@@ -563,46 +649,60 @@ public class PlotInputServiceImpl implements PlotInputService {
         String abbr = codeAbbr.getAbbr();
         switch (abbr) {
             case "PLOT_OTH_1":
+                template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
                         escapeHtml(paper.get("")),
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_OTH_2":
+                template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 // Map<String, Object> ministry = (Map<String, Object>)
                 // paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
                         escapeHtml(paper.get("department")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_3":
+                template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
                         escapeHtml(paper.get("department")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
+                template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
                         escapeHtml(paper.get("bankHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_5":
+                template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
                         escapeHtml(paper.get("statementNumber")),
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_OTH_6":
+                template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
                         escapeHtml(paper.get("stateUT")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_7":
+                template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
+                        escapeHtml(languageType),
                         escapeHtml(paper.get("requirementUnderAct")),
                         escapeHtml(paper.get("year")));
                 break;
@@ -1095,10 +1195,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setPendingAt(" ");
                                 entity.setStatus(plot.getCurrentStatus());
                                 entity.setCurrentStatus(plot.getCurrentStatus());
-                            } else {
-                                // entity.setPendingAt("Table Office");
-                                entity.setStatus("In Progress");
-                                entity.setCurrentStatus("In Progress");
                             }
                         }
                     }
@@ -1125,10 +1221,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 entity.setPendingAt(" ");
                                 entity.setStatus(plot.getCurrentStatus());
                                 entity.setCurrentStatus(plot.getCurrentStatus());
-                            } else {
-                                // entity.setPendingAt("Table Office");
-                                entity.setStatus("In Progress");
-                                entity.setCurrentStatus("In Progress");
                             }
                         }
                     }
@@ -1154,7 +1246,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         PlotInput dBEntity = plotinputRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PlotInput not found with id: " + id));
         // log.debug("Fetched PlotInput by id: {}", dBEntity);
-
         if (dBEntity.getApplicationInstanceId() != null) {
             PlotGenerate plot = repository
                     .findById(dBEntity.getApplicationInstanceId()).get();
@@ -1178,7 +1269,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         dBEntity = plotinputRepository.save(dBEntity);
         PlotInputDTO dto = PlotInputMapper.toDTO(dBEntity);
         dto.setRequests(getRequests(dto.getId()));
-
         return dto;
     }
 
@@ -1464,13 +1554,24 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
             if (shouldAdd) {
-                dtoList.add(PlotInputMapper.dateChartMapToDTO(entity));
+                PlotDateChartDTO dto=PlotInputMapper.dateChartMapToDTO(entity);
+                dto.setMinistryCode(getMinistryCodeById(dto.getMinistryId()));
+                dtoList.add(dto);
                 // Stop checking further dates for this entity once added
             }
         }
         return dtoList;
     }
 
+   private Integer getMinistryCodeById(Long id)
+   {
+    Optional<Ministries> ministry=ministriesRepository.findById(id);
+    if(ministry.isEmpty())
+    {
+        throw new ResourceNotFoundException("Ministry Entry is not Available for id:"+id);
+    }
+    return ministry.get().getMinistryCode();
+   }
     // question api
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
             List<Long> existingMinistries, Long houseId) {

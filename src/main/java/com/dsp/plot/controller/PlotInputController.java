@@ -45,7 +45,7 @@ public class PlotInputController {
                 PlotInputDTO savedEntity = plotinputService.save(plotinputDTO);
 
                 GenericResponse<PlotInputDTO> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
-                                "PlotInput created successfully", savedEntity);
+                                "Plot Input created with "+savedEntity.getApplicationNo()+" successfully", savedEntity);
 
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
