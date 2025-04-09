@@ -61,7 +61,7 @@ public class PlotInputMapper {
                                 .applicationId(dto.getApplicationId())
                                 .applicationNo(dto.getApplicationNo())
                                 .currentStatus(dto.getCurrentStatus())
-
+                                .DateOnWhichforwardedToLSSecretariat(dto.getDateOnWhichforwardedToLSSecretariat())
                                 .refId(dto.getRefId())
                                 .documentDate(dto.getDocumentDate())
                                 .paperName(dto.getPaperName()).build();

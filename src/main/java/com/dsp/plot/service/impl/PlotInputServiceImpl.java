@@ -528,7 +528,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 System.out.println("Invalid publishedIn value: " + paper.get("publishedIn"));
             }
         }
-
         Long gazetteDetailsId = null;
         if (paper.get("gazetteDetails") != null && !paper.get("gazetteDetails").toString().isBlank()) {
             try {
@@ -537,7 +536,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 System.out.println("Invalid gazetteDetails value: " + paper.get("gazetteDetails"));
             }
         }
-
         LocalDate dateOfPublication = null;
         if (paper.get("dateOfPublication") != null && !paper.get("dateOfPublication").toString().isBlank()) {
             try {
