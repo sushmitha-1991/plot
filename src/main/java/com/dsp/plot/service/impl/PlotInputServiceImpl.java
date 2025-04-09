@@ -1489,12 +1489,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         Specification<PlotDateChart> spec = Specification.where(null);
         spec = spec.and(DateChartSpec.isActive(isActive));
-        if (ministryId != null) {
-            spec = spec.and(DateChartSpec.hasMinistryId(ministryId));
-        }
-        if (groupName != null) {
-            spec = spec.and(DateChartSpec.hasGroupName(groupName));
-        }
         if (lokSabhaSessionNo == null || lokSabhaSessionNo.isEmpty() || lokSabhaSessionNo.isBlank()) {
             spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(null));
         } else {
@@ -1516,18 +1510,26 @@ public class PlotInputServiceImpl implements PlotInputService {
             spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(null));
         } else {
             try {
-                Optional<MastersRajyaSabha> rajyaSabha = mastersRSSRepository.findBySessionNumber("%"+rajyaSabhaNo+"%");
-                System.out.println("rajyaSabha ::" + rajyaSabha);
+                System.out.println("rajyaSabha ::" + rajyaSabhaNo);
+                Optional<MastersRajyaSabha> rajyaSabha = mastersRSSRepository.findBySessionNumber(rajyaSabhaNo);
+                System.out.println("rajyaSabha ::" + rajyaSabha.get());
                 spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabha.get().getId()));
             } catch (Exception e) {
                 System.out.println("Mentioned RajyaSabha no is not in Database");
             }
         }
-        List<PlotDateChart> listOfDateCharts = plotDateChartRepository.findAll();
+        List<PlotDateChart> listOfDateCharts = plotDateChartRepository.findAll(spec);
         List<Long> existingMinistries = listOfDateCharts.stream()
                 .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
+        System.out.println("existingMinistries ::"+existingMinistries);
         String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, houseId);
+        if (ministryId != null) {
+            spec = spec.and(DateChartSpec.hasMinistryId(ministryId));
+        }
+        if (groupName != null) {
+            spec = spec.and(DateChartSpec.hasGroupName(groupName));
+        }
         listOfDateCharts = plotDateChartRepository.findAll(spec);
         List<PlotDateChartDTO> dtoList = new ArrayList<>();
         for (PlotDateChart entity : listOfDateCharts) {
@@ -1654,7 +1656,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 MastersRajyaSabha session = optionalSession.get();
                                 dto.setRajyaSabhaSessionNo(session.getId());
                             }
-
                             dto.setMinistryId(optionalMinistries.get().getId());
                             PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
                             entityList.add(entity);
