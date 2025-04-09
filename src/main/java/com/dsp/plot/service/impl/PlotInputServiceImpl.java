@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -514,9 +515,37 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         String template = "A copy of the Notification No. {0} of the {1} {2} of {3}, published in {4} on {5}"
                 + "  {6},  for the period of {10}, under sub-section {7} of {8} of the {9} Act.";
-        Long publishedId = Long.parseLong(paper.get("publishedIn").toString());
-        Long gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
-        LocalDate dateOfPublication = LocalDate.parse(paper.get("dateOfPublication").toString());
+        // Long publishedId = Long.parseLong(paper.get("publishedIn").toString());
+        // Long gazetteDetailsId =
+        // Long.parseLong(paper.get("gazetteDetails").toString());
+        // LocalDate dateOfPublication =
+        // LocalDate.parse(paper.get("dateOfPublication").toString());
+        Long publishedId = null;
+        if (paper.get("publishedIn") != null && !paper.get("publishedIn").toString().isBlank()) {
+            try {
+                publishedId = Long.parseLong(paper.get("publishedIn").toString());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid publishedIn value: " + paper.get("publishedIn"));
+            }
+        }
+
+        Long gazetteDetailsId = null;
+        if (paper.get("gazetteDetails") != null && !paper.get("gazetteDetails").toString().isBlank()) {
+            try {
+                gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid gazetteDetails value: " + paper.get("gazetteDetails"));
+            }
+        }
+
+        LocalDate dateOfPublication = null;
+        if (paper.get("dateOfPublication") != null && !paper.get("dateOfPublication").toString().isBlank()) {
+            try {
+                dateOfPublication = LocalDate.parse(paper.get("dateOfPublication").toString());
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format for dateOfPublication: " + paper.get("dateOfPublication"));
+            }
+        }
         String publicationDate = formatDateWithSuffix(dateOfPublication);
         System.out.println(publicationDate);
         String publishedIn = "";
@@ -652,6 +681,11 @@ public class PlotInputServiceImpl implements PlotInputService {
         switch (abbr) {
             case "PLOT_OTH_1":
                 template = "A copy of the {0} {1} of the {1}, for the year {2}";
+                /*
+                 *
+                 *
+                 *
+                 */
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
@@ -1496,10 +1530,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                 // Long sessionIndex=Long.parseLong(lokSabhaSessionNo);
                 int sessionIndex = Integer.parseInt(lokSabhaSessionNo);
                 String session = sessionRoman[sessionIndex];
-                Optional<MastersLokSabha> lokSabha = masterLSSRepository.findLokSabhaByLokSabha("%"+lokSabhaNo+"%");
+                Optional<MastersLokSabha> lokSabha = masterLSSRepository.findLokSabhaByLokSabha("%" + lokSabhaNo + "%");
                 System.out.println("lokSabha " + lokSabha.get());
                 Optional<MastersLokSabhaSession> lokSabhaSession = masterLSSRepository
-                        .findBySessionNumberAndLokSabhaMasterId("%"+session+"%", lokSabha.get().getId());
+                        .findBySessionNumberAndLokSabhaMasterId("%" + session + "%", lokSabha.get().getId());
                 System.out.println("lokSabhaSession " + lokSabhaSession.get());
                 spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(lokSabhaSession.get().getId()));
             } catch (Exception e) {
@@ -1522,7 +1556,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         List<Long> existingMinistries = listOfDateCharts.stream()
                 .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
-        System.out.println("existingMinistries ::"+existingMinistries);
+        System.out.println("existingMinistries ::" + existingMinistries);
         String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, houseId);
         if (ministryId != null) {
             spec = spec.and(DateChartSpec.hasMinistryId(ministryId));
