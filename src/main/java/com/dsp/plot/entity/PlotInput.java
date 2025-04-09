@@ -121,6 +121,10 @@ public class PlotInput extends InputInstance {
     @Column(name = "is_send_to_library")
     private Boolean sendToLibrary;
 
+    @Column(name = "sent_to_ls_secretariant_on")
+    private LocalDate DateOnWhichforwardedToLSSecretariat;
+
+
     @Column(name = "nodal_officer_mobile_no", length = 13)
     private String nodalOfficerMobileNo;
     @ManyToOne

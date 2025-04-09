@@ -47,6 +47,8 @@ public class PlotInputDTO {
     private LocalDate prevPaperLaidDate;
     private String content;
     private Boolean sendToLibrary;
+    //changes
+    private LocalDate DateOnWhichforwardedToLSSecretariat;
     // Input Instances DTO
     private Long applicationId; // Reference to Application ID
     private String applicationNo;

@@ -104,6 +104,7 @@ public class PlotInputMapper {
                                 .paperDetails(entity.getPaperDetails())
                                 .documents(entity.getDocuments())
                                 .proposedDateOfLaying(entity.getProposedDateOfLaying())
+                                .DateOnWhichforwardedToLSSecretariat(entity.getDateOnWhichforwardedToLSSecretariat())
                                 .actualDateOfLaying(entity.getActualDateOfLaying())
                                 .nodalOfficerId(entity.getNodalOfficerId())
                                 .nodalOfficerDesignation(entity.getNodalOfficerDesignation())
@@ -338,6 +339,7 @@ public class PlotInputMapper {
                         entity.setAct(getStringValue(dataMap, "act"));
                         entity.setUnderAct(getStringValue(dataMap, "underAct"));
                         entity.setDraftFlag(getBooleanValue(dataMap, "draftFlag"));
+                        entity.setDateOnWhichforwardedToLSSecretariat(getLocalDateValue(dataMap,"DateOnWhichforwardedToLSSecretariat"));
                         entity.setStatus(getStringValue(dataMap, "status"));
                         entity.setRemarks(getStringValue(dataMap, "remarks"));
                         entity.setRefNo(dto.getApplicationNo());

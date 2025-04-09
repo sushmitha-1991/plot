@@ -2,8 +2,6 @@ package com.dsp.plot.dto;
 import java.util.List;
 import java.util.Map;
 
-import com.dsp.plot.entity.Ministries;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -13,5 +13,6 @@ public interface MastersRSSRepository extends JpaRepository<MastersRajyaSabha,Lo
      @Query(value = "SELECT id FROM master.rajya_sabha_session_master ORDER BY created_by DESC LIMIT 1", 
      nativeQuery = true)
     Long findLatestByCreatedBy();
+   
    Optional<MastersRajyaSabha> findBySessionNumber(String SessionNumber);
 }

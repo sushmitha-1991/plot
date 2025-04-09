@@ -46,6 +46,7 @@ import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.BaseUser;
 import com.dsp.plot.entity.Departments;
 import com.dsp.plot.entity.MasterCode;
+import com.dsp.plot.entity.MastersLokSabha;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
 import com.dsp.plot.entity.Ministries;
@@ -94,6 +95,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     private PlotGenerateRepository repository;
     @Autowired
     private MastersRSSRepository mastersRSSRepository;
+
     @Autowired
     private CodeRepository codeRepository;
     @Autowired
@@ -1480,6 +1482,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
             Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId, String groupName,
             LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying) {
+        String[] sessionRoman = { "0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII" };
         Long houseId = getHouseId();
         if (isActive == null) {
             isActive = true;
@@ -1495,13 +1498,30 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (lokSabhaSessionNo == null || lokSabhaSessionNo.isEmpty() || lokSabhaSessionNo.isBlank()) {
             spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(null));
         } else {
-            spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(Long.parseLong(lokSabhaSessionNo)));
+            try {
+                // Long sessionIndex=Long.parseLong(lokSabhaSessionNo);
+                int sessionIndex = Integer.parseInt(lokSabhaSessionNo);
+                String session = sessionRoman[sessionIndex];
+                Optional<MastersLokSabha> lokSabha = masterLSSRepository.findLokSabhaByLokSabha("%"+lokSabhaNo+"%");
+                System.out.println("lokSabha " + lokSabha.get());
+                Optional<MastersLokSabhaSession> lokSabhaSession = masterLSSRepository
+                        .findBySessionNumberAndLokSabhaMasterId("%"+session+"%", lokSabha.get().getId());
+                System.out.println("lokSabhaSession " + lokSabhaSession.get());
+                spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(lokSabhaSession.get().getId()));
+            } catch (Exception e) {
+                System.out.println("Mentioned LokSabhaSession no is not in Database");
+            }
         }
         if (rajyaSabhaNo == null || rajyaSabhaNo.isEmpty() || rajyaSabhaNo.isBlank()) {
             spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(null));
         } else {
-            Optional<MastersRajyaSabha> rajyaSabha = mastersRSSRepository.findBySessionNumber(rajyaSabhaNo);
-            spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabha.get().getId()));
+            try {
+                Optional<MastersRajyaSabha> rajyaSabha = mastersRSSRepository.findBySessionNumber("%"+rajyaSabhaNo+"%");
+                System.out.println("rajyaSabha ::" + rajyaSabha);
+                spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabha.get().getId()));
+            } catch (Exception e) {
+                System.out.println("Mentioned RajyaSabha no is not in Database");
+            }
         }
         List<PlotDateChart> listOfDateCharts = plotDateChartRepository.findAll();
         List<Long> existingMinistries = listOfDateCharts.stream()
@@ -1517,7 +1537,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                     shouldAdd = false;
                     continue;
                 }
-
             } else if (houseId == 2) {
                 if (entity.getLokSabhaSessionNo() == null) {
                     shouldAdd = false;
@@ -1531,7 +1550,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             for (Map<String, Object> dateEntry : dateList) {
                 String existingdateofSubmissionOfPapers = (String) dateEntry.get("dateofSubmissionOfPapers");
                 String existingactualDateOfLaying = (String) dateEntry.get("actualDateOfLaying");
-
                 if (existingdateofSubmissionOfPapers != null) {
                     existingDOS.add(existingdateofSubmissionOfPapers);
                 }
@@ -1554,7 +1572,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
             if (shouldAdd) {
-                PlotDateChartDTO dto=PlotInputMapper.dateChartMapToDTO(entity);
+                PlotDateChartDTO dto = PlotInputMapper.dateChartMapToDTO(entity);
                 dto.setMinistryCode(getMinistryCodeById(dto.getMinistryId()));
                 dtoList.add(dto);
                 // Stop checking further dates for this entity once added
@@ -1563,15 +1581,14 @@ public class PlotInputServiceImpl implements PlotInputService {
         return dtoList;
     }
 
-   private Integer getMinistryCodeById(Long id)
-   {
-    Optional<Ministries> ministry=ministriesRepository.findById(id);
-    if(ministry.isEmpty())
-    {
-        throw new ResourceNotFoundException("Ministry Entry is not Available for id:"+id);
+    private Integer getMinistryCodeById(Long id) {
+        Optional<Ministries> ministry = ministriesRepository.findById(id);
+        if (ministry.isEmpty()) {
+            throw new ResourceNotFoundException("Ministry Entry is not Available for id:" + id);
+        }
+        return ministry.get().getMinistryCode();
     }
-    return ministry.get().getMinistryCode();
-   }
+
     // question api
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
             List<Long> existingMinistries, Long houseId) {
