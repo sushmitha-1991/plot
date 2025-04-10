@@ -51,6 +51,7 @@ public class PlotInputMapper {
                                 .proposedDateOfLaying(dto.getProposedDateOfLaying())
                                 .actualDateOfLaying(dto.getActualDateOfLaying())
                                 .nodalOfficerId(dto.getNodalOfficerId())
+                                .nodalOfficerName(dto.getNodalOfficerName())
                                 .nodalOfficerDesignation(dto.getNodalOfficerDesignation())
                                 .nodalOfficerMobileNo(dto.getNodalOfficerMobileNo())
                                 .nodalOfficerPhoneNo(dto.getNodalOfficerPhoneNo())
@@ -104,6 +105,7 @@ public class PlotInputMapper {
                                 .paperDetails(entity.getPaperDetails())
                                 .documents(entity.getDocuments())
                                 .proposedDateOfLaying(entity.getProposedDateOfLaying())
+                                .nodalOfficerName(entity.getNodalOfficerName())
                                 .DateOnWhichforwardedToLSSecretariat(entity.getDateOnWhichforwardedToLSSecretariat())
                                 .actualDateOfLaying(entity.getActualDateOfLaying())
                                 .nodalOfficerId(entity.getNodalOfficerId())
@@ -325,6 +327,7 @@ public class PlotInputMapper {
                                         .isEqual(getLocalDateValue(dataMap, "actualDateOfLaying")))
                                 return null; // Return empty if any validation fails
                         entity.setLokSabhaNo(getLongValue(dataMap, "lokSabhaNo"));
+                        entity.setNodalOfficerName(getStringValue(dataMap, "nodalOfficerName"));
                         entity.setLokSabhaSessionNo(getLongValue(dataMap, "lokSabhaSessionNo"));
                         entity.setRajyaSabhaSessionNo(getLongValue(dataMap, "rajyaSabhaSessionNo"));
                         entity.setSubmissionDate(getLocalDateValue(dataMap, "submissionDate"));

@@ -1365,23 +1365,16 @@ public class PlotInputServiceImpl implements PlotInputService {
         // Save the updated PlotInput
         Long houseId = getHouseId();
         if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
-            // List<Request> requests =
-            // requestRepository.findByPlotInputIdAndIsActive(dbEntity.getId(), true);
-            // for (Request request : requests) {
-            // request.setIsActive(false);
-            // request.setIsDeleted(true);
-            // request=requestRepository.save(request);
-            // }
-            List<Request> requests = requestRepository.findByPlotInputIdAndIsActive(dbEntity.getId(), true);
-
-            // Update fields in a single loop
-            requests.forEach(request -> {
-                request.setIsActive(false);
-                request.setIsDeleted(true);
-            });
-
-            // Save all updated requests in a single batch operation
-            requestRepository.saveAll(requests);
+            
+            Long userId=utils.getUserIdFromAuthentication();
+            Optional<BaseUser> loginUser=userRepository.findById(userId);
+            Request returnRequest=Request.builder()
+            .plotInputId(id)
+            .request(plotinputDTO.getRemarks())
+            .userName(loginUser.get().getUsername())
+            .build();
+            // // Save all updated requests in a single batch operation
+            requestRepository.save(returnRequest);
             if (dbEntity.getApplicationInstanceId() != null) {
                 throw new ResourceNotFoundException(
                         "Plot has already generated with Specific Ministry Input  So cannot be returned: " + id);

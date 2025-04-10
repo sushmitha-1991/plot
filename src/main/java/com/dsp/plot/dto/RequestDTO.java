@@ -21,6 +21,7 @@ public class RequestDTO {
     private Long id;
     private Long plotInputId;
     private String request;
+    private String userName;
     private LocalDateTime createdAt;
     private LocalDate createdAtWithOutTime;
 

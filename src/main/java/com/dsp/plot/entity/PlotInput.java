@@ -11,26 +11,22 @@ import com.dsp.plot.util.JsonMapConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Data
-@Setter
-@Getter
 @Audited
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@Getter
+@Setter
 @Table(name = "plot_input", schema = "plot")
 public class PlotInput extends InputInstance {
     // @Id
@@ -124,7 +120,9 @@ public class PlotInput extends InputInstance {
     @Column(name = "sent_to_ls_secretariant_on")
     private LocalDate DateOnWhichforwardedToLSSecretariat;
 
+    @Column(name = "nodal_officer_name")
 
+    private String nodalOfficerName;
     @Column(name = "nodal_officer_mobile_no", length = 13)
     private String nodalOfficerMobileNo;
     @ManyToOne

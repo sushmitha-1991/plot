@@ -9,7 +9,7 @@ public class RequestMapper {
                 .id(dto.getId())
                 .plotInputId(dto.getPlotInputId())
                 .request(dto.getRequest())
-
+                .userName(dto.getUserName())
                 .build();
     }
 
@@ -19,6 +19,7 @@ public class RequestMapper {
                 .plotInputId(entity.getPlotInputId())
                 .request(entity.getRequest())
                 .createdAt(entity.getCreatedAt())
+                .userName(entity.getUserName())
                 .createdAtWithOutTime(entity.getCreatedAt().toLocalDate())
                 .build();
     }

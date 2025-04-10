@@ -1,12 +1,7 @@
 package com.dsp.plot.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
-
 import com.dsp.plot.dto.PlotHistoryDTO;
-import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.entity.PlotHistory;
-import com.dsp.plot.entity.Request;
 
 
 public class PlotHistoryMapper {
