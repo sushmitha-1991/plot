@@ -1365,14 +1365,13 @@ public class PlotInputServiceImpl implements PlotInputService {
         // Save the updated PlotInput
         Long houseId = getHouseId();
         if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
-            
-            Long userId=utils.getUserIdFromAuthentication();
-            Optional<BaseUser> loginUser=userRepository.findById(userId);
-            Request returnRequest=Request.builder()
-            .plotInputId(id)
-            .request(plotinputDTO.getRemarks())
-            .userName(loginUser.get().getUsername())
-            .build();
+            Long userId = utils.getUserIdFromAuthentication();
+            Optional<BaseUser> loginUser = userRepository.findById(userId);
+            Request returnRequest = Request.builder()
+                    .plotInputId(id)
+                    .request(plotinputDTO.getRemarks())
+                    .userName(loginUser.get().getUsername())
+                    .build();
             // // Save all updated requests in a single batch operation
             requestRepository.save(returnRequest);
             if (dbEntity.getApplicationInstanceId() != null) {
@@ -1398,15 +1397,72 @@ public class PlotInputServiceImpl implements PlotInputService {
         } else {
             if (houseId == 1) {
                 dbEntity.setPendingAt("Table Office");
+
             } else if (houseId == 2) {
                 dbEntity.setPendingAt("Table Office A");
             }
+
+        }
+        System.out.println("#####  " + dbEntity.getActualDateOfLaying());
+        if (dbEntity.getActualDateOfLaying() != null) {
+
+            // Get ministry based on ministry code
+            Ministries ministry = ministriesRepository
+                    .findByMinistryCode(dbEntity.getMinistryId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "No ministry found with ministry code: " + dbEntity.getMinistryId()));
+
+            Optional<PlotDateChart> optionalDateChart;
+
+            // Fetch PlotDateChart based on houseId
+            if (houseId == 1) {
+                optionalDateChart = plotDateChartRepository.findByMinistryIdAndRajyaSabhaSessionNo(
+                        ministry.getId(), dbEntity.getRajyaSabhaSessionNo());
+            } else if (houseId == 2) {
+                optionalDateChart = plotDateChartRepository.findByMinistryIdAndLokSabhaNoAndLokSabhaSessionNo(
+                        ministry.getId(), dbEntity.getLokSabhaNo(), dbEntity.getLokSabhaSessionNo());
+            } else {
+                throw new IllegalArgumentException("Invalid houseId: " + houseId);
+            }
+
+            PlotDateChart dateChartEntity = optionalDateChart.orElseThrow(() -> new ResourceNotFoundException(
+                    "No entry found with specified ministry in date chart or question list."));
+
+            for (Map<String, Object> date : dateChartEntity.getDates()) {
+                Object proposedDateObj = date.get("proposedDateOfLaying");
+                // System.out.println("##### date "+proposedDateObj);
+                // System.out.println("##### dto value "+dbEntity.getProposedDateOfLaying());
+                // System.out.println(proposedDateObj.toString().isEmpty());
+                if (proposedDateObj != null && !proposedDateObj.toString().isEmpty()) {
+                    try {
+                        LocalDate proposedDate = LocalDate.parse(proposedDateObj.toString());
+                        // System.out.println("equal condition
+                        // "+(proposedDate.equals(dbEntity.getProposedDateOfLaying())));
+                        if (proposedDate.equals(dbEntity.getProposedDateOfLaying())) {
+                            Object actualDateObj = date.get("actualDateOfLaying");
+                            // System.out.println("##### actual date in dates");
+                            // System.out.println(actualDateObj);
+                            // System.out.println("##### actual date entity");
+                            // System.out.println(dbEntity.getActualDateOfLaying());
+                            if (actualDateObj == null || actualDateObj.toString().isEmpty()) {
+                                String actualDateTOUpdate = (dbEntity.getActualDateOfLaying()).toString();
+                                date.put("actualDateOfLaying", actualDateTOUpdate);
+                            }
+                        }
+                    } catch (DateTimeParseException e) {
+                        throw new RuntimeException("Invalid proposedDateOfLaying format: " + proposedDateObj, e);
+                    }
+                }
+            }
+
+            // Save updated date chart
+            plotDateChartRepository.save(dateChartEntity);
         }
         dbEntity.setCurrentStatus(dbEntity.getStatus());
         dbEntity.setDocumentDate(dbEntity.getSubmissionDate());
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
         dbEntity.setApplicationInstanceId(dbEntity.getGeneratedPlotId());
-        dbEntity = plotinputRepository.save(dbEntity);
+        PlotInput savedInput = plotinputRepository.save(dbEntity);
         if (dbEntity.getApplicationInstanceId() != null && dbEntity.getSendToLibrary()) {
             PlotGenerate plot = repository
                     .findById(dbEntity.getApplicationInstanceId()).get();
@@ -1414,9 +1470,8 @@ public class PlotInputServiceImpl implements PlotInputService {
             plot = repository.save(plot);
         }
         // Prepare the response DTO
-        PlotInputDTO dto = PlotInputMapper.toDTO(dbEntity);
+        PlotInputDTO dto = PlotInputMapper.toDTO(savedInput);
         dto.setRequests(getRequests(dto.getId()));
-
         return dto;
     }
 
