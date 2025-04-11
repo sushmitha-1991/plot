@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dsp.plot.dto.DocumentDTO;
+import com.dsp.plot.dto.PlotContentDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.response.GenericResponse;
@@ -254,5 +255,12 @@ public class PlotGenerateController {
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData("inline", "synopsis_roster.pdf");
             return ResponseEntity.ok().headers(headers).contentLength(pdfBytes.length).body(pdfBytes);
+        }
+        @PostMapping("/testPath")
+        public  ResponseEntity<GenericResponse<String>> postMethodName(@RequestBody List<PlotContentDTO> dtos) {
+                String content = plotService.generateReorderedContent(dtos);
+                GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Updated Content ", content);
+                return new ResponseEntity<>(response, HttpStatus.OK);
         }
 }

@@ -33,6 +33,7 @@ import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.BaseUser;
 import com.dsp.plot.entity.MastersLokSabhaSession;
 import com.dsp.plot.entity.MastersRajyaSabha;
+import com.dsp.plot.entity.Ministries;
 import com.dsp.plot.entity.PlotGenerate;
 import com.dsp.plot.entity.PlotIndex;
 import com.dsp.plot.entity.PlotInput;
@@ -43,12 +44,7 @@ import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.NoDataFoundException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
-import com.dsp.plot.repository.MasterLSSRepository;
-import com.dsp.plot.repository.MastersRSSRepository;
-import com.dsp.plot.repository.MyUserRepository;
-import com.dsp.plot.repository.PlotGenerateRepository;
-import com.dsp.plot.repository.PlotIndexRepository;
-import com.dsp.plot.repository.PlotInputRepository;
+import com.dsp.plot.repository.*;
 import com.dsp.plot.service.PlotGenerateService;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
 
@@ -57,6 +53,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class PlotGenerateServiceImpl implements PlotGenerateService {
+
+    private final MinistriesRepository ministriesRepository;
 
     @Value("${workflow.service.url}")
     private String draftUrl;
@@ -80,6 +78,10 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     private PlotInputRepository inputRepository;
     @Autowired
     private RestTemplate restTemplate;
+
+    PlotGenerateServiceImpl(MinistriesRepository ministriesRepository) {
+        this.ministriesRepository = ministriesRepository;
+    }
 
     @Override
     public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
@@ -492,6 +494,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             throw e;
         }
     }
+
     @Override
     public List<PlotIndexDTO> getIndexes(Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
             LocalDate startDate, LocalDate endDate, String status, String reportName, Long createdBy) {
@@ -514,9 +517,9 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         if (rajyaSabhaSessionNo != null) {
             spec = spec.and(PlotIndexSpec.hasRajyaSabhaSessionNo(rajyaSabhaSessionNo));
         }
-        //sorting
-        Sort sort=Sort.by(Sort.Direction.DESC, "createdAt");
-        List<PlotIndex> response = plotIndexRepo.findAll(spec,sort);
+        // sorting
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        List<PlotIndex> response = plotIndexRepo.findAll(spec, sort);
         // List<PlotIndex> response = plotIndexRepo.findAll(spec);
         List<PlotIndexDTO> responseDTO = new ArrayList<>();
         for (PlotIndex entity : response) {
@@ -577,24 +580,24 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         entity = plotIndexRepo.save(entity);
         PlotIndexDTO responseDto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(entity.getId()).get());
         Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
-            if (username.isPresent()) {
-                BaseUser user = username.get();
-                responseDto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
-            }
+        if (username.isPresent()) {
+            BaseUser user = username.get();
+            responseDto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
+        }
 
-            if (!StringUtils.isBlank(dto.getRefNo())) {
-                // Get the Draft ID from draft table using appNo
-                String res = deleteDraftEntry(dto.getRefNo());
-                System.out.println("res:::::::" + res);
-                // /delete-save-as-draft
-            }
+        if (!StringUtils.isBlank(dto.getRefNo())) {
+            // Get the Draft ID from draft table using appNo
+            String res = deleteDraftEntry(dto.getRefNo());
+            System.out.println("res:::::::" + res);
+            // /delete-save-as-draft
+        }
         return responseDto;
     }
 
     @Override
     public PlotIndexDTO getIndexById(Long id) {
         // TODO Auto-generated method stub
-        PlotIndex entity=plotIndexRepo.findById(id).get();
+        PlotIndex entity = plotIndexRepo.findById(id).get();
         PlotIndexDTO dto = PlotGenerateMapper.toIndexDTO(entity);
         Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
         if (username.isPresent()) {
@@ -617,83 +620,87 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         throw new UnsupportedOperationException("Unimplemented method 'getAll'");
     }
 
-   
-    public String generateReorderedContent (List<PlotContentDTO> contents) {
-        
+    @Override
+    public String generateReorderedContent(List<PlotContentDTO> contents) {
+
         if (contents == null || contents.isEmpty()) {
             return null;
         }
 
-        String lastMinisterName = null;
+        // String lastMinisterName = null;
+        List<String> ministryList = new ArrayList<>();
         int seqNo = 0;
         for (int i = 0; i < contents.size(); i++) {
             PlotContentDTO x = contents.get(i);
-            
-            //Long inputId = x.getPlotInputId();            
-            //PlotInput input = inputRepository.getById(inputId);            
+            Optional<Ministries> ministry=ministriesRepository.findByMinistryCode(x.getMinstryId());
+            System.out.println("@@  x  @@@ " + x);
+            System.out.println("&&&&&&"+ministry.get().getMinistryName());
+            // Long inputId = x.getPlotInputId();
+            // PlotInput input = inputRepository.getById(inputId);
             // get minister name from input or parse minister name from text
-
             // OR parse the text
             String content = x.getAddedText();
+            System.out.println("@@ content @@@ " + content);
             String ministerName = parseMinisterName(content);
-          
-            if (ministerName.equals(lastMinisterName)) {
+            System.out.println("@@ ministerName @@@ " + ministerName);
+            if (ministryList.contains(ministerName)) {
                 seqNo++; // increase seq no
-                
                 // remove 'To Lay on the table'.
-                //newContent = generateTrimmedContent(inputId, seqNo);
-                String newContent = removeContentBetweenBodyAndFirstBr (content);
-                if (seqNo > 1) newContent = replaceNumber(newContent, seqNo);
-                
+                // newContent = generateTrimmedContent(inputId, seqNo);
+                String newContent = removeContentBetweenBodyAndFirstBr(content);
+                System.out.println("@@ newContent @@@ " + newContent);
+                if (seqNo > 1)
+                    newContent = replaceNumber(newContent, seqNo);
                 x.setAddedText(newContent);
             } else {
+                ministryList.add(ministerName);
                 seqNo = 0;
             }
-            lastMinisterName = ministerName;
+            System.out.println("@@@ ministryList @@ " + ministryList);
+            // ministryList.add(ministerName);
         }
-        
         return generateCombinedContent(contents);
     }
-    
+
     private static String generateCombinedContent(List<PlotContentDTO> contents) {
-        
+
         StringBuilder finalContent = new StringBuilder();
-        
-        contents.forEach(x->{
+
+        contents.forEach(x -> {
             finalContent.append(x.getAddedText());
             finalContent.append("<br>");
         });
-        
+
         return finalContent.toString();
     }
-    
+
     private static String parseMinisterName(String htmlString) {
-        
+
         String plainText = htmlString.replaceAll("<[^>]*>", "");
-        
+
         String targetPhrase = "to lay on the table";
         int index = plainText.indexOf(targetPhrase);
-        
+
         String mname = null;
         if (index != -1) {
             mname = plainText.substring(0, index).trim();
         }
         return mname;
     }
-    
+
     private static String removeContentBetweenBodyAndFirstBr(String html) {
         int bodyStart = html.indexOf("<body>");
         int firstBr = html.indexOf("<br>", bodyStart);
 
         if (bodyStart == -1 || firstBr == -1) {
-            return html;         }
+            return html;
+        }
 
         String beforeBody = html.substring(0, bodyStart + 6); // Keep opening <body> tag
         String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
 
         return beforeBody + afterBr;
     }
-
 
     private static String replaceNumber(String html, int number) {
         // Replace "1)" with the input number followed by ")"
