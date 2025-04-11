@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.dsp.plot.dto.DocumentDTO;
+import com.dsp.plot.dto.PlotContentDTO;
 import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
@@ -49,6 +50,7 @@ import com.dsp.plot.repository.PlotGenerateRepository;
 import com.dsp.plot.repository.PlotIndexRepository;
 import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.service.PlotGenerateService;
+import com.fasterxml.jackson.core.base.ParserMinimalBase;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -606,6 +608,89 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     public List<PlotGenerateDTO> getAll() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAll'");
+    }
+
+   
+    public String generateReorderedContent (List<PlotContentDTO> contents) {
+        
+        if (contents == null || contents.isEmpty()) {
+            return null;
+        }
+
+        String lastMinisterName = null;
+        int seqNo = 0;
+        for (int i = 0; i < contents.size(); i++) {
+            PlotContentDTO x = contents.get(i);
+            
+            //Long inputId = x.getPlotInputId();            
+            //PlotInput input = inputRepository.getById(inputId);            
+            // get minister name from input or parse minister name from text
+
+            // OR parse the text
+            String content = x.getAddedText();
+            String ministerName = parseMinisterName(content);
+          
+            if (ministerName.equals(lastMinisterName)) {
+                seqNo++; // increase seq no
+                
+                // remove 'To Lay on the table'.
+                //newContent = generateTrimmedContent(inputId, seqNo);
+                String newContent = removeContentBetweenBodyAndFirstBr (content);
+                if (seqNo > 1) newContent = replaceNumber(newContent, seqNo);
+                
+                x.setAddedText(newContent);
+            } else {
+                seqNo = 0;
+            }
+            lastMinisterName = ministerName;
+        }
+        
+        return generateCombinedContent(contents);
+    }
+    
+    private static String generateCombinedContent(List<PlotContentDTO> contents) {
+        
+        StringBuilder finalContent = new StringBuilder();
+        
+        contents.forEach(x->{
+            finalContent.append(x.getAddedText());
+            finalContent.append("<br>");
+        });
+        
+        return finalContent.toString();
+    }
+    
+    private static String parseMinisterName(String htmlString) {
+        
+        String plainText = htmlString.replaceAll("<[^>]*>", "");
+        
+        String targetPhrase = "to lay on the table";
+        int index = plainText.indexOf(targetPhrase);
+        
+        String mname = null;
+        if (index != -1) {
+            mname = plainText.substring(0, index).trim();
+        }
+        return mname;
+    }
+    
+    private static String removeContentBetweenBodyAndFirstBr(String html) {
+        int bodyStart = html.indexOf("<body>");
+        int firstBr = html.indexOf("<br>", bodyStart);
+
+        if (bodyStart == -1 || firstBr == -1) {
+            return html;         }
+
+        String beforeBody = html.substring(0, bodyStart + 6); // Keep opening <body> tag
+        String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
+
+        return beforeBody + afterBr;
+    }
+
+
+    private static String replaceNumber(String html, int number) {
+        // Replace "1)" with the input number followed by ")"
+        return html.replace("1)", number + ")");
     }
 
 }
