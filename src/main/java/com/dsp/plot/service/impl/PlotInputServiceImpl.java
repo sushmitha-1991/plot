@@ -212,6 +212,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
+                //generate content
             String contentText = formatPaperDetails(entity.getPaperDetails(),
                     optionalAuthority.get().getAuthorityName(), departmentName, abbr,
                     entity.getApplicationNo());
