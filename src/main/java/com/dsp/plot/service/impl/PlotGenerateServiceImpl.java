@@ -581,6 +581,13 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 BaseUser user = username.get();
                 responseDto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
             }
+
+            if (!StringUtils.isBlank(dto.getRefNo())) {
+                // Get the Draft ID from draft table using appNo
+                String res = deleteDraftEntry(dto.getRefNo());
+                System.out.println("res:::::::" + res);
+                // /delete-save-as-draft
+            }
         return responseDto;
     }
 

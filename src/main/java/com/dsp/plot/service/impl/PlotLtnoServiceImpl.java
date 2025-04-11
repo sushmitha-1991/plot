@@ -12,10 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +43,7 @@ import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.PaperLaidRepository;
 import com.dsp.plot.repository.PlotLtnoRepository;
+import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotLtnoService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,6 +57,8 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
 
     @Value("${master.service.url}")
     private String masterServiceUrl;
+    @Value("${workflow.service.url}")
+    private String draftUrl;
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
@@ -128,9 +134,16 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             entity.setDocumentDate(entity.getLtnoDate());
             entity = ltnoRepo.save(entity);
             entity.setRefId(entity.getId());
-            // log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
+            // log.info("Saved Bulletin1 attributes: ID={}, Status={}", entity.getId(),
+            // entity.getStatus());
             // entity = plotRepository.save(entity);
             // Convert saved entity back to DTO
+            if (!StringUtils.isBlank(plotDTO.getApplicationNo())) {
+                // Get the Draft ID from draft table using appNo
+                String res = deleteDraftEntry(plotDTO.getApplicationNo());
+                System.out.println("res:::::::" + res);
+                // /delete-save-as-draft
+            }
             PlotLtnoDto responseDTO = LtnoMapper.toDTO(entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
             return responseDTO;
@@ -176,9 +189,9 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         if (paperType != null) {
             spec = spec.and(PlotLtnoSpec.hasPaperType(paperType));
         }
-
         // entitys = ltnoRepo.findAll();
-        entitys = ltnoRepo.findAll(spec);
+        Sort sort = Sort.by(Sort.Direction.DESC, "ltnoDate");
+        entitys = ltnoRepo.findAll(spec,sort);
         Long houseId = getHouseId();
         for (PlotLtno entity : entitys) {
             if (houseId == 1) {
@@ -246,6 +259,8 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         if (title != null) {
             spec = spec.and(PlotTitleSpec.hasTitle(title));
         }
+        Sort sort = Sort.by(Sort.Direction.DESC, "plotLaidDate");
+        //plotLaidDate
         entitys = titleRepo.findAll(spec);
         Long houseId = getHouseId();
         for (PaperLaidOnTable entity : entitys) {
@@ -289,8 +304,16 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
             entity.setRefNo(applicationNo.getId());
             entity = titleRepo.save(entity);
-            // log.info("Saved Bulletin1 attributes: ID={},  Status={}", entity.getId(), entity.getStatus());
+            // log.info("Saved Bulletin1 attributes: ID={}, Status={}", entity.getId(),
+            // entity.getStatus());
             // entity = plotRepository.save(entity);
+
+            if (!StringUtils.isBlank(plotLaidOnTableDTO.getRefNo())) {
+                // Get the Draft ID from draft table using appNo
+                String res = deleteDraftEntry(plotLaidOnTableDTO.getRefNo());
+                System.out.println("res:::::::" + res);
+                // /delete-save-as-draft
+            }
             // Convert saved entity back to DTO
             PlotLaidOnTableDTO responseDTO = LtnoMapper.titleToDTO(entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
@@ -441,6 +464,38 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             houseId = ((UserDetailsDTO) principal).getHouseId();
         }
         return houseId;
+    }
+    // delete draft entry
+
+    public String deleteDraftEntry(String applicationNo) {
+        String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
+        String token = getTokenFromRequest();
+
+        if (token == null) {
+            throw new IllegalStateException("Authorization token is missing");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers); // No body needed for DELETE request
+
+        try {
+            ResponseEntity<GenericResponse> response = restTemplate.exchange(url, HttpMethod.DELETE, entity,
+                    GenericResponse.class);
+
+            System.out.println("@@@");
+            System.out.println(response);
+            if (response.getBody() != null && response.getBody().isSuccess()) {
+                return response.getBody().getMessage(); // Return success message
+            } else {
+                return "Failed to delete draft entry";
+            }
+        } catch (Exception e) {
+            System.err.println("Error during API call: " + e.getMessage());
+            throw new RuntimeException("Failed to delete draft entry", e);
+        }
     }
 
 }

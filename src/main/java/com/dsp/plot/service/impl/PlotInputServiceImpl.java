@@ -88,6 +88,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String masterServiceUrl;
     @Value("${workflow.service.url}")
     private String draftUrl;
+
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
@@ -212,7 +213,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             String abbr = "";
             if (paperAbbr.isPresent())
                 abbr = paperAbbr.get().getAbbr();
-                //generate content
+            // generate content
             String contentText = formatPaperDetails(entity.getPaperDetails(),
                     optionalAuthority.get().getAuthorityName(), departmentName, abbr,
                     entity.getApplicationNo());
@@ -222,6 +223,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             entity.setRefId(entity.getId());
             // log.info("before plot Input Saved: ID={}, Status={}", entity.getId(),
             // entity.getStatus());
+
             entity = plotinputRepository.save(entity);
             // log.info("after plot Input Saved: ID={}, Status={}", entity.getId(),
             // entity.getStatus());
@@ -232,6 +234,13 @@ public class PlotInputServiceImpl implements PlotInputService {
             // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
             // responseDTO,entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
+
+            if (!StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
+                // Get the Draft ID from draft table using appNo
+                String res = deleteDraftEntry(plotinputDTO.getApplicationNo());
+                System.out.println("res:::::::" + res);
+                // /delete-save-as-draft
+            }
             return responseDTO;
         } catch (DataIntegrityViolationException e) {
             log.error("Database constraint violated: {}", e.getMessage());
@@ -1426,38 +1435,38 @@ public class PlotInputServiceImpl implements PlotInputService {
                 throw new IllegalArgumentException("Invalid houseId: " + houseId);
             }
 
-            PlotDateChart dateChartEntity = optionalDateChart.orElseThrow(() -> new ResourceNotFoundException(
-                    "No entry found with specified ministry in date chart or question list."));
-
-            for (Map<String, Object> date : dateChartEntity.getDates()) {
-                Object proposedDateObj = date.get("proposedDateOfLaying");
-                // System.out.println("##### date "+proposedDateObj);
-                // System.out.println("##### dto value "+dbEntity.getProposedDateOfLaying());
-                // System.out.println(proposedDateObj.toString().isEmpty());
-                if (proposedDateObj != null && !proposedDateObj.toString().isEmpty()) {
-                    try {
-                        LocalDate proposedDate = LocalDate.parse(proposedDateObj.toString());
-                        // System.out.println("equal condition
-                        // "+(proposedDate.equals(dbEntity.getProposedDateOfLaying())));
-                        if (proposedDate.equals(dbEntity.getProposedDateOfLaying())) {
-                            Object actualDateObj = date.get("actualDateOfLaying");
-                            // System.out.println("##### actual date in dates");
-                            // System.out.println(actualDateObj);
-                            // System.out.println("##### actual date entity");
-                            // System.out.println(dbEntity.getActualDateOfLaying());
-                            if (actualDateObj == null || actualDateObj.toString().isEmpty()) {
-                                String actualDateTOUpdate = (dbEntity.getActualDateOfLaying()).toString();
-                                date.put("actualDateOfLaying", actualDateTOUpdate);
+            if (optionalDateChart.isPresent()) {
+                PlotDateChart dateChartEntity = optionalDateChart.get();
+                for (Map<String, Object> date : dateChartEntity.getDates()) {
+                    Object proposedDateObj = date.get("proposedDateOfLaying");
+                    // System.out.println("##### date "+proposedDateObj);
+                    // System.out.println("##### dto value "+dbEntity.getProposedDateOfLaying());
+                    // System.out.println(proposedDateObj.toString().isEmpty());
+                    if (proposedDateObj != null && !proposedDateObj.toString().isEmpty()) {
+                        try {
+                            LocalDate proposedDate = LocalDate.parse(proposedDateObj.toString());
+                            // System.out.println("equal condition
+                            // "+(proposedDate.equals(dbEntity.getProposedDateOfLaying())));
+                            if (proposedDate.equals(dbEntity.getProposedDateOfLaying())) {
+                                Object actualDateObj = date.get("actualDateOfLaying");
+                                // System.out.println("##### actual date in dates");
+                                // System.out.println(actualDateObj);
+                                // System.out.println("##### actual date entity");
+                                // System.out.println(dbEntity.getActualDateOfLaying());
+                                if (actualDateObj == null || actualDateObj.toString().isEmpty()) {
+                                    String actualDateTOUpdate = (dbEntity.getActualDateOfLaying()).toString();
+                                    date.put("actualDateOfLaying", actualDateTOUpdate);
+                                }
                             }
+                        } catch (DateTimeParseException e) {
+                            throw new RuntimeException("Invalid proposedDateOfLaying format: " + proposedDateObj, e);
                         }
-                    } catch (DateTimeParseException e) {
-                        throw new RuntimeException("Invalid proposedDateOfLaying format: " + proposedDateObj, e);
                     }
-                }
-            }
 
+                }
+                plotDateChartRepository.save(dateChartEntity);
+            }
             // Save updated date chart
-            plotDateChartRepository.save(dateChartEntity);
         }
         dbEntity.setCurrentStatus(dbEntity.getStatus());
         dbEntity.setDocumentDate(dbEntity.getSubmissionDate());
@@ -1841,6 +1850,38 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
 
+    }
+    // delete draft entry
+
+    public String deleteDraftEntry(String applicationNo) {
+        String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
+        String token = getTokenFromRequest();
+
+        if (token == null) {
+            throw new IllegalStateException("Authorization token is missing");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers); // No body needed for DELETE request
+
+        try {
+            ResponseEntity<GenericResponse> response = restTemplate.exchange(url, HttpMethod.DELETE, entity,
+                    GenericResponse.class);
+
+            System.out.println("@@@");
+            System.out.println(response);
+            if (response.getBody() != null && response.getBody().isSuccess()) {
+                return response.getBody().getMessage(); // Return success message
+            } else {
+                return "Failed to delete draft entry";
+            }
+        } catch (Exception e) {
+            System.err.println("Error during API call: " + e.getMessage());
+            throw new RuntimeException("Failed to delete draft entry", e);
+        }
     }
 
     // Generate Application No Functionality
