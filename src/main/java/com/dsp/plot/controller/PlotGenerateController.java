@@ -263,4 +263,16 @@ public class PlotGenerateController {
                                 "Updated Content ", content);
                 return new ResponseEntity<>(response, HttpStatus.OK);
         }
+        
+        @PostMapping("/generate-content")
+        public ResponseEntity<GenericResponse<String>> generateContent (
+                @RequestBody List<PlotContentDTO> contents) throws Exception {
+
+            System.out.println("Input received");
+            String content = plotService.generateReorderedContent(contents);
+            GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+                                "Generated reordered content", content);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }        
 }
