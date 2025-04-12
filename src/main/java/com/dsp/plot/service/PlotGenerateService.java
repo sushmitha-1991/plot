@@ -28,7 +28,7 @@ public interface PlotGenerateService {
 
     void delete(Long id);
 
-    void deleteIndex(Long id);
+    void deleteIndex(Long id); 
 
     DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
 
