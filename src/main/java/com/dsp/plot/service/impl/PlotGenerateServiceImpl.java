@@ -663,9 +663,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     }
 
     private static String generateCombinedContent(List<PlotContentDTO> contents) {
-
         StringBuilder finalContent = new StringBuilder();
-
         contents.forEach(x -> {
             finalContent.append(x.getAddedText());
             finalContent.append("<br>");
