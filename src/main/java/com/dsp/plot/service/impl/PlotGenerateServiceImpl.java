@@ -620,111 +620,101 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         throw new UnsupportedOperationException("Unimplemented method 'getAll'");
     }
 
-//    @Override
-//    public String generateReorderedContent(List<PlotContentDTO> contents) {
-//
-//        if (contents == null || contents.isEmpty()) {
-//            return null;
-//        } 
-//
-//        // String lastMinisterName = null;
-//        List<String> ministryList = new ArrayList<>();
-//        int seqNo = 0;
-//        for (int i = 0; i < contents.size(); i++) {
-//            PlotContentDTO x = contents.get(i);
-//            Optional<Ministries> ministry=ministriesRepository.findByMinistryCode(x.getMinstryId());
-//            System.out.println("@@  x  @@@ " + x);
-//            System.out.println("&&&&&&"+ministry.get().getMinistryName());
-//            // Long inputId = x.getPlotInputId();
-//            // PlotInput input = inputRepository.getById(inputId);
-//            // get minister name from input or parse minister name from text
-//            // OR parse the text
-//            String content = x.getAddedText();
-//            System.out.println("@@ content @@@ " + content);
-//            String ministerName = parseMinisterName(content);
-//            System.out.println("@@ ministerName @@@ " + ministerName);
-//            if (ministryList.contains(ministerName)) {
-//                seqNo++; // increase seq no
-//                // remove 'To Lay on the table'.
-//                // newContent = generateTrimmedContent(inputId, seqNo);
-//                String newContent = removeContentBetweenBodyAndFirstBr(content);
-//                System.out.println("@@ newContent @@@ " + newContent);
-//                if (seqNo > 1)
-//                    newContent = replaceNumber(newContent, seqNo);
-//                x.setAddedText(newContent);
-//            } else {
-//                ministryList.add(ministerName);
-//                seqNo = 0;
-//            }
-//            System.out.println("@@@ ministryList @@ " + ministryList);
-//            // ministryList.add(ministerName);
-//        }
-//        return generateCombinedContent(contents);
-//    }
+    // @Override
+    // public String generateReorderedContent(List<PlotContentDTO> contents) {
+    //
+    // if (contents == null || contents.isEmpty()) {
+    // return null;
+    // }
+    //
+    // // String lastMinisterName = null;
+    // List<String> ministryList = new ArrayList<>();
+    // int seqNo = 0;
+    // for (int i = 0; i < contents.size(); i++) {
+    // PlotContentDTO x = contents.get(i);
+    // Optional<Ministries>
+    // ministry=ministriesRepository.findByMinistryCode(x.getMinstryId());
+    // System.out.println("@@ x @@@ " + x);
+    // System.out.println("&&&&&&"+ministry.get().getMinistryName());
+    // // Long inputId = x.getPlotInputId();
+    // // PlotInput input = inputRepository.getById(inputId);
+    // // get minister name from input or parse minister name from text
+    // // OR parse the text
+    // String content = x.getAddedText();
+    // System.out.println("@@ content @@@ " + content);
+    // String ministerName = parseMinisterName(content);
+    // System.out.println("@@ ministerName @@@ " + ministerName);
+    // if (ministryList.contains(ministerName)) {
+    // seqNo++; // increase seq no
+    // // remove 'To Lay on the table'.
+    // // newContent = generateTrimmedContent(inputId, seqNo);
+    // String newContent = removeContentBetweenBodyAndFirstBr(content);
+    // System.out.println("@@ newContent @@@ " + newContent);
+    // if (seqNo > 1)
+    // newContent = replaceNumber(newContent, seqNo);
+    // x.setAddedText(newContent);
+    // } else {
+    // ministryList.add(ministerName);
+    // seqNo = 0;
+    // }
+    // System.out.println("@@@ ministryList @@ " + ministryList);
+    // // ministryList.add(ministerName);
+    // }
+    // return generateCombinedContent(contents);
+    // }
 
     @Override
-    public String generateReorderedContent (List<PlotContentDTO> contents) {
-        
+    public String generateReorderedContent(List<PlotContentDTO> contents) {
+
         if (contents == null || contents.isEmpty()) {
             System.out.println("Number of Inputs = 0");
             return null;
         }
-
         System.out.println("Number of Inputs: " + contents.size());
-        String lastMinisterName = null;
+        // String lastMinisterName = null;
         int seqNo = 0;
+        List<String> ministryList = new ArrayList<>();
         for (int i = 0; i < contents.size(); i++) {
             PlotContentDTO x = contents.get(i);
-            
-             // OR parse the text
+            // OR parse the text
             String content = x.getAddedText();
             String ministerName = parseMinisterName(content);
-          
-            if (ministerName.equals(lastMinisterName)) {
+            // if (ministerName.equals(lastMinisterName)) {
+            if (ministryList.contains(ministerName)) {
                 ++seqNo; // increase seq no
                 System.out.println("Seq no: " + seqNo);
-
                 // remove 'To Lay on the table'.
-                //newContent = generateTrimmedContent(inputId, seqNo);
-                String newContent = removeContentBetweenBodyAndFirstBr (content);
-                if (seqNo > 1) newContent = replaceNumber(newContent, seqNo);
-                
+                // newContent = generateTrimmedContent(inputId, seqNo);
+                String newContent = removeContentBetweenBodyAndFirstBr(content);
+                if (seqNo > 1)
+                    newContent = replaceNumber(newContent, seqNo);
                 x.setAddedText(newContent);
             } else {
                 seqNo = 0;
             }
-            lastMinisterName = ministerName;
+            // lastMinisterName = ministerName;
+            ministryList.add(ministerName);
             x.setAddedText(removeBodyHtmlTags(x.getAddedText()));
-
         }
-        
         return generateCombinedContent(contents);
     }
-	
+
     private static String generateCombinedContent(List<PlotContentDTO> contents) {
-
         StringBuilder finalContent = new StringBuilder();
-
         contents.forEach(x -> {
             finalContent.append(x.getAddedText());
             finalContent.append("<br>");
         });
         finalContent.append("</html></body>");
-        
         return finalContent.toString();
     }
-    
     private static String parseMinisterName(String htmlString) {
-        
         System.out.println("Input: " + htmlString);
-        
         String plainText = htmlString.replaceAll("<[^>]*>", "");
         System.out.println("Plain text: " + plainText);
-        
         String targetPhrase = "to lay on the Table:";
         int index = plainText.indexOf(targetPhrase);
         System.out.println("Match index: " + index);
-        
         String mname = null;
         if (index != -1) {
             mname = plainText.substring(0, index).trim();
@@ -732,20 +722,20 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         System.out.println("Min Name: " + mname);
         return mname;
     }
-    
+
     private static String removeContentBetweenBodyAndFirstBr(String html) {
         int bodyStart = html.indexOf("<body>");
         int firstBr = html.indexOf("<br>", bodyStart);
 
         if (bodyStart == -1 || firstBr == -1) {
-            return html;         }
+            return html;
+        }
 
         String beforeBody = html.substring(0, bodyStart + 6); // Keep opening <body> tag
         String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
 
         return beforeBody + afterBr;
     }
-
 
     private static String replaceNumber(String html, int number) {
         // Replace "1)" with the input number followed by ")"
@@ -754,7 +744,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         return afterReplacement;
     }
 
-    private static String removeBodyHtmlTags (String input) {
+    private static String removeBodyHtmlTags(String input) {
         String cleaned = input
                 .replace("<html>", "")
                 .replace("</html>", "")

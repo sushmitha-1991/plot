@@ -286,39 +286,73 @@ public class PlotInputServiceImpl implements PlotInputService {
             // System.out.println("<b>No paper details available.</b> Details");
             contentBuilder.append("<b>No paper details available.</b>");
         } else {
-            int i = 1; // Initialize numbering for list items
+
+            contentBuilder.append("<ol>"); // Start ordered list
+
             for (Map<String, Object> paper : paperDetails) {
                 if (paper == null || paper.isEmpty())
-                    continue; // Skip null/empty entries
-                // Create formatted output for each paper
-                // Reports
-                if (abbr.equals("PLOT_REPORT")) {
-                    String formattedString = getFormattedReportDetails(paper, applicationNo);
-                    // Append numbered list item
-                    if (StringUtils.isBlank(formattedString)) {
-                        contentBuilder.append(formattedString);
-                    }
-                    contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
+                    continue;
+
+                String formattedString = "";
+
+                switch (abbr) {
+                    case "PLOT_REPORT":
+                        formattedString = getFormattedReportDetails(paper, applicationNo);
+                        break;
+                    case "PLOT_NOTIFICATION":
+                        formattedString = getFormattedNotificationDetails(paper, applicationNo);
+                        break;
+                    case "PLOT_OTHER":
+                        formattedString = getFormattedOtherPaperDetails(paper, applicationNo);
+                        break;
+                    default:
+                        break;
                 }
-                // notifications
-                else if (abbr.equals("PLOT_NOTIFICATION")) {
-                    String formattedString = getFormattedNotificationDetails(paper, applicationNo);
-                    if (StringUtils.isBlank(formattedString)) {
-                        contentBuilder.append(formattedString);
-                    }
-                    // Append numbered list item
-                    contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
-                }
-                // others
-                else if (abbr.equals("PLOT_OTHER")) {
-                    String formattedString = getFormattedOtherPaperDetails(paper, applicationNo);
-                    // Append numbered list item
-                    if (StringUtils.isBlank(formattedString)) {
-                        contentBuilder.append(formattedString);
-                    }
-                    contentBuilder.append(i++).append(") ").append(formattedString).append("<br>");
+
+                if (StringUtils.isNotBlank(formattedString)) {
+                    contentBuilder.append("<li>").append(formattedString).append("</li>");
                 }
             }
+
+            contentBuilder.append("</ol>"); // End ordered list
+
+            // int i = 1; // Initialize numbering for list items
+            // for (Map<String, Object> paper : paperDetails) {
+            // if (paper == null || paper.isEmpty())
+            // continue; // Skip null/empty entries
+            // // Create formatted output for each paper
+            // // Reports
+            // if (abbr.equals("PLOT_REPORT")) {
+            // String formattedString = getFormattedReportDetails(paper, applicationNo);
+            // // Append numbered list item
+            // if (StringUtils.isBlank(formattedString)) {
+            // contentBuilder.append(formattedString);
+            // }
+            // contentBuilder.append(i++).append(")
+            // ").append(formattedString).append("<br>");
+            // }
+            // // notifications
+            // else if (abbr.equals("PLOT_NOTIFICATION")) {
+            // String formattedString = getFormattedNotificationDetails(paper,
+            // applicationNo);
+            // if (StringUtils.isBlank(formattedString)) {
+            // contentBuilder.append(formattedString);
+            // }
+            // // Append numbered list item
+            // contentBuilder.append(i++).append(")
+            // ").append(formattedString).append("<br>");
+            // }
+            // // others
+            // else if (abbr.equals("PLOT_OTHER")) {
+            // String formattedString = getFormattedOtherPaperDetails(paper, applicationNo);
+            // // Append numbered list item
+            // if (StringUtils.isBlank(formattedString)) {
+            // contentBuilder.append(formattedString);
+            // }
+            // contentBuilder.append(i++).append(")
+            // ").append(formattedString).append("<br>");
+            // }
+            // }
         }
         contentBuilder.append("</body></html>");
         return contentBuilder.toString();
