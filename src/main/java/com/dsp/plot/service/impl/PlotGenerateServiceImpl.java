@@ -498,6 +498,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     @Override
     public List<PlotIndexDTO> getIndexes(Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
             LocalDate startDate, LocalDate endDate, String status, String reportName, Long createdBy) {
+        Long houseId = getHouseId();
         Specification<PlotIndex> spec = Specification.where(PlotIndexSpec.isActive(true));
         if (startDate != null || endDate != null) {
             // spec = spec.and(PlotIndexSpec.hasDateBetween(startDate, endDate));
@@ -529,7 +530,14 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 BaseUser user = username.get();
                 dto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
             }
-            responseDTO.add(dto);
+            if (houseId == 1) {
+                if (dto.getRajyaSabhaSessionNo() != null)
+                    responseDTO.add(dto);
+            }
+            if (houseId == 2) {
+                if (dto.getLokSabhaSessionNo() != null)
+                    responseDTO.add(dto);
+            }
 
         }
         return responseDTO;
@@ -708,6 +716,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         finalContent.append("</html></body>");
         return finalContent.toString();
     }
+
     private static String parseMinisterName(String htmlString) {
         System.out.println("Input: " + htmlString);
         String plainText = htmlString.replaceAll("<[^>]*>", "");

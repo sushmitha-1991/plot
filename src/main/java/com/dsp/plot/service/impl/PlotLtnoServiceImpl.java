@@ -233,6 +233,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, Long ministryId,
             String title) {
         // TODO Auto-generated method stub
+        Long houseId=getHouseId();
         log.debug("Entering getAll Plots");
         List<PlotLaidOnTableDTO> dtoList = new ArrayList<>();
         List<PaperLaidOnTable> entitys;
@@ -262,7 +263,6 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         Sort sort = Sort.by(Sort.Direction.DESC, "plotLaidDate");
         //plotLaidDate
         entitys = titleRepo.findAll(spec);
-        Long houseId = getHouseId();
         for (PaperLaidOnTable entity : entitys) {
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
