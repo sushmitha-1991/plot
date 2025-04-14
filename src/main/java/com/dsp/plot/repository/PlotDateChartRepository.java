@@ -1,5 +1,6 @@
 package com.dsp.plot.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +11,7 @@ import com.dsp.plot.entity.PlotInput;
 
 public interface PlotDateChartRepository extends JpaRepository <PlotDateChart, Long> ,JpaSpecificationExecutor<PlotDateChart>{
 
-        Optional<PlotDateChart> findByMinistryId(Long ministryId);
+        List<PlotDateChart> findByMinistryId(Long ministryId);
         Optional<PlotDateChart> findByMinistryIdAndLokSabhaNoAndLokSabhaSessionNo(
     Long ministryId, 
     Integer lokSabhaNo, 

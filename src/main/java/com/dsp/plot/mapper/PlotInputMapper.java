@@ -62,7 +62,7 @@ public class PlotInputMapper {
                                 .applicationId(dto.getApplicationId())
                                 .applicationNo(dto.getApplicationNo())
                                 .currentStatus(dto.getCurrentStatus())
-                                .DateOnWhichforwardedToLSSecretariat(dto.getDateOnWhichforwardedToLSSecretariat())
+                                .dateOnWhichforwardedToLSSecretariat(dto.getDateOnWhichforwardedToLSSecretariat())
                                 .refId(dto.getRefId())
                                 .documentDate(dto.getDocumentDate())
                                 .paperName(dto.getPaperName()).build();
@@ -106,7 +106,7 @@ public class PlotInputMapper {
                                 .documents(entity.getDocuments())
                                 .proposedDateOfLaying(entity.getProposedDateOfLaying())
                                 .nodalOfficerName(entity.getNodalOfficerName())
-                                .DateOnWhichforwardedToLSSecretariat(entity.getDateOnWhichforwardedToLSSecretariat())
+                                .dateOnWhichforwardedToLSSecretariat(entity.getDateOnWhichforwardedToLSSecretariat())
                                 .actualDateOfLaying(entity.getActualDateOfLaying())
                                 .nodalOfficerId(entity.getNodalOfficerId())
                                 .nodalOfficerDesignation(entity.getNodalOfficerDesignation())
@@ -362,7 +362,6 @@ public class PlotInputMapper {
                         if (documents != null) {
                                 entity.setDocuments(documents);
                         }
-
                 }
                 return entity;
         }

@@ -118,7 +118,7 @@ public class PlotInput extends InputInstance {
     private Boolean sendToLibrary;
 
     @Column(name = "sent_to_ls_secretariant_on")
-    private LocalDate DateOnWhichforwardedToLSSecretariat;
+    private LocalDate dateOnWhichforwardedToLSSecretariat;
 
     @Column(name = "nodal_officer_name")
 

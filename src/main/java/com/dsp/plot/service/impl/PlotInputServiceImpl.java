@@ -722,34 +722,62 @@ public class PlotInputServiceImpl implements PlotInputService {
         String abbr = codeAbbr.getAbbr();
         switch (abbr) {
             case "PLOT_OTH_1":
-                template = "A copy of the {0} {1} of the {1}, for the year {2}";
-                /*
-                 *
-                 *
-                 *
-                 */
+                template = "A copy of the {0} {1} of the {2}, for the year {3}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
-                        escapeHtml(paper.get("")),
-                        escapeHtml(paper.get("year")));
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_2":
-                template = "A copy of the {0} {1} of the {1}, for the year {2}";
+                Integer ministryCode = (Integer) paper.get("ministry");
+                Optional<Ministries> ministry = ministriesRepository.findByMinistryCode(ministryCode);
+                String ministryName = ministry.get().getMinistryName();
+                Long departmentId = (Long) paper.get("department");
+                Optional<Departments> departmentOpt = departmentRepo.findById(departmentId);
+                String department = departmentOpt.get().getDepartmentName();
+                template = "A copy of the {0} {1} of the {2},of {3} MInistry,{4} Department for the year {5}";
                 // Map<String, Object> ministry = (Map<String, Object>)
                 // paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
-                        escapeHtml(paper.get("department")),
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(ministryName),
+                        escapeHtml(department),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_3":
+                /*
+                 * {
+                 * "paperType": {
+                 * "value": 851,
+                 * "label": "Other Papers"
+                 * },
+                 * "othersPaperName": {
+                 * "value": 859,
+                 * "label": "Output-Outcome Monitoring Framework, 2013"
+                 * },
+                 * "title": "title Of Notification",
+                 * "ministry": 16,
+                 * "financialYear": "2020-2021",
+                 * "documents": []
+                 * },
+                 * 
+                 */
+                // Integer ministryCode=(Integer)paper.get("ministry");
+                // Optional<Ministries>
+                // ministry=ministriesRepository.findByMinistryCode(ministryCode);
+                // String ministryName=ministry.get().getMinistryName();
+                // Long departmentId=(Long)paper.get("department");
+                // Optional<Departments> departmentOpt=departmentRepo.findById(departmentId);
+                // String department=departmentOpt.get().getDepartmentName();
                 template = "A copy of the {0} {1} of the {1}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
-                        escapeHtml(paper.get("department")),
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(paper.get("title")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
@@ -1761,14 +1789,14 @@ public class PlotInputServiceImpl implements PlotInputService {
                     for (String ministry : quesDto.getMinistries()) {
                         ministry = ministry.toUpperCase();
                         ministry = ministry.trim();
+                        if (ministry.equalsIgnoreCase("communications")) {
+                            System.out.println("ministry " + ministry);
+                            ministry = "COMMUNICATION";
+                        }
                         Optional<Ministries> optionalMinistries = ministriesRepository
                                 .findByMinistryName(ministry);
                         if (optionalMinistries.isPresent()) {
                             Long ministryId = optionalMinistries.get().getId();
-                            // Check if ministryId already exists in the list
-                            if (existingMinistries.contains(ministryId)) {
-                                continue; // Skip adding entry if ministryId is already present
-                            }
                             PlotDateChartDTO dto = PlotDateChartDTO.builder()
                                     .dates(datesList)
                                     .groupName(quesDto.getGroup())
@@ -1782,18 +1810,38 @@ public class PlotInputServiceImpl implements PlotInputService {
                             }
                             dto.setMinistryId(optionalMinistries.get().getId());
                             PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+                            // Check if ministryId already exists in the list
+                            if (existingMinistries.contains(ministryId)) {
+                                List<PlotDateChart> existingDateChart = plotDateChartRepository
+                                        .findByMinistryId(ministryId);
+                                for (PlotDateChart existDC : existingDateChart) {
+                                    if (existDC.getLokSabhaSessionNo() == null) {
+                                        List<Map<String, Object>> datesExisting = existDC.getDates();
+                                        for (Map<String, Object> dateList : datesExisting) {
+                                            if (dateList.get("actualDateOfLaying") != null
+                                                    || dateList.get("actualDateOfLaying") == "") {
+                                                continue;
+                                            } else {
+                                                existDC.setDates(datesList);
+                                                entityList.add(existDC);
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+                                System.out.println("ministry " + ministry);
+                                // continue; // Skip adding entry if ministryId is already present
+                            }
                             entityList.add(entity);
                         }
                     }
                 }
-
                 entityList = plotDateChartRepository.saveAll(entityList);
                 return "saved";
             } catch (HttpClientErrorException e) {
                 System.err.println("API Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
                 throw new RuntimeException("Failed to call external API", e);
             }
-
         } else {
             String url = sansadUrl + "/integration-gateway/question-branch-api/get-question-chart?lsNo="
                     + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
@@ -1846,14 +1894,32 @@ public class PlotInputServiceImpl implements PlotInputService {
                     for (String ministry : ministries) {
                         ministry = ministry.toUpperCase();
                         ministry = ministry.trim();
+                        if(ministry.equalsIgnoreCase("communications"))
+                        ministry="COMMUNICATION";
                         Optional<Ministries> optionalMinistries = ministriesRepository
                                 .findByMinistryName(ministry);
-
                         if (optionalMinistries.isPresent()) {
                             Long ministryId = optionalMinistries.get().getId();
                             // Check if ministryId already exists in the list
-
                             if (existingMinistries.contains(ministryId)) {
+                                List<PlotDateChart> existingDateChart = plotDateChartRepository
+                                        .findByMinistryId(ministryId);
+                                for (PlotDateChart existDC : existingDateChart) {
+                                    if (existDC.getRajyaSabhaSessionNo() == null) {
+                                        List<Map<String, Object>> datesExisting = existDC.getDates();
+                                        for (Map<String, Object> dateList : datesExisting) {
+                                            if (dateList.get("actualDateOfLaying") != null
+                                                    || dateList.get("actualDateOfLaying") == "") {
+                                                continue;
+                                            } else {
+                                                existDC.setDates(datesList);
+                                                entityList.add(existDC);
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+
                                 continue; // Skip adding entry if ministryId is already present
                             }
                             PlotDateChartDTO dto = PlotDateChartDTO.builder()
