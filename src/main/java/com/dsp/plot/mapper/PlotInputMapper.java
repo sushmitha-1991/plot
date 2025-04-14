@@ -43,6 +43,7 @@ public class PlotInputMapper {
                                 .sendToLibrary(dto.getSendToLibrary())
                                 .draftFlag(dto.getDraftFlag())
                                 .status(dto.getStatus())
+                                .note(dto.getNote())
                                 .refNo(dto.getRefNo())
                                 .remarks(dto.getRemarks())
                                 .paperDetails(dto.getPaperDetails())
@@ -105,6 +106,7 @@ public class PlotInputMapper {
                                 .paperDetails(entity.getPaperDetails())
                                 .documents(entity.getDocuments())
                                 .proposedDateOfLaying(entity.getProposedDateOfLaying())
+                                .note(entity.getNote())
                                 .nodalOfficerName(entity.getNodalOfficerName())
                                 .dateOnWhichforwardedToLSSecretariat(entity.getDateOnWhichforwardedToLSSecretariat())
                                 .actualDateOfLaying(entity.getActualDateOfLaying())
@@ -342,9 +344,11 @@ public class PlotInputMapper {
                         entity.setAct(getStringValue(dataMap, "act"));
                         entity.setUnderAct(getStringValue(dataMap, "underAct"));
                         entity.setDraftFlag(getBooleanValue(dataMap, "draftFlag"));
-                        entity.setDateOnWhichforwardedToLSSecretariat(getLocalDateValue(dataMap,"DateOnWhichforwardedToLSSecretariat"));
+                        entity.setDateOnWhichforwardedToLSSecretariat(
+                                        getLocalDateValue(dataMap, "DateOnWhichforwardedToLSSecretariat"));
                         entity.setStatus(getStringValue(dataMap, "status"));
                         entity.setRemarks(getStringValue(dataMap, "remarks"));
+                        entity.setNote(getStringValue(dataMap, "note"));
                         entity.setRefNo(dto.getApplicationNo());
                         entity.setProposedDateOfLaying(getLocalDateValue(dataMap, "proposedDateOfLaying"));
                         entity.setActualDateOfLaying(getLocalDateValue(dataMap, "actualDateOfLaying"));

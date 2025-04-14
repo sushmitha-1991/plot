@@ -121,8 +121,10 @@ public class PlotInput extends InputInstance {
     private LocalDate dateOnWhichforwardedToLSSecretariat;
 
     @Column(name = "nodal_officer_name")
-
     private String nodalOfficerName;
+    
+    @Column(name = "note",columnDefinition = "text")
+    private String note;
     @Column(name = "nodal_officer_mobile_no", length = 13)
     private String nodalOfficerMobileNo;
     @ManyToOne
