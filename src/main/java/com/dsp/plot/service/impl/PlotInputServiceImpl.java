@@ -1795,6 +1795,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         }
                         Optional<Ministries> optionalMinistries = ministriesRepository
                                 .findByMinistryName(ministry);
+
                         if (optionalMinistries.isPresent()) {
                             Long ministryId = optionalMinistries.get().getId();
                             PlotDateChartDTO dto = PlotDateChartDTO.builder()
@@ -1817,20 +1818,26 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 for (PlotDateChart existDC : existingDateChart) {
                                     if (existDC.getLokSabhaSessionNo() == null) {
                                         List<Map<String, Object>> datesExisting = existDC.getDates();
+                                        boolean hasValidDate = false;
                                         for (Map<String, Object> dateList : datesExisting) {
-                                            if (dateList.get("actualDateOfLaying") != null
-                                                    || dateList.get("actualDateOfLaying") == "") {
-                                                continue;
-                                            } else {
-                                                existDC.setDates(datesList);
-                                                entityList.add(existDC);
-                                                continue;
+                                            Object actualDateObj = dateList.get("actualDateOfLaying");
+                                            if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty()) {
+                                                // At least one actualDateOfLaying is non-null and non-empty → break
+                                                // immediately
+                                                hasValidDate = true;
+                                                break;
                                             }
+                                        }
+                                        // If no valid actualDateOfLaying was found in the entire loop
+                                        if (!hasValidDate) {
+                                            existDC.setDates(datesList);
+                                            entityList.add(existDC);
+                                            break;
                                         }
                                     }
                                 }
                                 System.out.println("ministry " + ministry);
-                                // continue; // Skip adding entry if ministryId is already present
+                                continue; // Skip adding entry if ministryId is already present
                             }
                             entityList.add(entity);
                         }
@@ -1894,8 +1901,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                     for (String ministry : ministries) {
                         ministry = ministry.toUpperCase();
                         ministry = ministry.trim();
-                        if(ministry.equalsIgnoreCase("communications"))
-                        ministry="COMMUNICATION";
+                        if (ministry.equalsIgnoreCase("communications"))
+                            ministry = "COMMUNICATION";
                         Optional<Ministries> optionalMinistries = ministriesRepository
                                 .findByMinistryName(ministry);
                         if (optionalMinistries.isPresent()) {
@@ -1907,20 +1914,27 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 for (PlotDateChart existDC : existingDateChart) {
                                     if (existDC.getRajyaSabhaSessionNo() == null) {
                                         List<Map<String, Object>> datesExisting = existDC.getDates();
+                                        boolean hasValidDate = false;
                                         for (Map<String, Object> dateList : datesExisting) {
-                                            if (dateList.get("actualDateOfLaying") != null
-                                                    || dateList.get("actualDateOfLaying") == "") {
-                                                continue;
-                                            } else {
-                                                existDC.setDates(datesList);
-                                                entityList.add(existDC);
-                                                continue;
+                                            Object actualDateObj = dateList.get("actualDateOfLaying");
+                                            if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty()) {
+                                                // At least one actualDateOfLaying is non-null and non-empty → break
+                                                // immediately
+                                                hasValidDate = true;
+                                                break;
                                             }
+                                        }
+
+                                        // If no valid actualDateOfLaying was found in the entire loop
+                                        if (!hasValidDate) {
+                                            existDC.setDates(datesList);
+                                            entityList.add(existDC);
+                                            break;
                                         }
                                     }
                                 }
-
-                                continue; // Skip adding entry if ministryId is already present
+                                continue;
+                                // Skip adding entry if ministryId is already present
                             }
                             PlotDateChartDTO dto = PlotDateChartDTO.builder()
                                     .dates(datesList)
