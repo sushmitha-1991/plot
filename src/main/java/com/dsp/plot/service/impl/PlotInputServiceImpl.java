@@ -144,13 +144,13 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
                     plotinputDTO.getProposedDateOfLaying());
-            if (daysDifference < 2) {
-                log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
-                // log.info("Date of Submission must be at least 2 days before the Proposed Date
-                // Of Lying", plotinputDTO);
-                throw new IllegalArgumentException(
-                        "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
-            }
+            // if (daysDifference < 2) {
+            //     log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
+            //     // log.info("Date of Submission must be at least 2 days before the Proposed Date
+            //     // Of Lying", plotinputDTO);
+            //     throw new IllegalArgumentException(
+            //             "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
+            // }
         }
         try {
             // Convert DTO to entity
