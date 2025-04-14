@@ -1682,6 +1682,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (groupName != null) {
             spec = spec.and(DateChartSpec.hasGroupName(groupName));
         }
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
         listOfDateCharts = plotDateChartRepository.findAll(spec);
         List<PlotDateChartDTO> dtoList = new ArrayList<>();
         for (PlotDateChart entity : listOfDateCharts) {
