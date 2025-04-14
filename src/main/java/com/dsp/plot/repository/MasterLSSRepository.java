@@ -18,7 +18,7 @@ public interface MasterLSSRepository extends JpaRepository<MastersLokSabhaSessio
     @Query(value = "SELECT * FROM master.lok_sabha_session_masters ls WHERE ls.session_number LIKE :lokSabhaSession", nativeQuery = true)
     Optional<MastersLokSabhaSession> findBySessionNumber(@Param("lokSabhaSession") String lokSabhaSession);
 
-    @Query(value = "SELECT * FROM master.lok_sabha_masters ls WHERE ls.lok_sabha_number LIKE :lokSabha", nativeQuery = true)
+    @Query(value = "SELECT * FROM master.lok_sabha_masters ls WHERE ls.lok_sabha_number=:lokSabha", nativeQuery = true)
     Optional<MastersLokSabha> findLokSabhaByLokSabha(@Param("lokSabha") String lokSabha);
 
     @Query(value = "SELECT * FROM master.lok_sabha_session_masters ls WHERE ls.lok_sabha_master_id = :lokSabhaNo AND ls.session_number LIKE :lokSabhaSession", nativeQuery = true)

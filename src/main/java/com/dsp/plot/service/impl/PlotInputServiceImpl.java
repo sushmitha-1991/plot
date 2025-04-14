@@ -67,6 +67,7 @@ import com.dsp.plot.repository.AuthorityRepository;
 import com.dsp.plot.repository.CodeRepository;
 import com.dsp.plot.repository.DepartmentRepository;
 import com.dsp.plot.repository.MasterLSSRepository;
+import com.dsp.plot.repository.MasterLsRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MinistriesRepository;
 import com.dsp.plot.repository.MyUserRepository;
@@ -104,7 +105,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private MinistriesRepository ministriesRepository;
     @Autowired
     private MasterLSSRepository masterLSSRepository;
-
+    @Autowired
+    private MasterLsRepository lsRepository;
     @Autowired
     private PlotDateChartRepository plotDateChartRepository;
     @Autowired
@@ -1648,7 +1650,13 @@ public class PlotInputServiceImpl implements PlotInputService {
                 // Long sessionIndex=Long.parseLong(lokSabhaSessionNo);
                 int sessionIndex = Integer.parseInt(lokSabhaSessionNo);
                 String session = sessionRoman[sessionIndex];
-                Optional<MastersLokSabha> lokSabha = masterLSSRepository.findLokSabhaByLokSabha("%" + lokSabhaNo + "%");
+                System.out.println("Session no " + session);
+                System.out.println("ls no " + lokSabhaNo);
+                String lsno = "%" + lokSabhaNo + "%";
+                System.out.println("ls no " + lsno);
+                Optional<MastersLokSabha> lokSabha = lsRepository.findByLokSabhaNumber(lokSabhaNo);
+                // if (lokSabha.isEmpty())
+                //     throw new ResourceNotFoundException("Specified ls no is not available in database");
                 System.out.println("lokSabha " + lokSabha.get());
                 Optional<MastersLokSabhaSession> lokSabhaSession = masterLSSRepository
                         .findBySessionNumberAndLokSabhaMasterId("%" + session + "%", lokSabha.get().getId());
