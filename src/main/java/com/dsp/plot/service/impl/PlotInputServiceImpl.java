@@ -145,11 +145,14 @@ public class PlotInputServiceImpl implements PlotInputService {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
                     plotinputDTO.getProposedDateOfLaying());
             // if (daysDifference < 2) {
-            //     log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
-            //     // log.info("Date of Submission must be at least 2 days before the Proposed Date
-            //     // Of Lying", plotinputDTO);
-            //     throw new IllegalArgumentException(
-            //             "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
+            // log.debug("Date of Submission must be at least 2 days before the Proposed
+            // Date Of Lying", plotinputDTO);
+            // // log.info("Date of Submission must be at least 2 days before the Proposed
+            // Date
+            // // Of Lying", plotinputDTO);
+            // throw new IllegalArgumentException(
+            // "Date of Submission must be at least 2 days before the Proposed Date Of
+            // Lying.");
             // }
         }
         try {
@@ -733,12 +736,31 @@ public class PlotInputServiceImpl implements PlotInputService {
                 break;
             case "PLOT_OTH_2":
                 Integer ministryCode = (Integer) paper.get("ministry");
-                Optional<Ministries> ministry = ministriesRepository.findByMinistryCode(ministryCode);
-                String ministryName = ministry.get().getMinistryName();
+                System.out.println("ministryCode " + ministryCode);
                 Long departmentId = (Long) paper.get("department");
-                Optional<Departments> departmentOpt = departmentRepo.findById(departmentId);
-                String department = departmentOpt.get().getDepartmentName();
-                template = "A copy of the {0} {1} of the {2},of {3} MInistry,{4} Department for the year {5}";
+
+                String ministryName = "";
+                if (ministryCode != null) {
+                    try {
+                        Optional<Ministries> ministry = ministriesRepository.findByMinistryCode(ministryCode);
+                        ministryName = ministry.get().getMinistryName();
+                    } catch (Exception e) {
+                        Optional<Ministries> ministry = ministriesRepository.findById(ministryCode.longValue());
+                        ministryName = ministry.get().getMinistryName();
+                    }
+                    template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                } else {
+                    if (departmentId != null) {
+                        template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
+                    } else {
+                        template = "A copy of the {0} {1} of the {2}, for the year {5}";
+                    }
+                }
+                String department = "";
+                if (departmentId != null) {
+                    Optional<Departments> departmentOpt = departmentRepo.findById(departmentId);
+                    department = departmentOpt.get().getDepartmentName();
+                }
                 // Map<String, Object> ministry = (Map<String, Object>)
                 // paper.get("ministryDepartmentPSU");
                 formattedString = MessageFormat.format(template,
@@ -750,56 +772,102 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_3":
-                /*
-                 * {
-                 * "paperType": {
-                 * "value": 851,
-                 * "label": "Other Papers"
-                 * },
-                 * "othersPaperName": {
-                 * "value": 859,
-                 * "label": "Output-Outcome Monitoring Framework, 2013"
-                 * },
-                 * "title": "title Of Notification",
-                 * "ministry": 16,
-                 * "financialYear": "2020-2021",
-                 * "documents": []
-                 * },
-                 * 
-                 */
-                // Integer ministryCode=(Integer)paper.get("ministry");
-                // Optional<Ministries>
-                // ministry=ministriesRepository.findByMinistryCode(ministryCode);
-                // String ministryName=ministry.get().getMinistryName();
-                // Long departmentId=(Long)paper.get("department");
-                // Optional<Departments> departmentOpt=departmentRepo.findById(departmentId);
-                // String department=departmentOpt.get().getDepartmentName();
-                template = "A copy of the {0} {1} of the {1}, for the year {2}";
+                Integer ministryCode3 = (Integer) paper.get("ministry");
+                System.out.println("ministryCode3 " + ministryCode3);
+                Long departmentId3 = (Long) paper.get("department");
+                String ministryName3 = "";
+                if (ministryCode3 != null) {
+                    try {
+                        Optional<Ministries> ministry3 = ministriesRepository.findByMinistryCode(ministryCode3);
+                        ministryName3 = ministry3.get().getMinistryName();
+                    } catch (Exception e) {
+                        Optional<Ministries> ministry3 = ministriesRepository.findById(ministryCode3.longValue());
+                        ministryName3 = ministry3.get().getMinistryName();
+                    }
+                    template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                } else {
+                    if (departmentId3!= null) {
+                        template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
+                    } else {
+                        template = "A copy of the {0} {1} of the {2}, for the year {5}";
+                    }
+                }
+                String department3 = "";
+                if (departmentId3 != null) {
+                    Optional<Departments> departmentOpt3 = departmentRepo.findById(departmentId3);
+                    department3 = departmentOpt3.get().getDepartmentName();
+                }
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
                         escapeHtml(paper.get("title")),
-                        escapeHtml(paper.get("title")),
+                        escapeHtml(ministryName3),
+                        escapeHtml(department3),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
-                template = "A copy of the {0} {1} of the {1}, for the year {2}";
+            Integer ministryCode4 = (Integer) paper.get("ministry");
+                System.out.println("ministryCode3 " + ministryCode4);
+                // Long departmentId4 = (Long) paper.get("department");
+                String ministryName4 = "";
+                if (ministryCode4 != null) {
+                    try {
+                        Optional<Ministries> ministry4 = ministriesRepository.findByMinistryCode(ministryCode4);
+                        ministryName3 = ministry4.get().getMinistryName();
+                    } catch (Exception e) {
+                        Optional<Ministries> ministry4 = ministriesRepository.findById(ministryCode4.longValue());
+                        ministryName4 = ministry4.get().getMinistryName();
+                    }
+                    template = "A copy of the {0} {1} of the {2}, of {3} Ministry, at {4} for the year {5}";
+                } else {
+                        template = "A copy of the {0} {1} of the {2}, at {4} for the year {5}";
+                }
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
+                        escapeHtml(paper.get("title")),
+                        escapeHtml(ministryName4),
                         escapeHtml(paper.get("bankHeadquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_5":
-                template = "A copy of the {0} {1} of the {1}, for the year {2}";
+                template = "A copy of the {0} {1} of the {2}, On Statement No. {3}, for the year {2}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
+                        escapeHtml(paper.get("title")),
                         escapeHtml(paper.get("statementNumber")),
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_OTH_6":
-                template = "A copy of the {0} {1} of the {1}, for the year {2}";
+
+                // template = "A copy of the {0} {1} of the {1}, for the year {2}";
+
+                Integer ministryCode6 = (Integer) paper.get("ministry");
+                System.out.println("ministryCode3 " + ministryCode6);
+                Long departmentId6 = (Long) paper.get("department");
+                String ministryName6 = "";
+                if (ministryCode6 != null) {
+                    try {
+                        Optional<Ministries> ministry6 = ministriesRepository.findByMinistryCode(ministryCode6);
+                        ministryName6 = ministry6.get().getMinistryName();
+                    } catch (Exception e) {
+                        Optional<Ministries> ministry6 = ministriesRepository.findById(ministryCode6.longValue());
+                        ministryName6 = ministry6.get().getMinistryName();
+                    }
+                    template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                } else {
+                    if (departmentId6!= null) {
+                        template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
+                    } else {
+                        template = "A copy of the {0} {1} of the {2}, for the year {5}";
+                    }
+                }
+                String department6 = "";
+                if (departmentId6 != null) {
+                    Optional<Departments> departmentOpt6 = departmentRepo.findById(departmentId6);
+                    department6 = departmentOpt6.get().getDepartmentName();
+                }
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
@@ -807,11 +875,13 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_7":
-                template = "A copy of the {0} {1} of the {1}, for the year {2}";
+                template = "A copy of the {0} {1} of the {2}, required Under Act of {3}, {4} and for the year {5}";
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
                         escapeHtml(languageType),
+                        escapeHtml(paper.get("title")),
                         escapeHtml(paper.get("requirementUnderAct")),
+                        escapeHtml(paper.get("nameOfAct")),
                         escapeHtml(paper.get("year")));
                 break;
             default:
@@ -1656,7 +1726,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                 System.out.println("ls no " + lsno);
                 Optional<MastersLokSabha> lokSabha = lsRepository.findByLokSabhaNumber(lokSabhaNo);
                 // if (lokSabha.isEmpty())
-                //     throw new ResourceNotFoundException("Specified ls no is not available in database");
+                // throw new ResourceNotFoundException("Specified ls no is not available in
+                // database");
                 System.out.println("lokSabha " + lokSabha.get());
                 Optional<MastersLokSabhaSession> lokSabhaSession = masterLSSRepository
                         .findBySessionNumberAndLokSabhaMasterId("%" + session + "%", lokSabha.get().getId());
