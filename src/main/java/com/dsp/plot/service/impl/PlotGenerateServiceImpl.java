@@ -582,9 +582,11 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             entity.setRajyaSabhaSessionNo(null);
             serialNumberRequest.setSessionId(entity.getLokSabhaSessionNo());
         }
-
-        SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
+        if(dto.getRefNo()==null)
+        {
+            SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
         entity.setRefNo(applicationNo.getId());
+        }
         entity = plotIndexRepo.save(entity);
         PlotIndexDTO responseDto = PlotGenerateMapper.toIndexDTO(plotIndexRepo.findById(entity.getId()).get());
         Optional<BaseUser> username = myUserRepository.findById(entity.getCreatedBy());
