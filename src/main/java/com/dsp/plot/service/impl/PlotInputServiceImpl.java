@@ -1048,8 +1048,9 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     .findById(entity.getApplicationInstanceId()).get();
                             if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
                                     || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
-                                if (plot.getCurrentStatus().equalsIgnoreCase("published")
-                                        || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
+                                // if (plot.getCurrentStatus().equalsIgnoreCase("published")
+                                //         || plot.getCurrentStatus().equalsIgnoreCase("approved")) 
+                                if (plot.getCurrentStatus().equalsIgnoreCase("approved")) {
                                     entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
@@ -1069,8 +1070,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     .findById(entity.getApplicationInstanceId()).get();
                             if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
                                     || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
-                                if (plot.getCurrentStatus().equalsIgnoreCase("published")
-                                        || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
+                                // if (plot.getCurrentStatus().equalsIgnoreCase("published")
+                                //         || plot.getCurrentStatus().equalsIgnoreCase("approved"))
+                                if (plot.getCurrentStatus().equalsIgnoreCase("approved")) 
+                                 {
                                     entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
@@ -1596,7 +1599,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                             throw new RuntimeException("Invalid proposedDateOfLaying format: " + proposedDateObj, e);
                         }
                     }
-
                 }
                 plotDateChartRepository.save(dateChartEntity);
             }
