@@ -202,8 +202,8 @@ public class PlotInputServiceImpl implements PlotInputService {
             if (StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
                 SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
                 entity.setApplicationNo(applicationNo.getId());
-                entity.setRefNo(applicationNo.getId());
             }
+            entity.setRefNo(entity.getApplicationNo());
             entity.setCurrentStatus(entity.getStatus());
             entity.setDocumentDate(entity.getSubmissionDate());
             log.debug("entity: {}", entity);
