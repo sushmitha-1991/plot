@@ -7,7 +7,7 @@ import java.util.Optional;
 import com.dsp.plot.entity.MastersRajyaSabha;
 @Repository
 public interface MastersRSSRepository extends JpaRepository<MastersRajyaSabha,Long>{
-     @Query(value = "SELECT id FROM master.rajya_sabha_session_master ORDER BY created_by DESC LIMIT 1",
+     @Query(value = "SELECT id FROM master.rajya_sabha_session_master ORDER BY created_at DESC LIMIT 1",
      nativeQuery = true)
     Long findLatestByCreatedBy();
     @Query(value = "SELECT mr.* FROM master.rajya_sabha_session_master mr where mr.session_number=:sessionNumber",
