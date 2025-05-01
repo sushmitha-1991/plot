@@ -1544,23 +1544,18 @@ public class PlotInputServiceImpl implements PlotInputService {
         } else {
             if (houseId == 1) {
                 dbEntity.setPendingAt("Table Office");
-
             } else if (houseId == 2) {
                 dbEntity.setPendingAt("Table Office A");
             }
-
         }
         System.out.println("#####  " + dbEntity.getActualDateOfLaying());
         if (dbEntity.getActualDateOfLaying() != null) {
-
             // Get ministry based on ministry code
             Ministries ministry = ministriesRepository
                     .findByMinistryCode(dbEntity.getMinistryId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "No ministry found with ministry code: " + dbEntity.getMinistryId()));
-
             Optional<PlotDateChart> optionalDateChart;
-
             // Fetch PlotDateChart based on houseId
             if (houseId == 1) {
                 optionalDateChart = plotDateChartRepository.findByMinistryIdAndRajyaSabhaSessionNo(
@@ -1571,25 +1566,15 @@ public class PlotInputServiceImpl implements PlotInputService {
             } else {
                 throw new IllegalArgumentException("Invalid houseId: " + houseId);
             }
-
             if (optionalDateChart.isPresent()) {
                 PlotDateChart dateChartEntity = optionalDateChart.get();
                 for (Map<String, Object> date : dateChartEntity.getDates()) {
                     Object proposedDateObj = date.get("proposedDateOfLaying");
-                    // System.out.println("##### date "+proposedDateObj);
-                    // System.out.println("##### dto value "+dbEntity.getProposedDateOfLaying());
-                    // System.out.println(proposedDateObj.toString().isEmpty());
                     if (proposedDateObj != null && !proposedDateObj.toString().isEmpty()) {
                         try {
                             LocalDate proposedDate = LocalDate.parse(proposedDateObj.toString());
-                            // System.out.println("equal condition
-                            // "+(proposedDate.equals(dbEntity.getProposedDateOfLaying())));
                             if (proposedDate.equals(dbEntity.getProposedDateOfLaying())) {
                                 Object actualDateObj = date.get("actualDateOfLaying");
-                                // System.out.println("##### actual date in dates");
-                                // System.out.println(actualDateObj);
-                                // System.out.println("##### actual date entity");
-                                // System.out.println(dbEntity.getActualDateOfLaying());
                                 if (actualDateObj == null || actualDateObj.toString().isEmpty()) {
                                     String actualDateTOUpdate = (dbEntity.getActualDateOfLaying()).toString();
                                     date.put("actualDateOfLaying", actualDateTOUpdate);

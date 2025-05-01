@@ -34,6 +34,8 @@ public class PlotGenerateDTO {
     private List<Long> plotInputs;
     private List<Long> plots;
     private Boolean sendToLibrary;
+    private String startingPageNo;
+
     //Application Instance DTO
     private Long id;
 	private Long applicationId;

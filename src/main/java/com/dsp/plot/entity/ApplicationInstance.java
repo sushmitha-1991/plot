@@ -85,6 +85,8 @@ public class ApplicationInstance extends Auditable{
 	private String htmlContentHindi;
 	@Column(name = "parent_instance_id")
 	private Long parentInstanceId;
+	@Column(name = "starting_page_no")
+    private Long startingPageNo;
 	
 
 }

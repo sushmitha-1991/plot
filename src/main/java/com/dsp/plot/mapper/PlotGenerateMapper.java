@@ -1,5 +1,7 @@
 package com.dsp.plot.mapper;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.dsp.plot.dto.ApplicationInstanceDTO;
 import com.dsp.plot.dto.ApproverDTO;
 import com.dsp.plot.dto.MastersLokSabhaDTO;
@@ -13,6 +15,17 @@ import com.dsp.plot.entity.PlotIndex;
 public class PlotGenerateMapper {
 
         public static PlotGenerate toEntity(PlotGenerateDTO dto) {
+                Long startingPageNo=null;
+                if (StringUtils.isNotBlank(dto.getStartingPageNo())) {
+                        try {
+                          startingPageNo=  Long.parseLong(dto.getStartingPageNo());
+                            // It's a valid Long
+                        } catch (NumberFormatException e) {
+                            // Not a valid Long, show message or log
+                            System.out.println("StartingPageNo must be a valid number.");
+
+                        }
+                    }
                 return PlotGenerate.builder()
                                 .lokSabhaNo(dto.getLokSabhaNo())
                                 .lokSabhaSessionNo(dto.getLokSabhaSessionNo())
@@ -40,10 +53,16 @@ public class PlotGenerateMapper {
                                 .currentStatus(dto.getCurrentStatus())
                                 .documentDate(dto.getPlotDate())
                                 .refId(dto.getRefId())
+                                .startingPageNo(startingPageNo)
                                 .build();
         }
 
         public static PlotGenerateDTO toDTO(PlotGenerate entity) {
+                String startingPageNo="";
+                if(entity.getStartingPageNo()!=null)
+                {
+                        startingPageNo=entity.getStartingPageNo().toString();
+                }
                 PlotGenerateDTO dto = PlotGenerateDTO.builder()
                                 .lokSabhaNo(entity.getLokSabhaNo())
                                 .lokSabhaSessionNo(entity.getLokSabhaSessionNo())
@@ -68,6 +87,7 @@ public class PlotGenerateMapper {
                                 .applicationNo(entity.getApplicationNo())
                                 .currentStatus(entity.getCurrentStatus())
                                 .refId(entity.getRefId())
+                                .startingPageNo(startingPageNo)
                                 .applicationInstanceDTO(ApplicationInstanceDTO.builder()
                                                 .id(entity.getId())
                                                 .applicationId(entity.getApplicationId())
