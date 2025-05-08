@@ -12,7 +12,7 @@ import com.dsp.plot.entity.MastersLokSabhaSession;
 
 @Repository
 public interface MasterLSSRepository extends JpaRepository<MastersLokSabhaSession, Long> {
-    @Query(value = "SELECT id FROM master.lok_sabha_session_masters ORDER BY created_at DESC LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT id FROM master.lok_sabha_session_masters ORDER BY session_start DESC LIMIT 1", nativeQuery = true)
     Long findLatestByCreatedBy();
 
     @Query(value = "SELECT * FROM master.lok_sabha_session_masters ls WHERE ls.session_number LIKE :lokSabhaSession", nativeQuery = true)
