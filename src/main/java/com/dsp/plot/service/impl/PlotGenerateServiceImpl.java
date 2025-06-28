@@ -728,7 +728,9 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         for (String ministryName : ministryList) {
             System.out.println("minister in content " + ministryName);
 
-            finalResponse.replace("<br><b>" + ministryName + "", "</ol><br><b>" + ministryName).replace("</li><br></body>", "</li></ol><br></body>");
+            finalResponse.replace("<br><b>" + ministryName + "", "</ol><br><b>" + ministryName)
+            .replace("</li><br></body>", "</li></ol><br></body>")
+            .replace("</li><br><b>", "</li></ol><br><b>");
         }
         return finalResponse;
     }
