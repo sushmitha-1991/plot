@@ -10,6 +10,7 @@ public class RequestMapper {
                 .plotInputId(dto.getPlotInputId())
                 .request(dto.getRequest())
                 .userName(dto.getUserName())
+                // .isAlreadyReturned(dto.getIsAlreadyReturned())
                 .build();
     }
 
@@ -21,6 +22,7 @@ public class RequestMapper {
                 .createdAt(entity.getCreatedAt())
                 .userName(entity.getUserName())
                 .createdAtWithOutTime(entity.getCreatedAt().toLocalDate())
+                .isAlreadyReturned(entity.getIsAlreadyReturned())
                 .build();
     }
 }

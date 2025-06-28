@@ -786,7 +786,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                     template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
                 } else {
-                    if (departmentId3!= null) {
+                    if (departmentId3 != null) {
                         template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
                     } else {
                         template = "A copy of the {0} {1} of the {2}, for the year {5}";
@@ -806,7 +806,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
-            Integer ministryCode4 = (Integer) paper.get("ministry");
+                Integer ministryCode4 = (Integer) paper.get("ministry");
                 System.out.println("ministryCode3 " + ministryCode4);
                 // Long departmentId4 = (Long) paper.get("department");
                 String ministryName4 = "";
@@ -820,7 +820,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                     template = "A copy of the {0} {1} of the {2}, of {3} Ministry, at {4} for the year {5}";
                 } else {
-                        template = "A copy of the {0} {1} of the {2}, at {4} for the year {5}";
+                    template = "A copy of the {0} {1} of the {2}, at {4} for the year {5}";
                 }
                 formattedString = MessageFormat.format(template,
                         escapeHtml(paperTitle),
@@ -857,7 +857,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                     template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
                 } else {
-                    if (departmentId6!= null) {
+                    if (departmentId6 != null) {
                         template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
                     } else {
                         template = "A copy of the {0} {1} of the {2}, for the year {5}";
@@ -1049,7 +1049,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
                                     || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
                                 // if (plot.getCurrentStatus().equalsIgnoreCase("published")
-                                //         || plot.getCurrentStatus().equalsIgnoreCase("approved")) 
+                                // || plot.getCurrentStatus().equalsIgnoreCase("approved"))
                                 if (plot.getCurrentStatus().equalsIgnoreCase("approved")) {
                                     entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
@@ -1071,9 +1071,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                             if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
                                     || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
                                 // if (plot.getCurrentStatus().equalsIgnoreCase("published")
-                                //         || plot.getCurrentStatus().equalsIgnoreCase("approved"))
-                                if (plot.getCurrentStatus().equalsIgnoreCase("approved")) 
-                                 {
+                                // || plot.getCurrentStatus().equalsIgnoreCase("approved"))
+                                if (plot.getCurrentStatus().equalsIgnoreCase("approved")) {
                                     entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
@@ -1511,16 +1510,23 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         // Save the updated PlotInput
         Long houseId = getHouseId();
-        if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
+        if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) 
+        {
             Long userId = utils.getUserIdFromAuthentication();
             Optional<BaseUser> loginUser = userRepository.findById(userId);
             Request returnRequest = Request.builder()
                     .plotInputId(id)
                     .request(plotinputDTO.getRemarks())
                     .userName(loginUser.get().getUsername())
+                    .isAlreadyReturned(true)
                     .build();
             // // Save all updated requests in a single batch operation
             requestRepository.save(returnRequest);
+            List<Request> listOfRequests = requestRepository.findByPlotInputIdAndIsActive(id, true);
+            listOfRequests.forEach(req -> {
+                req.setIsAlreadyReturned(true);
+            });
+            requestRepository.saveAll(listOfRequests);
             if (dbEntity.getApplicationInstanceId() != null) {
                 throw new ResourceNotFoundException(
                         "Plot has already generated with Specific Ministry Input  So cannot be returned: " + id);
@@ -1542,6 +1548,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
         } else {
+            
             if (houseId == 1) {
                 dbEntity.setPendingAt("Table Office");
             } else if (houseId == 2) {
@@ -1624,6 +1631,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         try {
             // Convert DTO to entity
             Request entity = RequestMapper.toEntity(dto);
+            entity.setIsAlreadyReturned(false);
             entity = requestRepository.save(entity);
             log.debug("raised Request to entity: {}", entity);
             // log.info("Saved request attributes: ID={}, plot id={}", entity.getId(),

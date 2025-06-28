@@ -24,6 +24,7 @@ public class RequestDTO {
     private String userName;
     private LocalDateTime createdAt;
     private LocalDate createdAtWithOutTime;
+    private Boolean isAlreadyReturned;
 
     // private PlotInputDTO plotDetails;
 }

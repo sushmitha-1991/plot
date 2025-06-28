@@ -38,6 +38,9 @@ public class Request extends Auditable {
     private String request;
     @Column(name = "user_name")
     private String userName;
+    @Column(name="is_already_returned")
+    private Boolean isAlreadyReturned;
+
     @ManyToOne
     @JoinColumn(name = "plot_input_id", referencedColumnName = "id",updatable=false,insertable=false)
     private PlotInput plotInput;
