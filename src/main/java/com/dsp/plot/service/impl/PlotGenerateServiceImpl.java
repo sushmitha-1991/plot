@@ -700,22 +700,37 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 x.setAddedText(newContent);
             } else {
                 seqNo = 0;
+                content.replace("</ol>", "");
             }
             // lastMinisterName = ministerName;
             ministryList.add(ministerName);
+            System.out.println("ministerName  " + ministerName);
+
+            System.out.println("ministryList  " + ministryList);
             x.setAddedText(removeBodyHtmlTags(x.getAddedText()));
+
         }
-        return generateCombinedContent(contents);
+
+        return generateCombinedContent(contents, ministryList);
     }
 
-    private static String generateCombinedContent(List<PlotContentDTO> contents) {
+    private static String generateCombinedContent(List<PlotContentDTO> contents, List<String> ministryList) {
         StringBuilder finalContent = new StringBuilder();
         contents.forEach(x -> {
             finalContent.append(x.getAddedText());
             finalContent.append("<br>");
         });
-        finalContent.append("</html></body>");
-        return finalContent.toString();
+        finalContent.append("</body></html>");
+
+        log.info("final Content  {}", finalContent);
+
+        String finalResponse = finalContent.toString();
+        for (String ministryName : ministryList) {
+            System.out.println("minister in content " + ministryName);
+
+            finalResponse.replace("<br><b>" + ministryName + "", "</ol><br><b>" + ministryName).replace("</li><br></body>", "</li></ol><br></body>");
+        }
+        return finalResponse;
     }
 
     private static String parseMinisterName(String htmlString) {
@@ -734,6 +749,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     }
 
     private static String removeContentBetweenBodyAndFirstBr(String html) {
+        log.info("html " + html);
         int bodyStart = html.indexOf("<body>");
         int firstBr = html.indexOf("<br>", bodyStart);
 
@@ -743,13 +759,17 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
         String beforeBody = html.substring(0, bodyStart + 6); // Keep opening <body> tag
         String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
+        log.info("html " + html);
+        afterBr = afterBr.replace("<ol>", "").replace("</ol>", "");
+        
+        log.info("html " + html);
 
         return beforeBody + afterBr;
     }
 
     private static String replaceNumber(String html, int number) {
         // Replace "1)" with the input number followed by ")"
-        String afterReplacement = html.replace("1)", number + ")");
+        String afterReplacement = html.replace("1)", number + "");
         System.out.println("after no replacement: " + afterReplacement);
         return afterReplacement;
     }
