@@ -700,17 +700,21 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 x.setAddedText(newContent);
             } else {
                 seqNo = 0;
-                content.replace("</ol>", "");
+                System.out.println("content "+content);
+
+                System.out.println("contains  "+content.contains("</ol>"));
+                content=content.replace("</ol>", "");
+                System.out.println("content "+content);
             }
             // lastMinisterName = ministerName;
             ministryList.add(ministerName);
             System.out.println("ministerName  " + ministerName);
 
             System.out.println("ministryList  " + ministryList);
+            
             x.setAddedText(removeBodyHtmlTags(x.getAddedText()));
 
         }
-
         return generateCombinedContent(contents, ministryList);
     }
 
@@ -723,12 +727,18 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         finalContent.append("</body></html>");
         log.info("final Content  {}", finalContent);
         String finalResponse = finalContent.toString();
-        for (String ministryName : ministryList) {
-            System.out.println("minister in content " + ministryName);
-            finalResponse.replace("<br><b>" + ministryName + "", "</ol><br><b>" + ministryName)
+        System.out.println("finalResponse  "+finalResponse);
+        // for (String ministryName : ministryList) {
+            // System.out.println("minister in content " + ministryName);
+            finalResponse=finalResponse
             .replace("</li><br></body>", "</li></ol><br></body>")
-            .replace("</li><br><b>", "</li></ol><br><b>");
-        }
+            .replace("</li><br><b>", "</li></ol><br><b>")
+            .replace("</li></ol><br><br><li>", "</li><br><li>")
+            .replace("</li></ol><br><li>", "</li><br><li>")
+            .replace("</li><br><br><b>", "</li></ol><br><b>");
+        // }
+        System.out.println("finalResponse after replacing </ol> "+finalResponse);
+
         return finalResponse;
     }
 
