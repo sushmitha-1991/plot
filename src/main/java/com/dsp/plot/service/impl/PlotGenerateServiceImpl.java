@@ -760,7 +760,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         String beforeBody = html.substring(0, bodyStart + 6); // Keep opening <body> tag
         String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
         log.info("html " + html);
-        afterBr = afterBr.replace("<ol>", "").replace("</ol>", "");
+        afterBr = afterBr.replace("<ol>", "").replace("</ol>", "")
+        .replace("</li></ol><br><br><li>", "</li><br><br><li>");
         
         log.info("html " + html);
 
