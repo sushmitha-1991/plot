@@ -1,6 +1,7 @@
 package com.dsp.plot.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +60,7 @@ public class PlotInputDTO {
     private LocalDate documentDate;
     private InputInstanceDTO inputInstanceDTO;
     private Integer seqOfMinistryContent;
+    private LocalDateTime createdAt;
 
     private String nodalOfficerName;
     private String authenticatorName;

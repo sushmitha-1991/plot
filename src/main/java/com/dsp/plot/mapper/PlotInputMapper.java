@@ -96,6 +96,7 @@ public class PlotInputMapper {
                                 .digitallySigned(entity.getDigitallySigned())
                                 .act(entity.getAct())
                                 .underAct(entity.getUnderAct())
+                                .createdAt(entity.getCreatedAt())
                                 .paperTypeId(entity.getPaperTypeId())
                                 .content(entity.getContent())
                                 .draftFlag(entity.getDraftFlag())
@@ -291,6 +292,7 @@ public class PlotInputMapper {
                                 .applicationId(dto.getApplicationId())
                                 .applicationNo(dto.getApplicationNo())
                                 .id(dto.getDraftId())
+                                .createdAt(dto.getCreatedAt())
                                 .build();
                 if (dto.getData() == null || dto.getData().isNull()) {
                         return entity;

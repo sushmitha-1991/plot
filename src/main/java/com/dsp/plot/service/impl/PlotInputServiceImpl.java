@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1152,7 +1153,10 @@ public class PlotInputServiceImpl implements PlotInputService {
         // log.debug("Returning list of PlotDTOs: {}", dtoList);
         // log.info("Returning list of PlotDTOs: {}", dtoList);
         // log.error("Returning list of PlotDTOs: {}", dtoList);
-        return dtoList;
+
+
+
+        return sortByLatestCreatedAt(dtoList);
     }
 
     @Override
@@ -1254,7 +1258,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
         }
-        return dtoList;
+        return sortByLatestCreatedAt(dtoList);
 
     }
 
@@ -1310,7 +1314,11 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         return plotInputs;
     }
-
+public List<PlotInputDTO> sortByLatestCreatedAt(List<PlotInputDTO> dtoList) {
+    return dtoList.stream()
+                  .sorted(Comparator.comparing(PlotInputDTO::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                  .collect(Collectors.toList());
+}
     @Override
     public List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
