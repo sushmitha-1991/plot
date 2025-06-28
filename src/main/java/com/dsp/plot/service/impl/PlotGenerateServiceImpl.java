@@ -721,13 +721,10 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             finalContent.append("<br>");
         });
         finalContent.append("</body></html>");
-
         log.info("final Content  {}", finalContent);
-
         String finalResponse = finalContent.toString();
         for (String ministryName : ministryList) {
             System.out.println("minister in content " + ministryName);
-
             finalResponse.replace("<br><b>" + ministryName + "", "</ol><br><b>" + ministryName)
             .replace("</li><br></body>", "</li></ol><br></body>")
             .replace("</li><br><b>", "</li></ol><br><b>");
@@ -754,19 +751,15 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         log.info("html " + html);
         int bodyStart = html.indexOf("<body>");
         int firstBr = html.indexOf("<br>", bodyStart);
-
         if (bodyStart == -1 || firstBr == -1) {
             return html;
         }
-
         String beforeBody = html.substring(0, bodyStart + 6); // Keep opening <body> tag
         String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
         log.info("html " + html);
         afterBr = afterBr.replace("<ol>", "").replace("</ol>", "")
         .replace("</li></ol><br><br><li>", "</li><br><br><li>");
-        
         log.info("html " + html);
-
         return beforeBody + afterBr;
     }
 
