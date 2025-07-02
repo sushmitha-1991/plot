@@ -1150,11 +1150,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
         }
-        // log.debug("Returning list of PlotDTOs: {}", dtoList);
-        // log.info("Returning list of PlotDTOs: {}", dtoList);
-        // log.error("Returning list of PlotDTOs: {}", dtoList);
-
-
 
         return sortByLatestCreatedAt(dtoList);
     }
@@ -1258,7 +1253,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
         }
-        return sortByLatestCreatedAt(dtoList);
+        return sortByApplicationNoDesc(dtoList);
 
     }
 
@@ -1316,8 +1311,16 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 public List<PlotInputDTO> sortByLatestCreatedAt(List<PlotInputDTO> dtoList) {
     return dtoList.stream()
-                  .sorted(Comparator.comparing(PlotInputDTO::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                  .sorted(Comparator.comparing(PlotInputDTO::getCreatedAt, Comparator
+                  
+                  .nullsLast(Comparator.reverseOrder())))
                   .collect(Collectors.toList());
+}
+public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
+    return dtoList.stream()
+        .sorted(Comparator.comparing(PlotInputDTO::getApplicationNo, 
+                Comparator.nullsLast(Comparator.reverseOrder())))
+        .collect(Collectors.toList());
 }
     @Override
     public List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
