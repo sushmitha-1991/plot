@@ -113,6 +113,8 @@ public class PlotInput extends InputInstance {
 
     @Column(name = "nodal_officer_phone_no", length = 13)
     private String nodalOfficerPhoneNo;
+    @Column(name = "nodal_officer_email", length = 13)
+    private String nodalOfficerEmail;
 
     @Column(name = "is_send_to_library")
     private Boolean sendToLibrary;

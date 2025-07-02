@@ -64,6 +64,8 @@ public class PlotInputDTO {
 
     private String nodalOfficerName;
     private String authenticatorName;
+    private String nodalOfficerEmail;
+
 
     private String ministryName;
     private String departmentName;

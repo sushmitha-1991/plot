@@ -86,12 +86,13 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     @Override
     public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
         try {
+            System.out.println("dateOfDoc   "+dateOfDoc);
             List<PlotGenerate> entitys = new ArrayList<>();
             Specification<PlotGenerate> spec = Specification.where(null);
             spec = spec.and(PlotGenerateSpec.isActive(true));
             spec = spec.and(PlotGenerateSpec.hasDraftStatus(false));
-
             if (dateOfDoc == null) {
+                System.out.println("date is null "+dateOfDoc);
                 dateOfDoc = LocalDate.now();
             }
             if (doc.equalsIgnoreCase("PLOT")) {
@@ -100,9 +101,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             }
             if (entitys.isEmpty()) {
                 log.info("No Doc Found on Specified Date");
-                throw new NoDataFoundException("No Doc Found On Specified Date");
+                throw new NoDataFoundException("Papers To be Laid not available for "+dateOfDoc);
             }
-
             PlotGenerate entity = entitys.get(0);
             log.info("Doc Found on Specified Date:{}", entity);
             return DocumentDTO.builder()

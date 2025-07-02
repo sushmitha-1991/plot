@@ -41,6 +41,7 @@ public class PlotInputMapper {
                                 .act(dto.getAct())
                                 .paperTypeId(dto.getPaperTypeId())
                                 .sendToLibrary(dto.getSendToLibrary())
+                                .nodalOfficerEmail(dto.getNodalOfficerEmail())
                                 .draftFlag(dto.getDraftFlag())
                                 .status(dto.getStatus())
                                 .note(dto.getNote())
@@ -67,22 +68,6 @@ public class PlotInputMapper {
                                 .refId(dto.getRefId())
                                 .documentDate(dto.getDocumentDate())
                                 .paperName(dto.getPaperName()).build();
-                // .paperTiltle(dto.getPaperTiltle())
-                // .article(dto.getArticle())
-                // .placeOfPublished(dto.getPlaceOfPublished())
-                // .actualDateOfLaid(dto.getActualDateOfLaid())
-                // .section(dto.getSection())
-                // .subSection(dto.getSubSection())
-                // .constitutionalBody(dto.getConstitutionalBody())
-                // .headQuaters(dto.getHeadQuaters())
-                // .year(dto.getYear())
-                // .content(dto.getContent())
-                // .paperPresentInRS(dto.getPaperPresentInRS())
-                // .dateOfRS(dto.getDateOfRS())
-                // .informedDate(dto.getInformedDate())
-                // .isModifiedByHouse(dto.getIsModifiedByHouse())
-                // .actAndSection(dto.getActAndSection())
-                // .build();
         }
 
         public static PlotInputDTO toDTO(PlotInput entity) {
@@ -104,6 +89,7 @@ public class PlotInputMapper {
                                 .refNo(entity.getRefNo())
                                 .sendToLibrary(entity.getSendToLibrary())
                                 .remarks(entity.getRemarks())
+                                .nodalOfficerEmail(entity.getNodalOfficerEmail())
                                 .paperDetails(entity.getPaperDetails())
                                 .documents(entity.getDocuments())
                                 .proposedDateOfLaying(entity.getProposedDateOfLaying())
@@ -203,12 +189,12 @@ public class PlotInputMapper {
                         }
                         dto.setNodalOfficerDTO(ApproverDTO.builder()
                                         .id(entity.getNodalOfficerDetails().getId())
+                                        .email(entity.getNodalOfficerDetails().getEmail())
                                         .username(entity.getNodalOfficerDetails().getFirstName()
                                                         + " " + entity.getNodalOfficerDetails().getMiddleName()
                                                         + " " + entity.getNodalOfficerDetails().getLastName())
                                         .build());
                 }
-
                 return dto;
                 // .paperTiltle(entity.getPaperTiltle())
                 // .article(entity.getArticle())

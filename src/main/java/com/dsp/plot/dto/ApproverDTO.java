@@ -18,4 +18,5 @@ public class ApproverDTO {
 	private Long id;
 	private String username;
 	private String designation;
+	private String email;
 }
