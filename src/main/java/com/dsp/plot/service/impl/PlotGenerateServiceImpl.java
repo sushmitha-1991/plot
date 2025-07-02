@@ -91,10 +91,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             Specification<PlotGenerate> spec = Specification.where(null);
             spec = spec.and(PlotGenerateSpec.isActive(true));
             spec = spec.and(PlotGenerateSpec.hasDraftStatus(false));
+            System.out.println("date of doc "+dateOfDoc);
             if (dateOfDoc == null) {
                 System.out.println("date is null "+dateOfDoc);
                 dateOfDoc = LocalDate.now();
             }
+            spec=spec.and(PlotGenerateSpec.hasDateBetween(dateOfDoc,dateOfDoc));
             if (doc.equalsIgnoreCase("PLOT")) {
                 entitys = plotRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
                 log.info(" Doc Found on Specified Date:{}", entitys);
