@@ -756,6 +756,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             mname = plainText.substring(0, index).trim();
         }
         System.out.println("Min Name: " + mname);
+        if(mname!=null)
+        return mname.trim();
         return mname;
     }
 

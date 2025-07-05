@@ -142,9 +142,9 @@ public class PlotInputServiceImpl implements PlotInputService {
             plotinputDTO.setStatus("Submitted");
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
-        if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
-            long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-                    plotinputDTO.getProposedDateOfLaying());
+        // if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
+        //     long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+        //             plotinputDTO.getProposedDateOfLaying());
             // if (daysDifference < 2) {
             // log.debug("Date of Submission must be at least 2 days before the Proposed
             // Date Of Lying", plotinputDTO);
@@ -155,7 +155,13 @@ public class PlotInputServiceImpl implements PlotInputService {
             // "Date of Submission must be at least 2 days before the Proposed Date Of
             // Lying.");
             // }
-        }
+        // }
+        // if(plotinputDTO.getId()!=null)
+        // {
+        //     Optional<PlotInput> dbEntity = plotinputRepository.findById(plotinputDTO.getId());
+        //     if(dbEntity.isPresent())
+        //       return  update(plotinputDTO.getId(),plotinputDTO);
+        // }
         try {
             // Convert DTO to entity
             PlotInput entity = PlotInputMapper.toEntity(plotinputDTO);
@@ -225,10 +231,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                     entity.getApplicationNo());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
-            entity = plotinputRepository.save(entity);
+
+            if(entity.getId()==null)
+             entity = plotinputRepository.save(entity);
             entity.setRefId(entity.getId());
-            // log.info("before plot Input Saved: ID={}, Status={}", entity.getId(),
-            // entity.getStatus());
+         
 
             entity = plotinputRepository.save(entity);
             // log.info("after plot Input Saved: ID={}, Status={}", entity.getId(),
@@ -280,11 +287,11 @@ public class PlotInputServiceImpl implements PlotInputService {
 
         contentBuilder.append("<b>")
                 .append(escapeHtml(Authenticator));
-        if (!department.isBlank()) {
-            contentBuilder.append(" (")
-                    .append(escapeHtml(department))
-                    .append(")");
-        }
+        // if (!department.isBlank()) {
+        //     contentBuilder.append(" (")
+        //             .append(escapeHtml(department))
+        //             .append(")");
+        // }
         contentBuilder.append("</b> to lay on the Table:<br>");
 
         // Check if paper details exist
@@ -2056,17 +2063,13 @@ public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
     public String deleteDraftEntry(String applicationNo) {
         String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
         String token = getTokenFromRequest();
-
         if (token == null) {
             throw new IllegalStateException("Authorization token is missing");
         }
-
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-
         HttpEntity<Void> entity = new HttpEntity<>(headers); // No body needed for DELETE request
-
         try {
             ResponseEntity<GenericResponse> response = restTemplate.exchange(url, HttpMethod.DELETE, entity,
                     GenericResponse.class);
