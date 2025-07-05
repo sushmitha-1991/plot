@@ -90,7 +90,6 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String masterServiceUrl;
     @Value("${workflow.service.url}")
     private String draftUrl;
-
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
@@ -142,27 +141,28 @@ public class PlotInputServiceImpl implements PlotInputService {
             plotinputDTO.setStatus("Submitted");
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
-        // if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
-        //     long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-        //             plotinputDTO.getProposedDateOfLaying());
-            // if (daysDifference < 2) {
-            // log.debug("Date of Submission must be at least 2 days before the Proposed
-            // Date Of Lying", plotinputDTO);
-            // // log.info("Date of Submission must be at least 2 days before the Proposed
-            // Date
-            // // Of Lying", plotinputDTO);
-            // throw new IllegalArgumentException(
-            // "Date of Submission must be at least 2 days before the Proposed Date Of
-            // Lying.");
-            // }
+        // if (plotinputDTO.getSubmissionDate() != null &&
+        // plotinputDTO.getProposedDateOfLaying() != null) {
+        // long daysDifference =
+        // ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+        // plotinputDTO.getProposedDateOfLaying());
+        // if (daysDifference < 2) {
+        // log.debug("Date of Submission must be at least 2 days before the Proposed
+        // Date Of Lying", plotinputDTO);
+        // // log.info("Date of Submission must be at least 2 days before the Proposed
+        // Date
+        // // Of Lying", plotinputDTO);
+        // throw new IllegalArgumentException(
+        // "Date of Submission must be at least 2 days before the Proposed Date Of
+        // Lying.");
         // }
-        // if(plotinputDTO.getId()!=null)
-        // {
-        //     Optional<PlotInput> dbEntity = plotinputRepository.findById(plotinputDTO.getId());
-        //     if(dbEntity.isPresent())
-        //       return  update(plotinputDTO.getId(),plotinputDTO);
         // }
         try {
+            if (plotinputDTO.getId() != null && StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
+                Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
+                if (existEntity.isPresent())
+                    return update(plotinputDTO.getId(), plotinputDTO);
+            }
             // Convert DTO to entity
             PlotInput entity = PlotInputMapper.toEntity(plotinputDTO);
             log.debug("Converted PlotInputDTO to entity: {}", entity);
@@ -214,7 +214,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             entity.setCurrentStatus(entity.getStatus());
             entity.setDocumentDate(entity.getSubmissionDate());
             log.debug("entity: {}", entity);
-            // set content
+            // generate content in input
             String departmentName = "";
             if (entity.getDepartmentId() != null) {
                 Optional<Departments> optionalDepartment = departmentRepo.findById(entity.getDepartmentId());
@@ -231,12 +231,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                     entity.getApplicationNo());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
-
-            if(entity.getId()==null)
-             entity = plotinputRepository.save(entity);
+            entity = plotinputRepository.save(entity);
             entity.setRefId(entity.getId());
-         
-
             entity = plotinputRepository.save(entity);
             // log.info("after plot Input Saved: ID={}, Status={}", entity.getId(),
             // entity.getStatus());
@@ -247,7 +243,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
             // responseDTO,entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
-
             if (!StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
                 // Get the Draft ID from draft table using appNo
                 String res = deleteDraftEntry(plotinputDTO.getApplicationNo());
@@ -288,9 +283,9 @@ public class PlotInputServiceImpl implements PlotInputService {
         contentBuilder.append("<b>")
                 .append(escapeHtml(Authenticator));
         // if (!department.isBlank()) {
-        //     contentBuilder.append(" (")
-        //             .append(escapeHtml(department))
-        //             .append(")");
+        // contentBuilder.append(" (")
+        // .append(escapeHtml(department))
+        // .append(")");
         // }
         contentBuilder.append("</b> to lay on the Table:<br>");
 
@@ -988,6 +983,16 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     .findByMinistryCode(input.getMinistryId());
                             input.setMinistries(ministriesOptional.get());
                         }
+                        if (input.getNodalOfficerId() != null) {
+                            Optional<BaseUser> nodalOptional = userRepository
+                                    .findById(input.getNodalOfficerId());
+                            input.setNodalOfficerDetails(nodalOptional.get());
+                        }
+                        if (input.getAuthenticatedById() != null) {
+                            Optional<MinistryAuthority> authOptional = ministriesRepository
+                                    .findByMinistryAuthId(input.getAuthenticatedById());
+                            input.setAuthenticatorDetails(authOptional.get());
+                        }
                         if (input.getDepartmentId() != null) {
                             Optional<Departments> departmentOptional = departmentRepo.findById(input.getDepartmentId());
                             input.setDepartments(departmentOptional.get());
@@ -1058,12 +1063,18 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
                                 // if (plot.getCurrentStatus().equalsIgnoreCase("published")
                                 // || plot.getCurrentStatus().equalsIgnoreCase("approved"))
-                                if (plot.getCurrentStatus().equalsIgnoreCase("approved")) {
-                                    entity.setPendingAt(" ");
+                                if (!plot.getCurrentStatus().equalsIgnoreCase("Published")) {
+                                    if (plot.getCurrentStatus().equalsIgnoreCase("Approved"))
+                                        entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
+                                } else {
+                                    if (entity.getSendToLibrary()!=null && entity.getSendToLibrary()) {
+                                        entity.setPendingAt(" ");
+                                        entity.setStatus(plot.getCurrentStatus());
+                                        entity.setCurrentStatus(plot.getCurrentStatus());
+                                    }
                                 }
-
                             }
                         }
                         entity = plotinputRepository.save(entity);
@@ -1080,12 +1091,18 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
                                 // if (plot.getCurrentStatus().equalsIgnoreCase("published")
                                 // || plot.getCurrentStatus().equalsIgnoreCase("approved"))
-                                if (plot.getCurrentStatus().equalsIgnoreCase("approved")) {
-                                    entity.setPendingAt(" ");
+                                if (!plot.getCurrentStatus().equalsIgnoreCase("published")) {
+                                    if (plot.getCurrentStatus().equalsIgnoreCase("Approved"))
+                                        entity.setPendingAt(" ");
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
+                                } else {
+                                    if (entity.getSendToLibrary()!=null && entity.getSendToLibrary()) {
+                                        entity.setPendingAt(" ");
+                                        entity.setStatus(plot.getCurrentStatus());
+                                        entity.setCurrentStatus(plot.getCurrentStatus());
+                                    }
                                 }
-
                             }
                         }
                         entity = plotinputRepository.save(entity);
@@ -1138,6 +1155,16 @@ public class PlotInputServiceImpl implements PlotInputService {
                                         .findById(input.getPaperTypeId());
                                 input.setPaperTypes(paperTypeOptional.get());
                             }
+                            if (input.getNodalOfficerId() != null) {
+                                Optional<BaseUser> nodalOptional = userRepository
+                                        .findById(input.getNodalOfficerId());
+                                input.setNodalOfficerDetails(nodalOptional.get());
+                            }
+                            if (input.getAuthenticatedById() != null) {
+                                Optional<MinistryAuthority> authOptional = ministriesRepository
+                                        .findByMinistryAuthId(input.getAuthenticatedById());
+                                input.setAuthenticatorDetails(authOptional.get());
+                            }
                             dtoList.add(PlotInputMapper.toDTO(input));
                         }
                     }
@@ -1151,6 +1178,48 @@ public class PlotInputServiceImpl implements PlotInputService {
                             paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
                     for (PlotInput input : plotInputs) {
                         if (input != null) {
+                            if (houseId == 1) {
+                                if (input.getRajyaSabhaSessionNo() == null) {
+                                    input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
+                                }
+                                Optional<MastersRajyaSabha> session = mastersRSSRepository
+                                        .findById(input.getRajyaSabhaSessionNo());
+                                if (session.isPresent())
+                                    input.setRajyaSabhaSession(session.get().getSessionNumber());
+                            }
+                            if (houseId == 2) {
+                                if (input.getLokSabhaSessionNo() == null) {
+                                    input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
+                                }
+                                Optional<MastersLokSabhaSession> session = masterLSSRepository
+                                        .findById(input.getLokSabhaSessionNo());
+                                System.out.println(":::::::" + session.get());
+                                if (session.isPresent()) {
+                                    input.setLokSabhaSession(session.get().getLokSabha().getLokSabhaNumber());
+                                    input.setLokSabhaSessionNumber(session.get().getSessionNumber());
+                                }
+                            }
+                            System.out.println("@@@" + input);
+                            if (input.getMinistryId() != null) {
+                                Optional<Ministries> ministriesOptional = ministriesRepository
+                                        .findByMinistryCode(input.getMinistryId());
+                                input.setMinistries(ministriesOptional.get());
+                            }
+                            if (input.getDepartmentId() != null) {
+                                Optional<Departments> departmentOptional = departmentRepo
+                                        .findById(input.getDepartmentId());
+                                input.setDepartments(departmentOptional.get());
+                            }
+                            if (input.getPaperTypeId() != null) {
+                                Optional<MasterCode> paperTypeOptional = codeRepository
+                                        .findById(input.getPaperTypeId());
+                                input.setPaperTypes(paperTypeOptional.get());
+                            }
+                            // if (input.getAuthority() != null) {
+                            // Optional<MasterCode> paperTypeOptional =
+                            // codeRepository.findById(input.getPaperTypeId());
+                            // input.setPaperTypes(paperTypeOptional.get());
+                            // }
                             dtoList.add(PlotInputMapper.toDTO(input));
                         }
                     }
@@ -1316,19 +1385,22 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         return plotInputs;
     }
-public List<PlotInputDTO> sortByLatestCreatedAt(List<PlotInputDTO> dtoList) {
-    return dtoList.stream()
-                  .sorted(Comparator.comparing(PlotInputDTO::getCreatedAt, Comparator
-                  
-                  .nullsLast(Comparator.reverseOrder())))
-                  .collect(Collectors.toList());
-}
-public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
-    return dtoList.stream()
-        .sorted(Comparator.comparing(PlotInputDTO::getApplicationNo, 
-                Comparator.nullsLast(Comparator.reverseOrder())))
-        .collect(Collectors.toList());
-}
+
+    public List<PlotInputDTO> sortByLatestCreatedAt(List<PlotInputDTO> dtoList) {
+        return dtoList.stream()
+                .sorted(Comparator.comparing(PlotInputDTO::getCreatedAt, Comparator
+
+                        .nullsLast(Comparator.reverseOrder())))
+                .collect(Collectors.toList());
+    }
+
+    public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
+        return dtoList.stream()
+                .sorted(Comparator.comparing(PlotInputDTO::getApplicationNo,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .collect(Collectors.toList());
+    }
+
     @Override
     public List<PlotInputDTO> getHistories(Boolean isActive, Boolean draftStatus, Long lokSabhaNo,
             Long lokSabhaSessionNo, Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status,
@@ -1528,8 +1600,7 @@ public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
         }
         // Save the updated PlotInput
         Long houseId = getHouseId();
-        if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) 
-        {
+        if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
             Long userId = utils.getUserIdFromAuthentication();
             Optional<BaseUser> loginUser = userRepository.findById(userId);
             Request returnRequest = Request.builder()
@@ -1566,7 +1637,7 @@ public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
                 }
             }
         } else {
-            
+
             if (houseId == 1) {
                 dbEntity.setPendingAt("Table Office");
             } else if (houseId == 2) {
@@ -1619,7 +1690,8 @@ public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
         dbEntity.setApplicationInstanceId(dbEntity.getGeneratedPlotId());
         PlotInput savedInput = plotinputRepository.save(dbEntity);
-        if (dbEntity.getApplicationInstanceId() != null && dbEntity.getSendToLibrary()) {
+        if (dbEntity.getApplicationInstanceId() != null 
+        && dbEntity.getSendToLibrary()!=null && dbEntity.getSendToLibrary()) {
             PlotGenerate plot = repository
                     .findById(dbEntity.getApplicationInstanceId()).get();
             plot.setSendToLibrary(dbEntity.getSendToLibrary());
@@ -2041,14 +2113,12 @@ public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
                                 dto.setLokSabhaNo(session.getLokSabha().getId());
                                 dto.setLokSabhaSessionNo(session.getId());
                             }
-
                             dto.setMinistryId(optionalMinistries.get().getId());
                             PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
                             entityList.add(entity);
                         }
                     }
                 }
-
                 entityList = plotDateChartRepository.saveAll(entityList);
                 return "saved";
             } catch (HttpClientErrorException e) {
@@ -2062,6 +2132,9 @@ public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
 
     public String deleteDraftEntry(String applicationNo) {
         String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
+        // String url = "http://localhost:8087/delete-save-as-draft?applicationNo=" +
+        // applicationNo;
+
         String token = getTokenFromRequest();
         if (token == null) {
             throw new IllegalStateException("Authorization token is missing");
@@ -2083,7 +2156,8 @@ public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
             }
         } catch (Exception e) {
             System.err.println("Error during API call: " + e.getMessage());
-            throw new RuntimeException("Failed to delete draft entry", e);
+            // throw new RuntimeException("Failed to delete draft entry", e);
+            return "Error in Deleting Draft Entry ";
         }
     }
 
