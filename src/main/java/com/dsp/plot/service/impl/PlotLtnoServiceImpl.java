@@ -260,9 +260,9 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         if (title != null) {
             spec = spec.and(PlotTitleSpec.hasTitle(title));
         }
-        Sort sort = Sort.by(Sort.Direction.DESC, "plotLaidDate");
+        Sort sort = Sort.by(Sort.Direction.DESC, "refNo");
         //plotLaidDate
-        entitys = titleRepo.findAll(spec);
+        entitys = titleRepo.findAll(spec,sort);
         for (PaperLaidOnTable entity : entitys) {
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
