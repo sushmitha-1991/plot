@@ -141,22 +141,36 @@ public class PlotInputServiceImpl implements PlotInputService {
             plotinputDTO.setStatus("Submitted");
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
-        // if (plotinputDTO.getSubmissionDate() != null &&
-        // plotinputDTO.getProposedDateOfLaying() != null) {
-        // long daysDifference =
-        // ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-        // plotinputDTO.getProposedDateOfLaying());
-        // if (daysDifference < 2) {
-        // log.debug("Date of Submission must be at least 2 days before the Proposed
-        // Date Of Lying", plotinputDTO);
-        // // log.info("Date of Submission must be at least 2 days before the Proposed
-        // Date
-        // // Of Lying", plotinputDTO);
-        // throw new IllegalArgumentException(
-        // "Date of Submission must be at least 2 days before the Proposed Date Of
-        // Lying.");
-        // }
-        // }
+        Long houseId = getHouseId();
+        if (houseId == 1) {
+            if (plotinputDTO.getSubmissionDate() != null &&
+                    plotinputDTO.getProposedDateOfLaying() != null) {
+                long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+                        plotinputDTO.getProposedDateOfLaying());
+                if (daysDifference < 3) {
+                    log.debug("Date of Submission must be at least 3 days before the Proposed Date Of Lying",
+                            plotinputDTO);
+                    // log.info("Date of Submission must be at least 2 days before the Proposed Date
+                    // Of Lying", plotinputDTO);
+                    throw new IllegalArgumentException(
+                            "Date of Submission must be at least 3 days before the Proposed Date Of Lying.");
+                }
+            }
+        } else {
+            if (plotinputDTO.getSubmissionDate() != null &&
+                    plotinputDTO.getProposedDateOfLaying() != null) {
+                long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+                        plotinputDTO.getProposedDateOfLaying());
+                if (daysDifference < 2) {
+                    log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying",
+                            plotinputDTO);
+                    // log.info("Date of Submission must be at least 2 days before the Proposed Date
+                    // Of Lying", plotinputDTO);
+                    throw new IllegalArgumentException(
+                            "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
+                }
+            }
+        }
         try {
             if (plotinputDTO.getId() != null && StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
                 Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
@@ -169,7 +183,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             // Save PlotInput entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
-            Long houseId = getHouseId();
             if (houseId == 1) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
@@ -1069,7 +1082,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
                                 } else {
-                                    if (entity.getSendToLibrary()!=null && entity.getSendToLibrary()) {
+                                    if (entity.getSendToLibrary() != null && entity.getSendToLibrary()) {
                                         entity.setPendingAt(" ");
                                         entity.setStatus(plot.getCurrentStatus());
                                         entity.setCurrentStatus(plot.getCurrentStatus());
@@ -1097,7 +1110,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                                     entity.setStatus(plot.getCurrentStatus());
                                     entity.setCurrentStatus(plot.getCurrentStatus());
                                 } else {
-                                    if (entity.getSendToLibrary()!=null && entity.getSendToLibrary()) {
+                                    if (entity.getSendToLibrary() != null && entity.getSendToLibrary()) {
                                         entity.setPendingAt(" ");
                                         entity.setStatus(plot.getCurrentStatus());
                                         entity.setCurrentStatus(plot.getCurrentStatus());
@@ -1690,8 +1703,8 @@ public class PlotInputServiceImpl implements PlotInputService {
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
         dbEntity.setApplicationInstanceId(dbEntity.getGeneratedPlotId());
         PlotInput savedInput = plotinputRepository.save(dbEntity);
-        if (dbEntity.getApplicationInstanceId() != null 
-        && dbEntity.getSendToLibrary()!=null && dbEntity.getSendToLibrary()) {
+        if (dbEntity.getApplicationInstanceId() != null
+                && dbEntity.getSendToLibrary() != null && dbEntity.getSendToLibrary()) {
             PlotGenerate plot = repository
                     .findById(dbEntity.getApplicationInstanceId()).get();
             plot.setSendToLibrary(dbEntity.getSendToLibrary());
