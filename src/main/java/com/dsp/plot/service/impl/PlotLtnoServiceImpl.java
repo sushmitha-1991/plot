@@ -190,7 +190,9 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             spec = spec.and(PlotLtnoSpec.hasPaperType(paperType));
         }
         // entitys = ltnoRepo.findAll();
-        Sort sort = Sort.by(Sort.Direction.DESC, "ltnoDate");
+        // Sort sort = Sort.by(Sort.Direction.DESC, "ltnoDate");
+        Sort sort = Sort.by(Sort.Direction.DESC, "refNo");
+
         entitys = ltnoRepo.findAll(spec,sort);
         Long houseId = getHouseId();
         for (PlotLtno entity : entitys) {
