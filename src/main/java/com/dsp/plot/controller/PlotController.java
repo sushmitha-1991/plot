@@ -37,7 +37,7 @@ public class PlotController {
                 PlotLaidOnTableDTO savedEntity = service.saveTitle(plotLaidOnTableDTO);
 
                 GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
-                                "Plot Title created successfully", savedEntity);
+                                "Plot Title created with "+savedEntity.getRefNo()+" successfully", savedEntity);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
 
