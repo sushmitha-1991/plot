@@ -578,8 +578,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperTitle = stringValue;
             }
         }
-        String template = "A copy of the Notification No. {0} of the {1} {2} of {3}, published in {4} on {5}"
-                + "  {6},  for the period of {10}, under sub-section {7} of {8} of the {9} Act.";
+        String template = "A copy of the Notification No. {0} of the {1} {2} of {3}, published in {4} {5} on {6}"
+                + "  {7},  for the period of {11}, under sub-section {8} of {9} of the {10} Act.";
         // Long publishedId = Long.parseLong(paper.get("publishedIn").toString());
         // Long gazetteDetailsId =
         // Long.parseLong(paper.get("gazetteDetails").toString());
@@ -628,6 +628,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 escapeHtml(paper.get("notificationNumber")),
                 escapeHtml(paperTitle),
                 escapeHtml(languageType),
+                escapeHtml(paper.get("shortTitle")),
                 escapeHtml(paper.get("paperTitle")),
                 escapeHtml(publishedIn),
                 escapeHtml(publicationDate),
