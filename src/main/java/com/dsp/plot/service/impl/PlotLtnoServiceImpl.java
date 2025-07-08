@@ -191,7 +191,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         }
         // entitys = ltnoRepo.findAll();
         // Sort sort = Sort.by(Sort.Direction.DESC, "ltnoDate");
-        Sort sort = Sort.by(Sort.Direction.DESC, "refNo");
+        Sort sort = Sort.by(Sort.Direction.DESC,"ltnoDate", "refNo");
 
         entitys = ltnoRepo.findAll(spec,sort);
         Long houseId = getHouseId();
@@ -262,7 +262,9 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         if (title != null) {
             spec = spec.and(PlotTitleSpec.hasTitle(title));
         }
-        Sort sort = Sort.by(Sort.Direction.DESC, "refNo");
+        // Sort sort = Sort.by(Sort.Direction.DESC, "plotLaidDate",Sort.Direction.DESC, "refNo");
+        Sort sort = Sort.by(Sort.Direction.DESC, "plotLaidDate", "refNo");
+
         //plotLaidDate
         entitys = titleRepo.findAll(spec,sort);
         for (PaperLaidOnTable entity : entitys) {

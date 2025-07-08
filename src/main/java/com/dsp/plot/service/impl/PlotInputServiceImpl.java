@@ -143,33 +143,41 @@ public class PlotInputServiceImpl implements PlotInputService {
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
         Long houseId = getHouseId();
         // if (houseId == 1) {
-        //     if (plotinputDTO.getSubmissionDate() != null &&
-        //             plotinputDTO.getProposedDateOfLaying() != null) {
-        //         long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-        //                 plotinputDTO.getProposedDateOfLaying());
-        //         if (daysDifference < 3) {
-        //             log.debug("Date of Submission must be at least 3 days before the Proposed Date Of Lying",
-        //                     plotinputDTO);
-        //             // log.info("Date of Submission must be at least 2 days before the Proposed Date
-        //             // Of Lying", plotinputDTO);
-        //             throw new IllegalArgumentException(
-        //                     "Date of Submission must be at least 3 days before the Proposed Date Of Lying.");
-        //         }
-        //     }
+        // if (plotinputDTO.getSubmissionDate() != null &&
+        // plotinputDTO.getProposedDateOfLaying() != null) {
+        // long daysDifference =
+        // ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+        // plotinputDTO.getProposedDateOfLaying());
+        // if (daysDifference < 3) {
+        // log.debug("Date of Submission must be at least 3 days before the Proposed
+        // Date Of Lying",
+        // plotinputDTO);
+        // // log.info("Date of Submission must be at least 2 days before the Proposed
+        // Date
+        // // Of Lying", plotinputDTO);
+        // throw new IllegalArgumentException(
+        // "Date of Submission must be at least 3 days before the Proposed Date Of
+        // Lying.");
+        // }
+        // }
         // } else {
-        //     if (plotinputDTO.getSubmissionDate() != null &&
-        //             plotinputDTO.getProposedDateOfLaying() != null) {
-        //         long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-        //                 plotinputDTO.getProposedDateOfLaying());
-        //         if (daysDifference < 2) {
-        //             log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying",
-        //                     plotinputDTO);
-        //             // log.info("Date of Submission must be at least 2 days before the Proposed Date
-        //             // Of Lying", plotinputDTO);
-        //             throw new IllegalArgumentException(
-        //                     "Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
-        //         }
-        //     }
+        // if (plotinputDTO.getSubmissionDate() != null &&
+        // plotinputDTO.getProposedDateOfLaying() != null) {
+        // long daysDifference =
+        // ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+        // plotinputDTO.getProposedDateOfLaying());
+        // if (daysDifference < 2) {
+        // log.debug("Date of Submission must be at least 2 days before the Proposed
+        // Date Of Lying",
+        // plotinputDTO);
+        // // log.info("Date of Submission must be at least 2 days before the Proposed
+        // Date
+        // // Of Lying", plotinputDTO);
+        // throw new IllegalArgumentException(
+        // "Date of Submission must be at least 2 days before the Proposed Date Of
+        // Lying.");
+        // }
+        // }
         // }
         try {
             if (plotinputDTO.getId() != null && StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
@@ -1922,226 +1930,381 @@ public class PlotInputServiceImpl implements PlotInputService {
         return ministry.get().getMinistryCode();
     }
 
-    // question api
+    // // question api
+    // public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo,
+    // String rajyaSabhaNo,
+    // List<Long> existingMinistries, Long houseId) {
+    // List<PlotDateChart> entityList = new ArrayList<>();
+    // if (houseId == 1) {
+    // String url = sansadUrl + "/api_rs/question/ministry-group-sitting?session="
+    // + rajyaSabhaNo;
+    // String token = getTokenFromRequest();
+    // HttpHeaders headers = new HttpHeaders();
+    // headers.setContentType(MediaType.APPLICATION_JSON);
+    // // Add the Authorization token if available
+    // if (token != null && !token.isEmpty()) {
+    // headers.set("Authorization", "Bearer " + token);
+    // } else {
+    // throw new RuntimeException("JWT Token is missing. Cannot proceed with the API
+    // request.");
+    // }
+    // // Create request entity with headers
+    // HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+    // try {
+    // ResponseEntity<List<QuesBranchApiDtoRS>> response = restTemplate.exchange(
+    // url,
+    // HttpMethod.GET,
+    // requestEntity,
+    // new ParameterizedTypeReference<List<QuesBranchApiDtoRS>>() {
+    // });
+    // List<QuesBranchApiDtoRS> quesDtoList = response.getBody();
+    // for (QuesBranchApiDtoRS quesDto : quesDtoList) {
+    // // Define date format
+    // // "2024-07-03 00:00:00.0"
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
+    // HH:mm:ss.S");
+    // List<Map<String, Object>> datesList = quesDto.getSittingDates().stream()
+    // .map(date -> {
+    // LocalDate proposedDate = LocalDate.parse(date, formatter);
+    // LocalDate submissionDate = proposedDate.minusDays(2);
+    // // Create the JSON-like structure
+    // Map<String, Object> dateMap = new HashMap<>();
+    // dateMap.put("proposedDateOfLaying", proposedDate.toString());
+    // dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
+    // dateMap.put("actualDateOfLaying", "");
+    // return dateMap;
+    // })
+    // .collect(Collectors.toList());
+    // // String[] ministries = quesDto.getMinistriesDepartments().split(";");
+    // for (String ministry : quesDto.getMinistries()) {
+    // ministry = ministry.toUpperCase();
+    // ministry = ministry.trim();
+    // if (ministry.equalsIgnoreCase("communications")) {
+    // System.out.println("ministry " + ministry);
+    // ministry = "COMMUNICATION";
+    // }
+    // Optional<Ministries> optionalMinistries = ministriesRepository
+    // .findByMinistryName(ministry);
+    // if (optionalMinistries.isPresent()) {
+    // Long ministryId = optionalMinistries.get().getId();
+    // PlotDateChartDTO dto = PlotDateChartDTO.builder()
+    // .dates(datesList)
+    // .groupName(quesDto.getGroup())
+    // .ministryId(ministryId)
+    // .build();
+    // Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
+    // .findBySessionNumber(rajyaSabhaNo);
+    // if (optionalSession.isPresent()) {
+    // MastersRajyaSabha session = optionalSession.get();
+    // dto.setRajyaSabhaSessionNo(session.getId());
+    // }
+    // dto.setMinistryId(optionalMinistries.get().getId());
+    // PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+    // // Check if ministryId already exists in the list
+    // if (existingMinistries.contains(ministryId)) {
+    // List<PlotDateChart> existingDateChart = plotDateChartRepository
+    // .findByMinistryId(ministryId);
+    // for (PlotDateChart existDC : existingDateChart)
+    // {
+    // if (existDC.getLokSabhaSessionNo() == null)
+    // {
+    // List<Map<String, Object>> datesExisting = existDC.getDates();
+    // boolean hasValidDate = false;
+    // for (Map<String, Object> dateList : datesExisting)
+    // {
+    // Object actualDateObj = dateList.get("actualDateOfLaying");
+    // Object proposedDate=dateList.get("proposedDateOfLaying");
+    // if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty())
+    // {
+    // // At least one actualDateOfLaying is non-null and non-empty → break
+    // // immediately
+    // hasValidDate = true;
+    // break;
+    // }
+    // }
+    // // If no valid actualDateOfLaying was found in the entire loop
+    // if (!hasValidDate) {
+    // existDC.setDates(datesList);
+    // entityList.add(existDC);
+    // break;
+    // }
+    // }
+    // }
+    // System.out.println("ministry " + ministry);
+    // continue; // Skip adding entry if ministryId is already present
+    // }
+    // entityList.add(entity);
+    // }
+    // }
+    // }
+    // entityList = plotDateChartRepository.saveAll(entityList);
+    // return "saved";
+    // } catch (HttpClientErrorException e) {
+    // System.err.println("API Error: " + e.getStatusCode() + " - " +
+    // e.getResponseBodyAsString());
+    // throw new RuntimeException("Failed to call external API", e);
+    // }
+    // } else {
+    // String url = sansadUrl +
+    // "/integration-gateway/question-branch-api/get-question-chart?lsNo="
+    // + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
+    // String token = getTokenFromRequest();
+    // HttpHeaders headers = new HttpHeaders();
+    // headers.setContentType(MediaType.APPLICATION_JSON);
+    // // Add the Authorization token if available
+    // if (token != null && !token.isEmpty()) {
+    // headers.set("Authorization", "Bearer " + token);
+    // } else {
+    // throw new RuntimeException("JWT Token is missing. Cannot proceed with the API
+    // request.");
+    // }
+    // // Create request entity with headers
+    // HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+    // try {
+    // ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
+    // url,
+    // HttpMethod.GET,
+    // requestEntity,
+    // new ParameterizedTypeReference<List<QuesBranchApiDto>>() {
+    // });
+    // List<QuesBranchApiDto> quesDtoList = response.getBody();
+    // for (QuesBranchApiDto quesDto : quesDtoList) {
+    // // Define date format
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+    // // Convert to List<Map<String, Object>>
+    // List<Map<String, Object>> datesList = Arrays
+    // .stream(quesDto.getDateOfAnsweringQuestions().split(","))
+    // .map(String::trim)
+    // .map(date -> {
+    // LocalDate proposedDate = LocalDate.parse(date, formatter);
+    // LocalDate submissionDate = proposedDate.minusDays(2);
+    // // Create the JSON-like structure
+    // Map<String, Object> dateMap = new HashMap<>();
+    // dateMap.put("proposedDateOfLaying", proposedDate.toString());
+    // dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
+    // dateMap.put("actualDateOfLaying", "");
+    // return dateMap;
+    // })
+    // .collect(Collectors.toList());
+    // String ministriesStr = quesDto.getMinistriesDepartments();
+    // String[] ministries;
+
+    // if (ministriesStr.contains(";")) {
+    // ministries = ministriesStr.split(";");
+    // } else {
+    // ministries = new String[] { ministriesStr }; // Store as a single-element
+    // array
+    // }
+    // // String[] ministries = quesDto.getMinistriesDepartments().split(";");
+    // for (String ministry : ministries) {
+    // ministry = ministry.toUpperCase();
+    // ministry = ministry.trim();
+    // if (ministry.equalsIgnoreCase("communications"))
+    // ministry = "COMMUNICATION";
+    // Optional<Ministries> optionalMinistries = ministriesRepository
+    // .findByMinistryName(ministry);
+    // if (optionalMinistries.isPresent()) {
+    // Long ministryId = optionalMinistries.get().getId();
+    // // Check if ministryId already exists in the list
+    // if (existingMinistries.contains(ministryId)) {
+    // List<PlotDateChart> existingDateChart = plotDateChartRepository
+    // .findByMinistryId(ministryId);
+    // for (PlotDateChart existDC : existingDateChart) {
+    // if (existDC.getRajyaSabhaSessionNo() == null) {
+    // List<Map<String, Object>> datesExisting = existDC.getDates();
+    // boolean hasValidDate = false;
+    // for (Map<String, Object> dateList : datesExisting) {
+    // Object actualDateObj = dateList.get("actualDateOfLaying");
+    // if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty()) {
+    // // At least one actualDateOfLaying is non-null and non-empty → break
+    // // immediately
+    // hasValidDate = true;
+    // break;
+    // }
+    // }
+
+    // // If no valid actualDateOfLaying was found in the entire loop
+    // if (!hasValidDate) {
+    // existDC.setDates(datesList);
+    // entityList.add(existDC);
+    // break;
+    // }
+    // }
+    // }
+    // continue;
+    // // Skip adding entry if ministryId is already present
+    // }
+    // PlotDateChartDTO dto = PlotDateChartDTO.builder()
+    // .dates(datesList)
+    // .groupName(quesDto.getGroup())
+    // .ministryId(ministryId)
+    // .build();
+    // Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
+    // .findById(Long.parseLong(lokSabhaSessionNo));
+    // if (optionalSession.isPresent()) {
+    // MastersLokSabhaSession session = optionalSession.get();
+    // dto.setLokSabhaNo(session.getLokSabha().getId());
+    // dto.setLokSabhaSessionNo(session.getId());
+    // }
+    // dto.setMinistryId(optionalMinistries.get().getId());
+    // PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+    // entityList.add(entity);
+    // }
+    // }
+    // }
+    // entityList = plotDateChartRepository.saveAll(entityList);
+    // return "saved";
+    // } catch (HttpClientErrorException e) {
+    // System.err.println("API Error: " + e.getStatusCode() + " - " +
+    // e.getResponseBodyAsString());
+    // throw new RuntimeException("Failed to call external API", e);
+    // }
+    // }
+
+    // }
+
+    private String getJwtTokenOrThrow() {
+        String token = getTokenFromRequest();
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("JWT Token is missing. Cannot proceed with the API request.");
+        }
+        return token;
+    }
+
+    private <T> List<T> fetchFromApi(String url, String token, ParameterizedTypeReference<List<T>> typeRef) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        System.out.println("url " + url);
+        try {
+            return restTemplate.exchange(url, HttpMethod.GET, requestEntity, typeRef).getBody();
+        } catch (HttpClientErrorException e) {
+            System.err.println("API Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            throw new RuntimeException("Failed to call external API", e);
+        }
+    }
+
+    private List<Map<String, Object>> parseDates(List<String> dateStrings, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        return dateStrings.stream()
+                .map(String::trim)
+                .map(date -> {
+                    LocalDate proposedDate = LocalDate.parse(date, formatter);
+                    LocalDate submissionDate = proposedDate.minusDays(2);
+                    Map<String, Object> dateMap = new HashMap<>();
+                    dateMap.put("proposedDateOfLaying", proposedDate.toString());
+                    dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
+                    dateMap.put("actualDateOfLaying", "");
+                    return dateMap;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void processMinistries(List<String> ministries, String groupName, List<Long> existingMinistries,
+            List<Map<String, Object>> datesList, String lsSessionNo,
+            String rsSessionNo, boolean isRajyaSabha, List<PlotDateChart> entityList) {
+        for (String ministry : ministries) {
+            System.out.println("ministry " + ministry);
+            ministry = ministry.trim().toUpperCase();
+            if (ministry.equalsIgnoreCase("communications")) {
+                ministry = "COMMUNICATION";
+            }
+
+            ministriesRepository.findByMinistryName(ministry).ifPresent(ministryEntity -> {
+                Long ministryId = ministryEntity.getId();
+                if (existingMinistries.contains(ministryId)) {
+                    List<PlotDateChart> existingDateCharts = plotDateChartRepository.findByMinistryId(ministryId);
+                    for (PlotDateChart chart : existingDateCharts) {
+                        System.out.println("date from api  " + datesList);
+                        System.out.println("date alreadyin Date Chart " + chart);
+                        boolean isSessionNull = isRajyaSabha ? chart.getLokSabhaSessionNo() == null
+                                : chart.getRajyaSabhaSessionNo() == null;
+                        if (isSessionNull && chart.getDates().stream()
+                                .noneMatch(d -> d.get("actualDateOfLaying") != null &&
+                                        !d.get("actualDateOfLaying").toString().trim().isEmpty())) {
+                            Boolean isDateLatest = isProposedDateAfterQustionBranchData(datesList, chart.getDates());
+                            if (!isDateLatest)
+                                chart.setDates(datesList);
+                            entityList.add(chart);
+                            return;
+                        }
+                    }
+                    return; // Skip adding new if existing valid found
+                }
+
+                PlotDateChartDTO dto = PlotDateChartDTO.builder()
+                        .dates(datesList)
+                        .groupName(groupName)
+                        .ministryId(ministryId)
+                        .build();
+
+                if (isRajyaSabha) {
+                    mastersRSSRepository.findBySessionNumber(rsSessionNo)
+                            .ifPresent(session -> dto.setRajyaSabhaSessionNo(session.getId()));
+                } else {
+                    masterLSSRepository.findById(Long.parseLong(lsSessionNo)).ifPresent(session -> {
+                        dto.setLokSabhaSessionNo(session.getId());
+                        dto.setLokSabhaNo(session.getLokSabha().getId());
+                    });
+                }
+
+                PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+                entityList.add(entity);
+            });
+        }
+    }
+
+    private Boolean isProposedDateAfterQustionBranchData(List<Map<String,Object>> datesList, List<Map<String,Object>> chart) {
+        // TODO Auto-generated method stub
+        Boolean res = false;
+        System.out.println(" datesList  "+datesList);
+        System.out.println(" chart  "+chart);
+        // for (Map<String, Object> dates : chart.getDates()) {
+        //     // List<String>
+        //     // proposedDates=dates.forEach(d->d.get("proposedDateOfLaying").toString());
+        //     // proposedDateOfLaying
+        //     List<String> proposedDates = chart.getDates().stream()
+        //             .map(d -> d.get("proposedDateOfLaying").toString())
+        //             .collect(Collectors.toList());
+        // }
+        return res;
+    }
+
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
             List<Long> existingMinistries, Long houseId) {
         List<PlotDateChart> entityList = new ArrayList<>();
-        if (houseId == 1) {
-            String url = sansadUrl + "/api_rs/question/ministry-group-sitting?session="
-                    + rajyaSabhaNo;
-            String token = getTokenFromRequest();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            // Add the Authorization token if available
-            if (token != null && !token.isEmpty()) {
-                headers.set("Authorization", "Bearer " + token);
-            } else {
-                throw new RuntimeException("JWT Token is missing. Cannot proceed with the API request.");
-            }
-            // Create request entity with headers
-            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-            try {
-                ResponseEntity<List<QuesBranchApiDtoRS>> response = restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        requestEntity,
-                        new ParameterizedTypeReference<List<QuesBranchApiDtoRS>>() {
-                        });
-                List<QuesBranchApiDtoRS> quesDtoList = response.getBody();
-                for (QuesBranchApiDtoRS quesDto : quesDtoList) {
-                    // Define date format
-                    // "2024-07-03 00:00:00.0"
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-                    List<Map<String, Object>> datesList = quesDto.getSittingDates().stream()
-                            .map(date -> {
-                                LocalDate proposedDate = LocalDate.parse(date, formatter);
-                                LocalDate submissionDate = proposedDate.minusDays(2);
-                                // Create the JSON-like structure
-                                Map<String, Object> dateMap = new HashMap<>();
-                                dateMap.put("proposedDateOfLaying", proposedDate.toString());
-                                dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
-                                dateMap.put("actualDateOfLaying", "");
-                                return dateMap;
-                            })
-                            .collect(Collectors.toList());
-                    // String[] ministries = quesDto.getMinistriesDepartments().split(";");
-                    for (String ministry : quesDto.getMinistries()) {
-                        ministry = ministry.toUpperCase();
-                        ministry = ministry.trim();
-                        if (ministry.equalsIgnoreCase("communications")) {
-                            System.out.println("ministry " + ministry);
-                            ministry = "COMMUNICATION";
-                        }
-                        Optional<Ministries> optionalMinistries = ministriesRepository
-                                .findByMinistryName(ministry);
+        String token = getJwtTokenOrThrow();
 
-                        if (optionalMinistries.isPresent()) {
-                            Long ministryId = optionalMinistries.get().getId();
-                            PlotDateChartDTO dto = PlotDateChartDTO.builder()
-                                    .dates(datesList)
-                                    .groupName(quesDto.getGroup())
-                                    .ministryId(ministryId)
-                                    .build();
-                            Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
-                                    .findBySessionNumber(rajyaSabhaNo);
-                            if (optionalSession.isPresent()) {
-                                MastersRajyaSabha session = optionalSession.get();
-                                dto.setRajyaSabhaSessionNo(session.getId());
-                            }
-                            dto.setMinistryId(optionalMinistries.get().getId());
-                            PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
-                            // Check if ministryId already exists in the list
-                            if (existingMinistries.contains(ministryId)) {
-                                List<PlotDateChart> existingDateChart = plotDateChartRepository
-                                        .findByMinistryId(ministryId);
-                                for (PlotDateChart existDC : existingDateChart) {
-                                    if (existDC.getLokSabhaSessionNo() == null) {
-                                        List<Map<String, Object>> datesExisting = existDC.getDates();
-                                        boolean hasValidDate = false;
-                                        for (Map<String, Object> dateList : datesExisting) {
-                                            Object actualDateObj = dateList.get("actualDateOfLaying");
-                                            if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty()) {
-                                                // At least one actualDateOfLaying is non-null and non-empty → break
-                                                // immediately
-                                                hasValidDate = true;
-                                                break;
-                                            }
-                                        }
-                                        // If no valid actualDateOfLaying was found in the entire loop
-                                        if (!hasValidDate) {
-                                            existDC.setDates(datesList);
-                                            entityList.add(existDC);
-                                            break;
-                                        }
-                                    }
-                                }
-                                System.out.println("ministry " + ministry);
-                                continue; // Skip adding entry if ministryId is already present
-                            }
-                            entityList.add(entity);
-                        }
-                    }
-                }
-                entityList = plotDateChartRepository.saveAll(entityList);
-                return "saved";
-            } catch (HttpClientErrorException e) {
-                System.err.println("API Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-                throw new RuntimeException("Failed to call external API", e);
+        if (houseId == 1) {
+            // Rajya Sabha
+            String url = sansadUrl + "/api_rs/question/ministry-group-sitting?session=" + rajyaSabhaNo;
+            List<QuesBranchApiDtoRS> rsDtos = fetchFromApi(url, token, new ParameterizedTypeReference<>() {
+            });
+            for (QuesBranchApiDtoRS dto : rsDtos) {
+                List<Map<String, Object>> datesList = parseDates(dto.getSittingDates(), "yyyy-MM-dd HH:mm:ss.S");
+                processMinistries(dto.getMinistries(), dto.getGroup(), existingMinistries, datesList,
+                        null, rajyaSabhaNo, true, entityList);
             }
         } else {
+            // Lok Sabha
             String url = sansadUrl + "/integration-gateway/question-branch-api/get-question-chart?lsNo="
                     + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
-            String token = getTokenFromRequest();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            // Add the Authorization token if available
-            if (token != null && !token.isEmpty()) {
-                headers.set("Authorization", "Bearer " + token);
-            } else {
-                throw new RuntimeException("JWT Token is missing. Cannot proceed with the API request.");
-            }
-            // Create request entity with headers
-            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-            try {
-                ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        requestEntity,
-                        new ParameterizedTypeReference<List<QuesBranchApiDto>>() {
-                        });
-                List<QuesBranchApiDto> quesDtoList = response.getBody();
-                for (QuesBranchApiDto quesDto : quesDtoList) {
-                    // Define date format
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-                    // Convert to List<Map<String, Object>>
-                    List<Map<String, Object>> datesList = Arrays
-                            .stream(quesDto.getDateOfAnsweringQuestions().split(","))
-                            .map(String::trim)
-                            .map(date -> {
-                                LocalDate proposedDate = LocalDate.parse(date, formatter);
-                                LocalDate submissionDate = proposedDate.minusDays(2);
-                                // Create the JSON-like structure
-                                Map<String, Object> dateMap = new HashMap<>();
-                                dateMap.put("proposedDateOfLaying", proposedDate.toString());
-                                dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
-                                dateMap.put("actualDateOfLaying", "");
-                                return dateMap;
-                            })
-                            .collect(Collectors.toList());
-                    String ministriesStr = quesDto.getMinistriesDepartments();
-                    String[] ministries;
-
-                    if (ministriesStr.contains(";")) {
-                        ministries = ministriesStr.split(";");
-                    } else {
-                        ministries = new String[] { ministriesStr }; // Store as a single-element array
-                    }
-                    // String[] ministries = quesDto.getMinistriesDepartments().split(";");
-                    for (String ministry : ministries) {
-                        ministry = ministry.toUpperCase();
-                        ministry = ministry.trim();
-                        if (ministry.equalsIgnoreCase("communications"))
-                            ministry = "COMMUNICATION";
-                        Optional<Ministries> optionalMinistries = ministriesRepository
-                                .findByMinistryName(ministry);
-                        if (optionalMinistries.isPresent()) {
-                            Long ministryId = optionalMinistries.get().getId();
-                            // Check if ministryId already exists in the list
-                            if (existingMinistries.contains(ministryId)) {
-                                List<PlotDateChart> existingDateChart = plotDateChartRepository
-                                        .findByMinistryId(ministryId);
-                                for (PlotDateChart existDC : existingDateChart) {
-                                    if (existDC.getRajyaSabhaSessionNo() == null) {
-                                        List<Map<String, Object>> datesExisting = existDC.getDates();
-                                        boolean hasValidDate = false;
-                                        for (Map<String, Object> dateList : datesExisting) {
-                                            Object actualDateObj = dateList.get("actualDateOfLaying");
-                                            if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty()) {
-                                                // At least one actualDateOfLaying is non-null and non-empty → break
-                                                // immediately
-                                                hasValidDate = true;
-                                                break;
-                                            }
-                                        }
-
-                                        // If no valid actualDateOfLaying was found in the entire loop
-                                        if (!hasValidDate) {
-                                            existDC.setDates(datesList);
-                                            entityList.add(existDC);
-                                            break;
-                                        }
-                                    }
-                                }
-                                continue;
-                                // Skip adding entry if ministryId is already present
-                            }
-                            PlotDateChartDTO dto = PlotDateChartDTO.builder()
-                                    .dates(datesList)
-                                    .groupName(quesDto.getGroup())
-                                    .ministryId(ministryId)
-                                    .build();
-                            Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
-                                    .findById(Long.parseLong(lokSabhaSessionNo));
-                            if (optionalSession.isPresent()) {
-                                MastersLokSabhaSession session = optionalSession.get();
-                                dto.setLokSabhaNo(session.getLokSabha().getId());
-                                dto.setLokSabhaSessionNo(session.getId());
-                            }
-                            dto.setMinistryId(optionalMinistries.get().getId());
-                            PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
-                            entityList.add(entity);
-                        }
-                    }
-                }
-                entityList = plotDateChartRepository.saveAll(entityList);
-                return "saved";
-            } catch (HttpClientErrorException e) {
-                System.err.println("API Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-                throw new RuntimeException("Failed to call external API", e);
+            List<QuesBranchApiDto> lsDtos = fetchFromApi(url, token, new ParameterizedTypeReference<>() {
+            });
+            for (QuesBranchApiDto dto : lsDtos) {
+                List<Map<String, Object>> datesList = parseDates(
+                        Arrays.asList(dto.getDateOfAnsweringQuestions().split(",")),
+                        "dd MMMM yyyy");
+                processMinistries(Arrays.asList(dto.getMinistriesDepartments().split(";")), dto.getGroup(),
+                        existingMinistries, datesList, lokSabhaSessionNo, null, false, entityList);
             }
         }
-
+        System.out.println("entity list " + entityList);
+        plotDateChartRepository.saveAll(entityList);
+        return "saved";
     }
+
     // delete draft entry
 
     public String deleteDraftEntry(String applicationNo) {
