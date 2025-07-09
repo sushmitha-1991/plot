@@ -2223,9 +2223,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                         if (isSessionNull && chart.getDates().stream()
                                 .noneMatch(d -> d.get("actualDateOfLaying") != null &&
                                         !d.get("actualDateOfLaying").toString().trim().isEmpty())) {
-                            Boolean isDateLatest = isProposedDateAfterQustionBranchData(datesList, chart.getDates());
-                            if (!isDateLatest)
-                                chart.setDates(datesList);
+                            
+                            chart.setDates(updateDatesListWithLatestProposedDates(datesList, chart.getDates()));
                             entityList.add(chart);
                             return;
                         }
@@ -2255,20 +2254,39 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
 
-    private Boolean isProposedDateAfterQustionBranchData(List<Map<String,Object>> datesList, List<Map<String,Object>> chart) {
-        // TODO Auto-generated method stub
-        Boolean res = false;
-        System.out.println(" datesList  "+datesList);
-        System.out.println(" chart  "+chart);
-        // for (Map<String, Object> dates : chart.getDates()) {
-        //     // List<String>
-        //     // proposedDates=dates.forEach(d->d.get("proposedDateOfLaying").toString());
-        //     // proposedDateOfLaying
-        //     List<String> proposedDates = chart.getDates().stream()
-        //             .map(d -> d.get("proposedDateOfLaying").toString())
-        //             .collect(Collectors.toList());
-        // }
-        return res;
+    public List<Map<String, Object>> updateDatesListWithLatestProposedDates(
+            List<Map<String, Object>> datesList,
+            List<Map<String, Object>> chart) {
+        System.out.println(" datesList  " + datesList);
+        System.out.println(" chart  " + chart);
+        int minSize = Math.min(datesList.size(), chart.size());
+
+        // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
+        for (int i = 0; i < minSize; i++) {
+            Map<String, Object> datesEntry = datesList.get(i);
+            Map<String, Object> chartEntry = chart.get(i);
+
+            Object datesPropObj = datesEntry.get("proposedDateOfLaying");
+            Object chartPropObj = chartEntry.get("proposedDateOfLaying");
+
+            if (datesPropObj != null && chartPropObj != null &&
+                    !datesPropObj.toString().isBlank() && !chartPropObj.toString().isBlank()) {
+
+                LocalDate datesDate = LocalDate.parse(datesPropObj.toString());
+                LocalDate chartDate = LocalDate.parse(chartPropObj.toString());
+
+                if (chartDate.isAfter(datesDate)) {
+                    datesList.set(i, new HashMap<>(chartEntry));
+                }
+            }
+        }
+
+        // Step 2: Append extra entries from chart to datesList
+        for (int i = minSize; i < chart.size(); i++) {
+            datesList.add(new HashMap<>(chart.get(i)));
+        }
+
+        return datesList;
     }
 
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
