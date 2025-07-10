@@ -37,7 +37,7 @@ public class PlotController {
                 PlotLaidOnTableDTO savedEntity = service.saveTitle(plotLaidOnTableDTO);
 
                 GenericResponse<PlotLaidOnTableDTO> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
-                                "Plot Title created with "+savedEntity.getRefNo()+" successfully", savedEntity);
+                                "Papers Laid on the table (LTNO) ("+savedEntity.getRefNo()+") is created successfully", savedEntity);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
 
@@ -46,7 +46,7 @@ public class PlotController {
                 PlotLtnoDto savedEntity = service.save(plotLtnoDto);
 
                 GenericResponse<PlotLtnoDto> response = new GenericResponse<>(HttpStatus.CREATED.value(), true,
-                                "Plot Ltno created with "+savedEntity.getApplicationNo()+" successfully ", savedEntity);
+                                "Papers Laid (LTNO) ("+savedEntity.getApplicationNo()+") is created successfully ", savedEntity);
                 return new ResponseEntity<>(response, HttpStatus.CREATED);
         }
 
