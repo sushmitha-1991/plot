@@ -142,43 +142,26 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
         Long houseId = getHouseId();
-        // if (houseId == 1) {
-        // if (plotinputDTO.getSubmissionDate() != null &&
-        // plotinputDTO.getProposedDateOfLaying() != null) {
-        // long daysDifference =
-        // ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-        // plotinputDTO.getProposedDateOfLaying());
-        // if (daysDifference < 3) {
-        // log.debug("Date of Submission must be at least 3 days before the Proposed
-        // Date Of Lying",
-        // plotinputDTO);
-        // // log.info("Date of Submission must be at least 2 days before the Proposed
-        // Date
-        // // Of Lying", plotinputDTO);
-        // throw new IllegalArgumentException(
-        // "Date of Submission must be at least 3 days before the Proposed Date Of
-        // Lying.");
-        // }
-        // }
-        // } else {
-        // if (plotinputDTO.getSubmissionDate() != null &&
-        // plotinputDTO.getProposedDateOfLaying() != null) {
-        // long daysDifference =
-        // ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-        // plotinputDTO.getProposedDateOfLaying());
-        // if (daysDifference < 2) {
-        // log.debug("Date of Submission must be at least 2 days before the Proposed
-        // Date Of Lying",
-        // plotinputDTO);
-        // // log.info("Date of Submission must be at least 2 days before the Proposed
-        // Date
-        // // Of Lying", plotinputDTO);
-        // throw new IllegalArgumentException(
-        // "Date of Submission must be at least 2 days before the Proposed Date Of
-        // Lying.");
-        // }
-        // }
-        // }
+        if (houseId == 1) {
+            if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
+            long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+            plotinputDTO.getProposedDateOfLaying());
+                if (daysDifference < 3) {
+                    log.debug("Date of Submission must be at least 3 days before the Proposed Date Of Lying",plotinputDTO);
+                    // log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
+                    throw new IllegalArgumentException("Date of Submission must be at least 3 days before the Proposed Date Of Lying.");
+                }
+            }
+        } else {
+            if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
+            long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(), plotinputDTO.getProposedDateOfLaying());
+                if (daysDifference < 2) {
+                    log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
+                    // log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
+                    throw new IllegalArgumentException("Date of Submission must be at least 2 days before the Proposed Date Of Lying.");
+                }
+            }
+        }
         try {
             if (plotinputDTO.getId() != null && StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
                 Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
