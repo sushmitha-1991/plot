@@ -743,9 +743,9 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_2":
-                Integer ministryCode = (Integer) paper.get("ministry");
+                Integer ministryCode = Integer.parseInt(paper.get("ministry").toString());
                 System.out.println("ministryCode " + ministryCode);
-                Long departmentId = (Long) paper.get("department");
+                Long departmentId = Long.parseLong(paper.get("department").toString());
 
                 String ministryName = "";
                 if (ministryCode != null) {
@@ -780,9 +780,12 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_3":
-                Integer ministryCode3 = (Integer) paper.get("ministry");
+                Integer ministryCode3 = Integer.parseInt(paper.get("ministry").toString());
                 System.out.println("ministryCode3 " + ministryCode3);
-                Long departmentId3 = (Long) paper.get("department");
+                System.out.println(paper.get("department"));
+                Long departmentId3 =Long.parseLong(paper.get("department").toString());
+                System.out.println("departmentId3 " + departmentId3);
+
                 String ministryName3 = "";
                 if (ministryCode3 != null) {
                     try {
@@ -800,6 +803,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         template = "A copy of the {0} {1} of the {2}, for the year {5}";
                     }
                 }
+                System.out.println("template "+template);
                 String department3 = "";
                 if (departmentId3 != null) {
                     Optional<Departments> departmentOpt3 = departmentRepo.findById(departmentId3);
@@ -814,8 +818,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
-                Integer ministryCode4 = (Integer) paper.get("ministry");
-                System.out.println("ministryCode3 " + ministryCode4);
+                Integer ministryCode4 = Integer.parseInt(paper.get("ministry").toString());
+                System.out.println("ministryCode4 " + ministryCode4);
                 // Long departmentId4 = (Long) paper.get("department");
                 String ministryName4 = "";
                 if (ministryCode4 != null) {
@@ -851,9 +855,9 @@ public class PlotInputServiceImpl implements PlotInputService {
 
                 // template = "A copy of the {0} {1} of the {1}, for the year {2}";
 
-                Integer ministryCode6 = (Integer) paper.get("ministry");
-                System.out.println("ministryCode3 " + ministryCode6);
-                Long departmentId6 = (Long) paper.get("department");
+                Integer ministryCode6 = Integer.parseInt(paper.get("ministry").toString());
+                System.out.println("ministryCode6 " + ministryCode6);
+                Long departmentId6 = Long.parseLong(paper.get("department").toString());
                 String ministryName6 = "";
                 if (ministryCode6 != null) {
                     try {
