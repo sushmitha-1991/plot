@@ -797,16 +797,16 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         }
 
     }
-
-    private String mapWithTemplate(String data) {
-    String house=getHouseAbbr();
+    @Override
+    public String mapWithTemplate(String data) {
+        String house=getHouseAbbr();
+        System.out.println("house abbr "+house);
         String fetchTemplate = "";
         String abbr="PLOT_"+house;
-        System.out.println(abbr);
+        System.out.println("abbr "+abbr);
         if(StringUtils.isBlank(data))
         data="";
         fetchTemplate=replacePlaceHoders(abbr,data);
-
         return fetchTemplate;
     }
 
@@ -826,9 +826,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     }
     private String getHouseAbbr() {
 		Long houseId = getHouseId();
+        System.out.println("house id "+houseId);
 		Optional<String> abbr = myUserRepository.findHouseAbbrById(houseId);
 		// if(abbr.isEmpty())
 		// throw
+        System.out.println("house abbr "+abbr);
+
 		return abbr.get();
 	}
     private static String generateCombinedContent(List<PlotContentDTO> contents, List<String> ministryList) {

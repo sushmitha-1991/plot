@@ -280,9 +280,17 @@ public class PlotGenerateController {
         public String fetchTemplate (
                 @PathVariable String abbr) throws Exception {
             System.out.println("Input received");
-           return plotService.fetchTemplate(abbr);
-        //     GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-        //                         "Generated reordered content", content);
-        //     return new ResponseEntity<>(response, HttpStatus.OK);
+           return plotService.mapWithTemplate(abbr);
+       
         }        
+//     @GetMapping("/content/{abbr}")
+//         public String fetchTemplate (
+//                 @PathVariable String abbr) throws Exception {
+//             System.out.println("Input received");
+//            return plotService.fetchTemplate(abbr);
+//         //     GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+//         //                         "Generated reordered content", content);
+//         //     return new ResponseEntity<>(response, HttpStatus.OK);
+//         }    
+        //mapWithTemplate
 }

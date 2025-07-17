@@ -32,6 +32,7 @@ public interface PlotGenerateService {
 
      String fetchTemplate(String abbr);
 
+     String mapWithTemplate(String data);
 
     DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
 
