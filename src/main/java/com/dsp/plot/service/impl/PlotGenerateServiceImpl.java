@@ -2,14 +2,18 @@ package com.dsp.plot.service.impl;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
@@ -29,6 +33,7 @@ import com.dsp.plot.dto.PlotGenerateDTO;
 import com.dsp.plot.dto.PlotIndexDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
+import com.dsp.plot.dto.TemplatesDTO;
 import com.dsp.plot.dto.UserDetailsDTO;
 import com.dsp.plot.entity.BaseUser;
 import com.dsp.plot.entity.MastersLokSabhaSession;
@@ -45,10 +50,10 @@ import com.dsp.plot.exception.NoDataFoundException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
 import com.dsp.plot.repository.*;
+import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotGenerateService;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
 
-import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -83,27 +88,59 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         this.ministriesRepository = ministriesRepository;
     }
 
+    // public String fromYYYYMMDDToDayMonthYear(LocalDate inputDate) {
+    // if (inputDate == null) {
+    // return null;
+    // }
+
+    // try {
+    // // LocalDate date = LocalDate.parse(inputDate); // yyyy-MM-dd is ISO, no
+    // formatter needed
+    // int day = inputDate.getDayOfMonth();
+    // String dayWithSuffix = day + getDaySuffix(day);
+
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy",
+    // Locale.ENGLISH);
+    // String monthYear = inputDate.format(formatter);
+
+    // return dayWithSuffix + " " + monthYear;
+    // } catch (Exception e) {
+    // System.err.println("Invalid input date: " + inputDate);
+    // return null;
+    // }
+    // }
+
+    // private static String getDaySuffix(int day) {
+    // if (day >= 11 && day <= 13) return "th";
+    // return switch (day % 10) {
+    // case 1 -> "st";
+    // case 2 -> "nd";
+    // case 3 -> "rd";
+    // default -> "th";
+    // };
+    // }
+
     @Override
     public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
         try {
-            System.out.println("dateOfDoc   "+dateOfDoc);
+            System.out.println("dateOfDoc   " + dateOfDoc);
             List<PlotGenerate> entitys = new ArrayList<>();
             Specification<PlotGenerate> spec = Specification.where(null);
             spec = spec.and(PlotGenerateSpec.isActive(true));
             spec = spec.and(PlotGenerateSpec.hasDraftStatus(false));
-            System.out.println("date of doc "+dateOfDoc);
+            System.out.println("date of doc " + dateOfDoc);
             if (dateOfDoc == null) {
-                System.out.println("date is null "+dateOfDoc);
+                System.out.println("date is null " + dateOfDoc);
                 dateOfDoc = LocalDate.now();
             }
-            spec=spec.and(PlotGenerateSpec.hasDateBetween(dateOfDoc,dateOfDoc));
+            spec = spec.and(PlotGenerateSpec.hasDateBetween(dateOfDoc, dateOfDoc));
             if (doc.equalsIgnoreCase("PLOT")) {
                 entitys = plotRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"));
                 log.info(" Doc Found on Specified Date:{}", entitys);
             }
             if (entitys.isEmpty()) {
                 log.info("No Doc Found on Specified Date");
-                throw new NoDataFoundException("Papers To be Laid not available for "+dateOfDoc);
+                throw new NoDataFoundException("Papers To be Laid not available for " + dateOfDoc);
             }
             PlotGenerate entity = entitys.get(0);
             log.info("Doc Found on Specified Date:{}", entity);
@@ -679,7 +716,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
         if (contents == null || contents.isEmpty()) {
             System.out.println("Number of Inputs = 0");
-            return null;
+            return mapWithTemplate(null);
+            // return null;
         }
         System.out.println("Number of Inputs: " + contents.size());
         // String lastMinisterName = null;
@@ -702,24 +740,97 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 x.setAddedText(newContent);
             } else {
                 seqNo = 0;
-                System.out.println("content "+content);
+                System.out.println("content " + content);
 
-                System.out.println("contains  "+content.contains("</ol>"));
-                content=content.replace("</ol>", "");
-                System.out.println("content "+content);
+                System.out.println("contains  " + content.contains("</ol>"));
+                content = content.replace("</ol>", "");
+                System.out.println("content " + content);
             }
             // lastMinisterName = ministerName;
             ministryList.add(ministerName);
             System.out.println("ministerName  " + ministerName);
 
             System.out.println("ministryList  " + ministryList);
-            
+
             x.setAddedText(removeBodyHtmlTags(x.getAddedText()));
 
         }
-        return generateCombinedContent(contents, ministryList);
+        String ministryInputData = generateCombinedContent(contents, ministryList);
+
+        return replaceSlash(mapWithTemplate(replaceUneccessary(ministryInputData)));
     }
 
+    @Override
+    public String fetchTemplate(String abbr) {
+        String url = masterServiceUrl + "/templates/getByAbbr/" + abbr;
+
+        String token = getTokenFromRequest();
+        if (token == null) {
+            throw new IllegalStateException("Authorization token is missing");
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(headers);
+
+        try {
+            // RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<GenericResponse<TemplatesDTO>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<GenericResponse<TemplatesDTO>>() {
+                        
+                    }
+                    );
+
+            if (response != null && response.getBody() != null && response.getBody().getData()!=null) {
+                TemplatesDTO dtoRes=response.getBody().getData();
+                System.out.println(dtoRes.getContent());
+                return dtoRes.getContent();
+            }
+            return "";
+        } catch (Exception e) {
+            System.err.println("Error during API call: " + e.getMessage());
+            throw e;
+        }
+
+    }
+
+    private String mapWithTemplate(String data) {
+    String house=getHouseAbbr();
+        String fetchTemplate = "";
+        String abbr="PLOT_"+house;
+        System.out.println(abbr);
+        if(StringUtils.isBlank(data))
+        data="";
+        fetchTemplate=replacePlaceHoders(abbr,data);
+
+        return fetchTemplate;
+    }
+
+    private String replacePlaceHoders(String abbr,String data)
+    {
+        String today=getTodayFormat();
+      String template= fetchTemplate(abbr);
+        template=template.replace("$today",today)
+        .replace("$input-content", data);
+        System.out.println("template");
+        System.out.println(template);
+        return template;
+    }
+    private String getTodayFormat()
+    {
+        return LocalDate.now().toString();
+    }
+    private String getHouseAbbr() {
+		Long houseId = getHouseId();
+		Optional<String> abbr = myUserRepository.findHouseAbbrById(houseId);
+		// if(abbr.isEmpty())
+		// throw
+		return abbr.get();
+	}
     private static String generateCombinedContent(List<PlotContentDTO> contents, List<String> ministryList) {
         StringBuilder finalContent = new StringBuilder();
         contents.forEach(x -> {
@@ -729,17 +840,17 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         finalContent.append("</body></html>");
         log.info("final Content  {}", finalContent);
         String finalResponse = finalContent.toString();
-        System.out.println("finalResponse  "+finalResponse);
+        System.out.println("finalResponse  " + finalResponse);
         // for (String ministryName : ministryList) {
-            // System.out.println("minister in content " + ministryName);
-            finalResponse=finalResponse
-            .replace("</li><br></body>", "</li></ol><br></body>")
-            .replace("</li><br><b>", "</li></ol><br><b>")
-            .replace("</li></ol><br><br><li>", "</li><br><li>")
-            .replace("</li></ol><br><li>", "</li><br><li>")
-            .replace("</li><br><br><b>", "</li></ol><br><b>");
+        // System.out.println("minister in content " + ministryName);
+        finalResponse = finalResponse
+                .replace("</li><br></body>", "</li></ol><br></body>")
+                .replace("</li><br><b>", "</li></ol><br><b>")
+                .replace("</li></ol><br><br><li>", "</li><br><li>")
+                .replace("</li></ol><br><li>", "</li><br><li>")
+                .replace("</li><br><br><b>", "</li></ol><br><b>");
         // }
-        System.out.println("finalResponse after replacing </ol> "+finalResponse);
+        System.out.println("finalResponse after replacing </ol> " + finalResponse);
 
         return finalResponse;
     }
@@ -756,8 +867,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             mname = plainText.substring(0, index).trim();
         }
         System.out.println("Min Name: " + mname);
-        if(mname!=null)
-        return mname.trim();
+        if (mname != null)
+            return mname.trim();
         return mname;
     }
 
@@ -772,7 +883,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
         log.info("html " + html);
         afterBr = afterBr.replace("<ol>", "").replace("</ol>", "")
-        .replace("</li></ol><br><br><li>", "</li><br><br><li>");
+                .replace("</li></ol><br><br><li>", "</li><br><br><li>");
         log.info("html " + html);
         return beforeBody + afterBr;
     }
@@ -790,6 +901,24 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 .replace("</html>", "")
                 .replace("<body>", "")
                 .replace("</body>", "");
+        System.out.println("Cleaned: " + cleaned);
+        return cleaned;
+    }
+     private static String replaceUneccessary(String input) {
+        String cleaned = input
+                .replace("<html>", "")
+                .replace("</html>", "")
+                .replace("<body>", "")
+                .replace("</body>", "")
+                .replace("\r","")
+                .replace("\n","");
+        System.out.println("Cleaned: " + cleaned);
+        return cleaned;
+    }
+     private static String replaceSlash(String input) {
+        String cleaned = input
+                .replace("\r","")
+                .replace("\n","");
         System.out.println("Cleaned: " + cleaned);
         return cleaned;
     }

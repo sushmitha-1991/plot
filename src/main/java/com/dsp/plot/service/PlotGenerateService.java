@@ -30,6 +30,9 @@ public interface PlotGenerateService {
 
     void deleteIndex(Long id); 
 
+     String fetchTemplate(String abbr);
+
+
     DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc);
 
     List<PlotIndexDTO> getIndexes(Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,

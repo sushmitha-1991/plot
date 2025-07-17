@@ -153,6 +153,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     IllegalArgumentException("Date of Submission must be at least 3 days before the Proposed Date Of Laying.");
                 }
             }
+            
         } else {
             if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
             long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(), plotinputDTO.getProposedDateOfLaying());
@@ -1398,11 +1399,18 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     public List<PlotInputDTO> sortByLatestCreatedAt(List<PlotInputDTO> dtoList) {
-        return dtoList.stream()
-                .sorted(Comparator.comparing(PlotInputDTO::getCreatedAt, Comparator
+        // return dtoList.stream()
+        //         .sorted(Comparator.comparing(PlotInputDTO::getSubmissionDate, Comparator
+        //                 .nullsLast(Comparator.reverseOrder())))
+        //         .collect(Collectors.toList());
 
-                        .nullsLast(Comparator.reverseOrder())))
-                .collect(Collectors.toList());
+
+         return dtoList.stream()
+            .filter(dto -> dto.getSubmissionDate() != null && dto.getApplicationNo() != null)
+            .sorted(Comparator
+                    .comparing(PlotInputDTO::getSubmissionDate, Comparator.reverseOrder())
+                    .thenComparing(PlotInputDTO::getApplicationNo, Comparator.reverseOrder()))
+            .collect(Collectors.toList());
     }
 
     public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {

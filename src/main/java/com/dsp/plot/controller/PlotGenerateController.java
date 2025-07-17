@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.service.annotation.PatchExchange;
 
 import com.dsp.plot.dto.DocumentDTO;
 import com.dsp.plot.dto.PlotContentDTO;
@@ -274,5 +275,14 @@ public class PlotGenerateController {
                                 "Generated reordered content", content);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
+        }        
+          @GetMapping("/content/{abbr}")
+        public String fetchTemplate (
+                @PathVariable String abbr) throws Exception {
+            System.out.println("Input received");
+           return plotService.fetchTemplate(abbr);
+        //     GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
+        //                         "Generated reordered content", content);
+        //     return new ResponseEntity<>(response, HttpStatus.OK);
         }        
 }
