@@ -822,7 +822,13 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     }
     private String getTodayFormat()
     {
-        return LocalDate.now().toString();
+        LocalDate date=LocalDate.now();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.ENGLISH);
+        String formattedDate = date.format(formatter);
+
+        System.out.println(formattedDate);  // Output: Wednesday, July 9, 2025
+        return formattedDate;
     }
     private String getHouseAbbr() {
 		Long houseId = getHouseId();
