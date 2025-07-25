@@ -31,4 +31,6 @@ public interface PlotInputRepository extends JpaRepository<PlotInput, Long>, Jpa
         @Query(value = "UPDATE dms.document_metadata SET application_no = :applicationNo WHERE uuid = :uuid", nativeQuery = true)
         void updateApplicationNoByUUID(@Param("uuid") String uuid, @Param("applicationNo") String applicationNo);
 
+        Optional<PlotInput> findByRefNo(String applicationNo);
+
 }

@@ -71,7 +71,8 @@ public class SecurityConfig {
 				// "plot-input/**",
 				"/v3/api-docs/**",
 				"/swagger-ui/**",
-				"/swagger-ui.html").permitAll().anyRequest().authenticated())
+				"/swagger-ui.html",
+				"/ltno/**").permitAll().anyRequest().authenticated())
 				.csrf(AbstractHttpConfigurer::disable).authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 		http.exceptionHandling((ex) -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))

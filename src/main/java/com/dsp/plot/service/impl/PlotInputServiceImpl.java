@@ -144,24 +144,29 @@ public class PlotInputServiceImpl implements PlotInputService {
         Long houseId = getHouseId();
         if (houseId == 1) {
             if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
-            long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
-            plotinputDTO.getProposedDateOfLaying());
+                long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+                        plotinputDTO.getProposedDateOfLaying());
                 if (daysDifference < 3) {
-                    log.debug("Date of Submission must be at least 3 days before the Proposed Date Of Laying",plotinputDTO);
-                    // log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
-                    throw new 
-                    IllegalArgumentException("Date of Submission must be at least 3 days before the Proposed Date Of Laying.");
+                    log.debug("Date of Submission must be at least 3 days before the Proposed Date Of Laying",
+                            plotinputDTO);
+                    // log.info("Date of Submission must be at least 2 days before the Proposed Date
+                    // Of Lying", plotinputDTO);
+                    throw new IllegalArgumentException(
+                            "Date of Submission must be at least 3 days before the Proposed Date Of Laying.");
                 }
             }
-            
+
         } else {
             if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
-            long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(), plotinputDTO.getProposedDateOfLaying());
+                long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
+                        plotinputDTO.getProposedDateOfLaying());
                 if (daysDifference < 2) {
-                    log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Laying", plotinputDTO);
-                    // log.info("Date of Submission must be at least 2 days before the Proposed Date Of Lying", plotinputDTO);
-                    throw new 
-                    IllegalArgumentException("Date of Submission must be at least 2 days before the Proposed Date Of Laying.");
+                    log.debug("Date of Submission must be at least 2 days before the Proposed Date Of Laying",
+                            plotinputDTO);
+                    // log.info("Date of Submission must be at least 2 days before the Proposed Date
+                    // Of Lying", plotinputDTO);
+                    throw new IllegalArgumentException(
+                            "Date of Submission must be at least 2 days before the Proposed Date Of Laying.");
                 }
             }
         }
@@ -170,6 +175,16 @@ public class PlotInputServiceImpl implements PlotInputService {
                 Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
                 if (existEntity.isPresent())
                     return update(plotinputDTO.getId(), plotinputDTO);
+                else
+                {
+                    Optional<PlotInput> existingEntity = plotinputRepository.findByRefNo(plotinputDTO.getApplicationNo());
+                     if (existEntity.isPresent())
+                     {
+                        plotinputDTO.setId(existEntity.get().getId());
+                        return update(existEntity.get().getId(), plotinputDTO);
+                     }
+                }
+
             }
             // Convert DTO to entity
             PlotInput entity = PlotInputMapper.toEntity(plotinputDTO);
@@ -746,10 +761,16 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_2":
-                Integer ministryCode = Integer.parseInt(paper.get("ministry").toString());
+                Integer ministryCode = null;
+                if (paper.get("ministry") != null) {
+                    ministryCode = Integer.parseInt(paper.get("ministry").toString());
+                }
                 System.out.println("ministryCode " + ministryCode);
-                Long departmentId = Long.parseLong(paper.get("department").toString());
+                Long departmentId = null;
 
+                if (paper.get("department") != null) {
+                    departmentId = Long.parseLong(paper.get("department").toString());
+                }
                 String ministryName = "";
                 if (ministryCode != null) {
                     try {
@@ -759,7 +780,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                         Optional<Ministries> ministry = ministriesRepository.findById(ministryCode.longValue());
                         ministryName = ministry.get().getMinistryName();
                     }
-                    template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                    if (departmentId != null) {
+                        template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                    } else {
+                        template = "A copy of the {0} {1} of the {2}, of {3} Ministry for the year {5}";
+                    }
                 } else {
                     if (departmentId != null) {
                         template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
@@ -783,10 +808,14 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_3":
-                Integer ministryCode3 = Integer.parseInt(paper.get("ministry").toString());
+                Integer ministryCode3 = null;
+                Long departmentId3 = null;
+                if (paper.get("ministry") != null)
+                    ministryCode3 = Integer.parseInt(paper.get("ministry").toString());
                 System.out.println("ministryCode3 " + ministryCode3);
                 System.out.println(paper.get("department"));
-                Long departmentId3 =Long.parseLong(paper.get("department").toString());
+                if (paper.get("department") != null)
+                    departmentId3 = Long.parseLong(paper.get("department").toString());
                 System.out.println("departmentId3 " + departmentId3);
 
                 String ministryName3 = "";
@@ -798,7 +827,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                         Optional<Ministries> ministry3 = ministriesRepository.findById(ministryCode3.longValue());
                         ministryName3 = ministry3.get().getMinistryName();
                     }
-                    template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                    if (departmentId3 != null) {
+                        template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                    } else {
+                        template = "A copy of the {0} {1} of the {2}, of {3} Ministry for the year {5}";
+                    }
                 } else {
                     if (departmentId3 != null) {
                         template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
@@ -806,7 +839,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         template = "A copy of the {0} {1} of the {2}, for the year {5}";
                     }
                 }
-                System.out.println("template "+template);
+                System.out.println("template " + template);
                 String department3 = "";
                 if (departmentId3 != null) {
                     Optional<Departments> departmentOpt3 = departmentRepo.findById(departmentId3);
@@ -821,7 +854,9 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("financialYear")));
                 break;
             case "PLOT_OTH_4":
-                Integer ministryCode4 = Integer.parseInt(paper.get("ministry").toString());
+                Integer ministryCode4 = null;
+                if (paper.get("ministry") != null)
+                    ministryCode4 = Integer.parseInt(paper.get("ministry").toString());
                 System.out.println("ministryCode4 " + ministryCode4);
                 // Long departmentId4 = (Long) paper.get("department");
                 String ministryName4 = "";
@@ -855,12 +890,14 @@ public class PlotInputServiceImpl implements PlotInputService {
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_OTH_6":
-
+                Integer ministryCode6 = null;
+                Long departmentId6 = null;
                 // template = "A copy of the {0} {1} of the {1}, for the year {2}";
-
-                Integer ministryCode6 = Integer.parseInt(paper.get("ministry").toString());
+                if (paper.get("ministry") != null)
+                    ministryCode6 = Integer.parseInt(paper.get("ministry").toString());
                 System.out.println("ministryCode6 " + ministryCode6);
-                Long departmentId6 = Long.parseLong(paper.get("department").toString());
+                if (paper.get("department") != null)
+                    departmentId6 = Long.parseLong(paper.get("department").toString());
                 String ministryName6 = "";
                 if (ministryCode6 != null) {
                     try {
@@ -870,7 +907,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                         Optional<Ministries> ministry6 = ministriesRepository.findById(ministryCode6.longValue());
                         ministryName6 = ministry6.get().getMinistryName();
                     }
-                    template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                    if (departmentId6 != null) {
+                        template = "A copy of the {0} {1} of the {2}, of {3} Ministry,{4} Department for the year {5}";
+                    } else {
+                        template = "A copy of the {0} {1} of the {2}, of {3} Ministry for the year {5}";
+                    }
                 } else {
                     if (departmentId6 != null) {
                         template = "A copy of the {0} {1} of the {2}, of {4} Department for the year {5}";
@@ -1400,17 +1441,16 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     public List<PlotInputDTO> sortByLatestCreatedAt(List<PlotInputDTO> dtoList) {
         // return dtoList.stream()
-        //         .sorted(Comparator.comparing(PlotInputDTO::getSubmissionDate, Comparator
-        //                 .nullsLast(Comparator.reverseOrder())))
-        //         .collect(Collectors.toList());
+        // .sorted(Comparator.comparing(PlotInputDTO::getSubmissionDate, Comparator
+        // .nullsLast(Comparator.reverseOrder())))
+        // .collect(Collectors.toList());
 
-
-         return dtoList.stream()
-            .filter(dto -> dto.getSubmissionDate() != null && dto.getApplicationNo() != null)
-            .sorted(Comparator
-                    .comparing(PlotInputDTO::getSubmissionDate, Comparator.reverseOrder())
-                    .thenComparing(PlotInputDTO::getApplicationNo, Comparator.reverseOrder()))
-            .collect(Collectors.toList());
+        return dtoList.stream()
+                .filter(dto -> dto.getSubmissionDate() != null && dto.getApplicationNo() != null)
+                .sorted(Comparator
+                        .comparing(PlotInputDTO::getSubmissionDate, Comparator.reverseOrder())
+                        .thenComparing(PlotInputDTO::getApplicationNo, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
 
     public List<PlotInputDTO> sortByApplicationNoDesc(List<PlotInputDTO> dtoList) {
@@ -2220,7 +2260,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         if (isSessionNull && chart.getDates().stream()
                                 .noneMatch(d -> d.get("actualDateOfLaying") != null &&
                                         !d.get("actualDateOfLaying").toString().trim().isEmpty())) {
-                            
+
                             chart.setDates(updateDatesListWithLatestProposedDates(datesList, chart.getDates()));
                             entityList.add(chart);
                             return;

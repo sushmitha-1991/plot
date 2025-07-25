@@ -18,7 +18,6 @@ public class PlotLtnoSpec {
                 : null;
     }
 
-
     public static Specification<PlotLtno> hasDateBetween(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> 
         {
