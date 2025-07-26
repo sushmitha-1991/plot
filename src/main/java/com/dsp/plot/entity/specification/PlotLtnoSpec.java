@@ -68,5 +68,13 @@ public class PlotLtnoSpec {
             return criteriaBuilder.like(criteriaBuilder.lower(root.get("paperType")), "%" + paperType.toLowerCase() + "%");
         };
     }
+    public static Specification<PlotLtno> hasPaperName(String paperName) {
+        return (root, query, criteriaBuilder) -> {
+            if (paperName == null || paperName.isBlank()) {
+                return null; // No filter applied if title is null or empty
+            }
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("paperName")), "%" + paperName.toLowerCase() + "%");
+        };
+    }
 
 }

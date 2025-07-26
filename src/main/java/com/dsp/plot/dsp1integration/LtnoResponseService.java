@@ -30,7 +30,9 @@ public class LtnoResponseService {
             spec = spec.and(PlotLtnoSpec.hasDateBetween(paperDateFrom, paperDateTo));
         }
         if (reportType != null) {
-            spec = spec.and(PlotLtnoSpec.hasPaperType(reportType));
+            // spec = spec.and(PlotLtnoSpec.hasPaperType(reportType));
+            spec = spec.and(PlotLtnoSpec.hasPaperName(reportType));
+
         }
         Sort sort = Sort.by(Sort.Direction.DESC, "ltnoDate");
         entitys = ltnoRepo.findAll(spec, sort);
