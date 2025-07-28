@@ -122,6 +122,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
     @Override
     public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
+        Long houseId = getHouseId();
         try {
             System.out.println("dateOfDoc   " + dateOfDoc);
             List<PlotGenerate> entitys = new ArrayList<>();
@@ -144,7 +145,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             }
             PlotGenerate entity = entitys.get(0);
             log.info("Doc Found on Specified Date:{}", entity);
-            return DocumentDTO.builder()
+            DocumentDTO dtoRes= DocumentDTO.builder()
                     .id(entity.getId())
                     .date(entity.getPlotDate())
                     .applicationId(entity.getApplicationId())
@@ -153,6 +154,16 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                     .note(entity.getContent())
                     .footNote(entity.getFootNote())
                     .build();
+            if (houseId == 1 & entity.getRajyaSabhaSessionNo()!=null) 
+            {
+                return dtoRes;
+            }
+            else if(houseId==2 & entity.getLokSabhaSessionNo()!=null)
+            {
+                return dtoRes;
+            }
+            return null;
+        
         } catch (IllegalArgumentException e) {
             // Handle cases where Sort property is invalid or not found
             throw new CustomBadRequestException("Invalid sorting field: id", e);
