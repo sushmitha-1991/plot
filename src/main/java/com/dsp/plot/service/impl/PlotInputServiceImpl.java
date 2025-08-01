@@ -184,7 +184,6 @@ public class PlotInputServiceImpl implements PlotInputService {
                         return update(existEntity.get().getId(), plotinputDTO);
                      }
                 }
-
             }
             // Convert DTO to entity
             PlotInput entity = PlotInputMapper.toEntity(plotinputDTO);
@@ -587,8 +586,19 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperTitle = stringValue;
             }
         }
-        String template = "A copy of the Notification No. {0} of the {1} {2} of {3}, published in {4} {5} on {6}"
-                + "  {7},  for the period of {11}, under sub-section {8} of {9} of the {10} Act.";
+        // String template = "A copy of the Notification No. {0} of the {1} {2} named {3}, published in {4} {5} on {6}"
+        //         + "  {7},  for the period of {11}, under sub-section {8} of {9} of the {10} Act.";
+String template ="";
+template= "A copy of the Notification No. {0} of the {1} named {3}, published in {5} on {6}"
+                + ", under sub-section {8} of the {10} and {9} Act of the {11}.";
+
+                /*  
+                 * 
+                 * if SubSection N?A
+                 * 
+                 * we need to add it as secondly
+                 * sub section
+                 */
         // Long publishedId = Long.parseLong(paper.get("publishedIn").toString());
         // Long gazetteDetailsId =
         // Long.parseLong(paper.get("gazetteDetails").toString());
@@ -1851,6 +1861,10 @@ public class PlotInputServiceImpl implements PlotInputService {
             Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId, String groupName,
             LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying) {
         String[] sessionRoman = { "0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII" };
+        Long lokSabhaNoId=null;
+        Long lokSabhaSessionNoId=null;
+        Long rajyaSabhaSessionNoId=null;
+        
         Long houseId = getHouseId();
         if (isActive == null) {
             isActive = true;
@@ -1869,13 +1883,14 @@ public class PlotInputServiceImpl implements PlotInputService {
                 String lsno = "%" + lokSabhaNo + "%";
                 System.out.println("ls no " + lsno);
                 Optional<MastersLokSabha> lokSabha = lsRepository.findByLokSabhaNumber(lokSabhaNo);
-                // if (lokSabha.isEmpty())
-                // throw new ResourceNotFoundException("Specified ls no is not available in
-                // database");
+                if (lokSabha.isEmpty())
+                throw new ResourceNotFoundException("Specified ls no: "+lokSabhaNo+" is not available in database ");
                 System.out.println("lokSabha " + lokSabha.get());
+                lokSabhaNoId=lokSabha.get().getId();
                 Optional<MastersLokSabhaSession> lokSabhaSession = masterLSSRepository
                         .findBySessionNumberAndLokSabhaMasterId("%" + session + "%", lokSabha.get().getId());
                 System.out.println("lokSabhaSession " + lokSabhaSession.get());
+                lokSabhaSessionNoId=lokSabhaSession.get().getId();
                 spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(lokSabhaSession.get().getId()));
             } catch (Exception e) {
                 System.out.println("Mentioned LokSabhaSession no is not in Database");
@@ -1889,6 +1904,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 Optional<MastersRajyaSabha> rajyaSabha = mastersRSSRepository.findBySessionNumber(rajyaSabhaNo);
                 System.out.println("rajyaSabha ::" + rajyaSabha.get());
                 spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabha.get().getId()));
+                rajyaSabhaSessionNoId=rajyaSabha.get().getId();
             } catch (Exception e) {
                 System.out.println("Mentioned RajyaSabha no is not in Database");
             }
@@ -1898,7 +1914,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
         System.out.println("existingMinistries ::" + existingMinistries);
-        String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, houseId);
+        String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, houseId, lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
         if (ministryId != null) {
             spec = spec.and(DateChartSpec.hasMinistryId(ministryId));
         }
@@ -2240,7 +2256,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private void processMinistries(List<String> ministries, String groupName, List<Long> existingMinistries,
             List<Map<String, Object>> datesList, String lsSessionNo,
-            String rsSessionNo, boolean isRajyaSabha, List<PlotDateChart> entityList) {
+            String rsSessionNo, boolean isRajyaSabha, List<PlotDateChart> entityList,Long lokSabhaNoId,Long lokSabhaSessionNoId,Long rajyaSabhaSessionNoId) {
         for (String ministry : ministries) {
             System.out.println("ministry " + ministry);
             ministry = ministry.trim().toUpperCase();
@@ -2276,13 +2292,11 @@ public class PlotInputServiceImpl implements PlotInputService {
                         .build();
 
                 if (isRajyaSabha) {
-                    mastersRSSRepository.findBySessionNumber(rsSessionNo)
-                            .ifPresent(session -> dto.setRajyaSabhaSessionNo(session.getId()));
+ dto.setRajyaSabhaSessionNo(rajyaSabhaSessionNoId);
                 } else {
-                    masterLSSRepository.findById(Long.parseLong(lsSessionNo)).ifPresent(session -> {
-                        dto.setLokSabhaSessionNo(session.getId());
-                        dto.setLokSabhaNo(session.getLokSabha().getId());
-                    });
+                        dto.setLokSabhaSessionNo(lokSabhaSessionNoId);
+                        dto.setLokSabhaNo(lokSabhaNoId);
+                    
                 }
 
                 PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
@@ -2291,43 +2305,107 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
 
+
+
     public List<Map<String, Object>> updateDatesListWithLatestProposedDates(
-            List<Map<String, Object>> datesList,
-            List<Map<String, Object>> chart) {
-        System.out.println(" datesList  " + datesList);
-        System.out.println(" chart  " + chart);
-        int minSize = Math.min(datesList.size(), chart.size());
+        List<Map<String, Object>> datesList,
+        List<Map<String, Object>> chart) {
 
-        // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
-        for (int i = 0; i < minSize; i++) {
-            Map<String, Object> datesEntry = datesList.get(i);
-            Map<String, Object> chartEntry = chart.get(i);
+    System.out.println("datesList  " + datesList);
+    System.out.println("chart  " + chart);
 
-            Object datesPropObj = datesEntry.get("proposedDateOfLaying");
-            Object chartPropObj = chartEntry.get("proposedDateOfLaying");
+    int minSize = Math.min(datesList.size(), chart.size());
 
-            if (datesPropObj != null && chartPropObj != null &&
-                    !datesPropObj.toString().isBlank() && !chartPropObj.toString().isBlank()) {
+    // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
+    for (int i = 0; i < minSize; i++) {
+        Map<String, Object> datesEntry = datesList.get(i);
+        Map<String, Object> chartEntry = chart.get(i);
 
-                LocalDate datesDate = LocalDate.parse(datesPropObj.toString());
-                LocalDate chartDate = LocalDate.parse(chartPropObj.toString());
+        Object datesPropObj = datesEntry.get("proposedDateOfLaying");
+        Object chartPropObj = chartEntry.get("proposedDateOfLaying");
 
-                if (chartDate.isAfter(datesDate)) {
-                    datesList.set(i, new HashMap<>(chartEntry));
-                }
+        String datesPropStr = datesPropObj != null ? datesPropObj.toString().trim() : "";
+        String chartPropStr = chartPropObj != null ? chartPropObj.toString().trim() : "";
+
+        if (!datesPropStr.isEmpty() && !chartPropStr.isEmpty()
+                && isValidDate(datesPropStr) && isValidDate(chartPropStr)) {
+
+            LocalDate datesDate = LocalDate.parse(datesPropStr);
+            LocalDate chartDate = LocalDate.parse(chartPropStr);
+
+            if (chartDate.isAfter(datesDate)) {
+                datesList.set(i, new HashMap<>(chartEntry));
+            }
+        } else {
+            if (!isValidDate(chartPropStr)) {
+                System.out.println("Invalid chart proposedDateOfLaying: " + chartPropStr);
+            }
+            if (!isValidDate(datesPropStr)) {
+                System.out.println("Invalid datesList proposedDateOfLaying: " + datesPropStr);
             }
         }
-
-        // Step 2: Append extra entries from chart to datesList
-        for (int i = minSize; i < chart.size(); i++) {
-            datesList.add(new HashMap<>(chart.get(i)));
+    }
+    // Step 2: Append extra entries from chart to datesList
+    for (int i = minSize; i < chart.size(); i++) {
+        Map<String, Object> chartEntry = chart.get(i);
+        Object chartPropObj = chartEntry.get("proposedDateOfLaying");
+        String chartPropStr = chartPropObj != null ? chartPropObj.toString().trim() : "";
+        if (chartPropStr.isEmpty() || isValidDate(chartPropStr)) {
+            datesList.add(new HashMap<>(chartEntry));
+        } else {
+            System.out.println("Skipped invalid extra chart entry at index " + i + ": " + chartPropStr);
         }
-
-        return datesList;
     }
 
+    return datesList;
+}
+
+// Helper method to validate date strings
+private boolean isValidDate(String dateStr) {
+    try {
+        LocalDate.parse(dateStr);
+        return true;
+    } catch (DateTimeParseException e) {
+        return false;
+    }
+}
+    // public List<Map<String, Object>> updateDatesListWithLatestProposedDates(
+    //         List<Map<String, Object>> datesList,
+    //         List<Map<String, Object>> chart) {
+    //     System.out.println(" datesList  " + datesList);
+    //     System.out.println(" chart  " + chart);
+    //     int minSize = Math.min(datesList.size(), chart.size());
+
+    //     // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
+    //     for (int i = 0; i < minSize; i++) {
+    //         Map<String, Object> datesEntry = datesList.get(i);
+    //         Map<String, Object> chartEntry = chart.get(i);
+
+    //         Object datesPropObj = datesEntry.get("proposedDateOfLaying");
+    //         Object chartPropObj = chartEntry.get("proposedDateOfLaying");
+
+    //         if (datesPropObj != null && chartPropObj != null &&
+    //                 !datesPropObj.toString().isBlank() && !chartPropObj.toString().isBlank()) {
+
+    //             LocalDate datesDate = LocalDate.parse(datesPropObj.toString());
+    //             LocalDate chartDate = LocalDate.parse(chartPropObj.toString());
+
+    //             if (chartDate.isAfter(datesDate)) {
+    //                 datesList.set(i, new HashMap<>(chartEntry));
+    //             }
+    //         }
+    //     }
+
+    //     // Step 2: Append extra entries from chart to datesList
+    //     for (int i = minSize; i < chart.size(); i++) {
+    //         datesList.add(new HashMap<>(chart.get(i)));
+    //     }
+
+    //     return datesList;
+    // }
+
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
-            List<Long> existingMinistries, Long houseId) {
+            List<Long> existingMinistries, Long houseId,Long lokSabhaNoId,Long lokSabhaSessionNoId,Long rajyaSabhaSessionNoId) {
         List<PlotDateChart> entityList = new ArrayList<>();
         String token = getJwtTokenOrThrow();
 
@@ -2339,12 +2417,13 @@ public class PlotInputServiceImpl implements PlotInputService {
             for (QuesBranchApiDtoRS dto : rsDtos) {
                 List<Map<String, Object>> datesList = parseDates(dto.getSittingDates(), "yyyy-MM-dd HH:mm:ss.S");
                 processMinistries(dto.getMinistries(), dto.getGroup(), existingMinistries, datesList,
-                        null, rajyaSabhaNo, true, entityList);
+                        null, rajyaSabhaNo, true, entityList, lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
             }
         } else {
             // Lok Sabha
             String url = sansadUrl + "/integration-gateway/question-branch-api/get-question-chart?lsNo="
                     + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
+                    System.out.println("url "+url);
             List<QuesBranchApiDto> lsDtos = fetchFromApi(url, token, new ParameterizedTypeReference<>() {
             });
             for (QuesBranchApiDto dto : lsDtos) {
@@ -2352,7 +2431,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         Arrays.asList(dto.getDateOfAnsweringQuestions().split(",")),
                         "dd MMMM yyyy");
                 processMinistries(Arrays.asList(dto.getMinistriesDepartments().split(";")), dto.getGroup(),
-                        existingMinistries, datesList, lokSabhaSessionNo, null, false, entityList);
+                        existingMinistries, datesList, lokSabhaSessionNo, null, false, entityList, lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
             }
         }
         System.out.println("entity list " + entityList);
