@@ -5,11 +5,14 @@
  */
 package com.dsp.plot.entity;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import org.hibernate.envers.Audited;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
@@ -75,15 +78,17 @@ public class BaseUser extends Auditable implements UserDetails {
 	private String abbr;
 	@Column(name = "is_verified")
 	private Boolean isVerified = false;
-
-	// Implement UserDetails interface methods
+	@Column(name = "role", nullable = false)
+	private String role;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// Here, you should return the roles and authorities granted to the user.
-		// If you're not using GrantedAuthority, you can return an empty list or
-		// customize as needed.
-		return Collections.emptyList();
+		if (this.role == null || this.role.isBlank()) {
+			return Collections.emptyList();
+		}
+
+		return Arrays.stream(this.role.split(",")).map(String::trim).filter(r -> !r.isEmpty())
+				.map(r -> new SimpleGrantedAuthority("ROLE_" + r.toUpperCase())).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -117,7 +122,7 @@ public class BaseUser extends Auditable implements UserDetails {
 
 	@Column(name = "designation_id", nullable = false, length = 50)
 	private String designationId;
-    @ManyToOne
-	@JoinColumn(name = "designation_id",referencedColumnName = "id",insertable = false, updatable =false)
+	@ManyToOne
+	@JoinColumn(name = "designation_id", referencedColumnName = "id", insertable = false, updatable = false)
 	private Designation designation;
 }
