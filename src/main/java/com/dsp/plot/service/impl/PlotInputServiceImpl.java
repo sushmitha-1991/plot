@@ -249,7 +249,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // generate content
             String contentText = formatPaperDetails(entity.getPaperDetails(),
                     optionalAuthority.get().getAuthorityName(), departmentName, abbr,
-                    entity.getApplicationNo());
+                    entity.getApplicationNo(), entity.getMinistryId());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
             entity = plotinputRepository.save(entity);
@@ -293,7 +293,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private String formatPaperDetails(List<Map<String, Object>> paperDetails, String Authenticator, String department,
             String abbr,
-            String applicationNo) {
+            String applicationNo, Integer ministryCode) {
         if (Authenticator == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
         }
@@ -329,7 +329,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         formattedString = getFormattedReportDetails(paper, applicationNo);
                         break;
                     case "PLOT_NOTIFICATION":
-                        formattedString = getFormattedNotificationDetails(paper, applicationNo);
+                        formattedString = getFormattedNotificationDetails(paper, applicationNo, ministryCode, department);
                         break;
                     case "PLOT_OTHER":
                         formattedString = getFormattedOtherPaperDetails(paper, applicationNo);
@@ -531,7 +531,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     // notification
-    private String getFormattedNotificationDetails(Map<String, Object> paper, String applicationNo) {
+    private String getFormattedNotificationDetails(Map<String, Object> paper, String applicationNo, Integer ministryCode, String departmentName) {
         Object paperDocs = paper.get("documents");
         List<String> docLangType = new ArrayList<>();
 
@@ -588,9 +588,12 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         // String template = "A copy of the Notification No. {0} of the {1} {2} named {3}, published in {4} {5} on {6}"
         //         + "  {7},  for the period of {11}, under sub-section {8} of {9} of the {10} Act.";
-String template ="";
-template= "A copy of the Notification No. {0} of the {1} named {3}, published in {5} on {6}"
-                + ", under sub-section {8} of the {10} and {9} Act of the {11}.";
+        //Changes done by Akshay
+        String template ="";
+        template = "A copy in {0} of the {1} ({2}) "
+                +"Notification No. {3} named {4}, published in {5} on {6}"
+                +", under sub-section {7} and section {8} of the Representation of the {9}"
+                +", for {10}.";
 
                 /*  
                  * 
@@ -612,14 +615,14 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                 System.out.println("Invalid publishedIn value: " + paper.get("publishedIn"));
             }
         }
-        Long gazetteDetailsId = null;
-        if (paper.get("gazetteDetails") != null && !paper.get("gazetteDetails").toString().isBlank()) {
-            try {
-                gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid gazetteDetails value: " + paper.get("gazetteDetails"));
-            }
-        }
+        // Long gazetteDetailsId = null;
+        // if (paper.get("gazetteDetails") != null && !paper.get("gazetteDetails").toString().isBlank()) {
+        //     try {
+        //         gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
+        //     } catch (NumberFormatException e) {
+        //         System.out.println("Invalid gazetteDetails value: " + paper.get("gazetteDetails"));
+        //     }
+        // }
         LocalDate dateOfPublication = null;
         if (paper.get("dateOfPublication") != null && !paper.get("dateOfPublication").toString().isBlank()) {
             try {
@@ -631,31 +634,69 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
         String publicationDate = formatDateWithSuffix(dateOfPublication);
         System.out.println(publicationDate);
         String publishedIn = "";
-        String gazetteDetails = "";
+        // String gazetteDetails = "";
         if (publishedId != null) {
             Optional<MasterCode> publishedAbbr = codeRepository.findById(publishedId);
             if (publishedAbbr.isPresent())
                 publishedIn = publishedAbbr.get().getCode();
         }
-        if (gazetteDetailsId != null) {
-            Optional<MasterCode> publishedAbbr = codeRepository.findById(gazetteDetailsId);
-            if (publishedAbbr.isPresent())
-                gazetteDetails = publishedAbbr.get().getCode();
-        }
+        // if (gazetteDetailsId != null) {
+        //     Optional<MasterCode> publishedAbbr = codeRepository.findById(gazetteDetailsId);
+        //     if (publishedAbbr.isPresent())
+        //         gazetteDetails = publishedAbbr.get().getCode();
+        // }
 
+        String ministryName = "";
+        if (ministryCode != null) {
+            try {
+                Optional<Ministries> ministry = ministriesRepository.findByMinistryCode(ministryCode);
+                ministryName = ministry.get().getMinistryName();
+            } catch (Exception e) {
+                Optional<Ministries> ministry = ministriesRepository.findById(ministryCode.longValue());
+                ministryName = ministry.get().getMinistryName();
+            }
+            if (StringUtils.isNotBlank(departmentName)) {
+                template= "A copy in {0} of the {1} ({2}) "
+                +"Notification No. {3} named {4}, published in {5} on {6}"
+                +", under sub-section {7} and section {8} of the Representation of the {9}"
+                +", for {10}.";
+            } else {
+                template= "A copy in {0} of the {1} "
+                +"Notification No. {3} named {4}, published in {5} on {6}"
+                +", under sub-section {7} and section {8} of the Representation of the {9}"
+                +", for {10}.";
+            }
+        } else {
+            if (StringUtils.isNotBlank(departmentName)) {
+                template= "A copy in {0} of the Department {2} "
+                +"Notification No. {3} named {4}, published in {5} on {6}"
+                +", under sub-section {7} and section {8} of the Representation of the {9}"
+                +", for {10}.";
+            } else {
+                template= "A copy in {0} "
+                +"Notification No. {3} named {4}, published in {5} on {6}"
+                +", under sub-section {7} and section {8} of the Representation of the {9}"
+                +", for {10}.";
+            }
+        }
+        // template= "A copy in {0} of the {1} ({2}) "
+        // +"Notification No. {3} named {4}, published in {5} on {6}"
+        // + ", under sub-section {7} and section {8} of the Representation of the {9}"
+        // +", {10}.";
         String formattedString = MessageFormat.format(template,
-                escapeHtml(paper.get("notificationNumber")),
-                escapeHtml(paperTitle),
-                escapeHtml(languageType),
-                escapeHtml(paper.get("shortTitle")),
-                escapeHtml(paper.get("paperTitle")),
-                escapeHtml(publishedIn),
-                escapeHtml(publicationDate),
-                escapeHtml(gazetteDetails),
-                escapeHtml(paper.get("periodSpecified")),
-                escapeHtml(paper.get("layingSection")),
-                escapeHtml(paper.get("issuingSection")),
-                escapeHtml(paper.get("laidUnderAct")));
+            escapeHtml(languageType),
+            escapeHtml(ministryName),
+            escapeHtml(departmentName),
+            escapeHtml(paper.get("notificationNumber")),
+            escapeHtml(paper.get("shortTitle")),
+            // escapeHtml(paper.get("paperTitle")),
+            escapeHtml(publishedIn),
+            escapeHtml(publicationDate),
+            // escapeHtml(gazetteDetails),
+            escapeHtml(paper.get("issuingSection")),
+            escapeHtml(paper.get("layingSection")),
+            escapeHtml(paper.get("laidUnderAct")),
+            escapeHtml(paper.get("periodSpecified")));
         return formattedString;
     }
 
@@ -1663,7 +1704,7 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                 abbr = paperAbbr.get().getAbbr();
             String contentText = formatPaperDetails(dbEntity.getPaperDetails(),
                     optionalAuthority.get().getAuthorityName(), departmentName, abbr,
-                    dbEntity.getApplicationNo());
+                    dbEntity.getApplicationNo(), plotinputDTO.getMinistryId());
             dbEntity.setContent(contentText);
             dbEntity.setHtmlContentEnglish(contentText);
         }
