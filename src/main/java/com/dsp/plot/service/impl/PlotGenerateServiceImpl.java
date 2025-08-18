@@ -63,6 +63,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
     @Value("${workflow.service.url}")
     private String draftUrl;
+     private static final String LS="LS";
+    private static final String RS="RS";
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
     // private final PlotInputMapper mapper;
     @Value("${master.service.url}")
@@ -122,7 +124,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
     @Override
     public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
-        Long houseId = getHouseId();
+        String house = houseAbbr();
         try {
             System.out.println("dateOfDoc   " + dateOfDoc);
             List<PlotGenerate> entitys = new ArrayList<>();
@@ -154,11 +156,11 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                     .note(entity.getContent())
                     .footNote(entity.getFootNote())
                     .build();
-            if (houseId == 1 & entity.getRajyaSabhaSessionNo()!=null) 
+            if (RS.equalsIgnoreCase(house) & entity.getRajyaSabhaSessionNo()!=null) 
             {
                 return dtoRes;
             }
-            else if(houseId==2 & entity.getLokSabhaSessionNo()!=null)
+            else if(LS.equalsIgnoreCase(house) & entity.getLokSabhaSessionNo()!=null)
             {
                 return dtoRes;
             }
@@ -191,8 +193,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             // generating application no
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
-            Long houseId = getHouseId();
-            if (houseId == 1) {
+            String house = houseAbbr();
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
                     entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
@@ -209,7 +211,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 entity.setLokSabhaNo(null);
                 serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
 
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() == null) {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
                     entity.setLokSabhaSessionNo(lokSabhaSession);
@@ -333,14 +335,14 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             spec = spec.and(PlotGenerateSpec.hasSendToLibrary(sendToLibrary));
         }
         entitys = plotRepository.findAll(spec);
-        Long houseId = getHouseId();
+        String house = houseAbbr();
         for (PlotGenerate entity : entitys) {
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotGenerateDTO dto = PlotGenerateMapper.toDTO(entity);
                     dtoList.add(dto);
                 }
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotGenerateDTO dto = PlotGenerateMapper.toDTO(entity);
                     dtoList.add(dto);
@@ -500,28 +502,11 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         }
         return houseId;
     }
-    // private String deleteDraftEntry(String applicationNo)
-    // {
-    // String url = draftUrl+"/delete-save-as-draft/applicationNo="+applicationNo;
-    // String token = getTokenFromRequest();
-    // if (token == null) {
-    // throw new IllegalStateException("Authorization token is missing");
-    // }
-    // HttpHeaders headers = new HttpHeaders();
-    // headers.set("Authorization", "Bearer " + token);
-    // headers.setContentType(MediaType.APPLICATION_JSON);
-
-    // HttpEntity<SerialNumberRequest> entity = new HttpEntity<>(request, headers);
-    // try {
-    // // RestTemplate restTemplate = new RestTemplate();
-    // return restTemplate.postForObject(url, entity, SerialNumberResponse.class);
-    // } catch (Exception e) {
-    // System.err.println("Error during API call: " + e.getMessage());
-    // throw e;
-    // }
-    // return "";
-    // }
-    private String deleteDraftEntry(String applicationNo) {
+       public String houseAbbr()
+    {
+        return inputRepository.fetchHouseAbbrByhouseId(getHouseId());
+    }
+   private String deleteDraftEntry(String applicationNo) {
         String url = draftUrl + "/delete-save-as-draft?applicationNo=" + applicationNo;
         String token = getTokenFromRequest();
         if (token == null) {
@@ -548,7 +533,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
     @Override
     public List<PlotIndexDTO> getIndexes(Long lokSabhaNo, Long lokSabhaSessionNo, Long rajyaSabhaSessionNo,
             LocalDate startDate, LocalDate endDate, String status, String reportName, Long createdBy) {
-        Long houseId = getHouseId();
+        String house = houseAbbr();
         Specification<PlotIndex> spec = Specification.where(PlotIndexSpec.isActive(true));
         if (startDate != null || endDate != null) {
             // spec = spec.and(PlotIndexSpec.hasDateBetween(startDate, endDate));
@@ -580,11 +565,11 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
                 BaseUser user = username.get();
                 dto.setCreatedBy(user.getFirstName() + " " + user.getLastName());
             }
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (dto.getRajyaSabhaSessionNo() != null)
                     responseDTO.add(dto);
             }
-            if (houseId == 2) {
+            if (LS.equalsIgnoreCase(house)) {
                 if (dto.getLokSabhaSessionNo() != null)
                     responseDTO.add(dto);
             }
@@ -599,8 +584,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         PlotIndex entity = PlotGenerateMapper.toEntityIndex(dto);
         SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
         serialNumberRequest.setAppId(entity.getApplicationId());
-        Long houseId = getHouseId();
-        if (houseId == 1) {
+        String house = houseAbbr();
+        if (LS.equalsIgnoreCase(house)) {
             if (entity.getRajyaSabhaSessionNo() == null) {
                 Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
                 entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
@@ -616,7 +601,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
             entity.setLokSabhaNo(null);
             serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
 
-        } else if (houseId == 2) {
+        } else if (LS.equalsIgnoreCase(house)) {
             if (entity.getLokSabhaSessionNo() == null) {
                 Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
                 entity.setLokSabhaSessionNo(lokSabhaSession);
@@ -842,7 +827,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
         return formattedDate;
     }
     private String getHouseAbbr() {
-		Long houseId = getHouseId();
+		Long houseId=getHouseId();
         System.out.println("house id "+houseId);
 		Optional<String> abbr = myUserRepository.findHouseAbbrById(houseId);
 		// if(abbr.isEmpty())

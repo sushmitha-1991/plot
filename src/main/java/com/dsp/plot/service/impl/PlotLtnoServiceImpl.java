@@ -42,6 +42,7 @@ import com.dsp.plot.mapper.LtnoMapper;
 import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.PaperLaidRepository;
+import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.repository.PlotLtnoRepository;
 import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotLtnoService;
@@ -69,6 +70,11 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
     private MastersRSSRepository mastersRSSRepository;
     @Autowired
     private MasterLSSRepository masterLSSRepository;
+
+      
+
+     private static final String LS="LS";
+    private static final String RS="RS";
     @Autowired
     private RestTemplate restTemplate;
     private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
@@ -87,8 +93,8 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             // Save Plot entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
-            Long houseId = getHouseId();
-            if (houseId == 1) {
+            String house = houseAbbr();
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
 
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
@@ -107,7 +113,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
                 entity.setLokSabhaNo(null);
                 serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
 
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() == null) {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
                     entity.setLokSabhaSessionNo(lokSabhaSession);
@@ -194,14 +200,14 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         Sort sort = Sort.by(Sort.Direction.DESC,"ltnoDate", "refNo");
 
         entitys = ltnoRepo.findAll(spec,sort);
-        Long houseId = getHouseId();
+        String house = houseAbbr();
         for (PlotLtno entity : entitys) {
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotLtnoDto dto = LtnoMapper.toDTO(entity);
                     dtoList.add(dto);
                 }
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotLtnoDto dto = LtnoMapper.toDTO(entity);
                     dtoList.add(dto);
@@ -235,7 +241,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             Long rajyaSabhaSessionNo, LocalDate startDate, LocalDate endDate, String status, Long ministryId,
             String title) {
         // TODO Auto-generated method stub
-        Long houseId=getHouseId();
+        String house=houseAbbr();
         log.debug("Entering getAll Plots");
         List<PlotLaidOnTableDTO> dtoList = new ArrayList<>();
         List<PaperLaidOnTable> entitys;
@@ -268,12 +274,12 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         //plotLaidDate
         entitys = titleRepo.findAll(spec,sort);
         for (PaperLaidOnTable entity : entitys) {
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     PlotLaidOnTableDTO dto = LtnoMapper.titleToDTO(entity);
                     dtoList.add(dto);
                 }
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() != null) {
                     PlotLaidOnTableDTO dto = LtnoMapper.titleToDTO(entity);
                     dtoList.add(dto);
@@ -297,12 +303,12 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
             PaperLaidOnTable entity = LtnoMapper.titleToEntity(plotLaidOnTableDTO);
             log.debug("Converted PlotDTO to entity: {}", entity);
             // Save Plot entity
-            Long houseId = getHouseId();
+            String house = houseAbbr();
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(plotLaidOnTableDTO.getApplicationId());
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 serialNumberRequest.setSessionId(plotLaidOnTableDTO.getRajyaSabhaSessionNo());
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 serialNumberRequest.setSessionId(plotLaidOnTableDTO.getLokSabhaSessionNo());
             }
             SerialNumberResponse applicationNo = generateApplicationNo(serialNumberRequest);
@@ -469,6 +475,11 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
         }
         return houseId;
     }
+      public String houseAbbr()
+    {
+        return ltnoRepo.fetchHouseAbbrByhouseId(getHouseId());
+    }
+
     // delete draft entry
 
     public String deleteDraftEntry(String applicationNo) {

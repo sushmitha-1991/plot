@@ -90,10 +90,13 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String masterServiceUrl;
     @Value("${workflow.service.url}")
     private String draftUrl;
+    private static final String LS="LS";
+    private static final String RS="RS";
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
     private UserUtils utils;
+
     @Autowired
     private PlotGenerateRepository repository;
     @Autowired
@@ -141,16 +144,14 @@ public class PlotInputServiceImpl implements PlotInputService {
             plotinputDTO.setStatus("Submitted");
         }
         log.debug("Entering savePlotInput with PlotInputDTO: {}", plotinputDTO);
-        Long houseId = getHouseId();
-        if (houseId == 1) {
+        String house = houseAbbr();
+        if (RS.equalsIgnoreCase(house)) {
             if (plotinputDTO.getSubmissionDate() != null && plotinputDTO.getProposedDateOfLaying() != null) {
                 long daysDifference = ChronoUnit.DAYS.between(plotinputDTO.getSubmissionDate(),
                         plotinputDTO.getProposedDateOfLaying());
                 if (daysDifference < 3) {
                     log.debug("Date of Submission must be at least 3 days before the Proposed Date Of Laying",
                             plotinputDTO);
-                    // log.info("Date of Submission must be at least 2 days before the Proposed Date
-                    // Of Lying", plotinputDTO);
                     throw new IllegalArgumentException(
                             "Date of Submission must be at least 3 days before the Proposed Date Of Laying.");
                 }
@@ -191,7 +192,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // Save PlotInput entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
             serialNumberRequest.setAppId(entity.getApplicationId());
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
                     Long rajyaSabhaSession = mastersRSSRepository.findLatestByCreatedBy();
                     entity.setRajyaSabhaSessionNo(rajyaSabhaSession);
@@ -208,7 +209,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 entity.setLokSabhaNo(null);
                 entity.setPendingAt("Table Office");
                 serialNumberRequest.setSessionId(entity.getRajyaSabhaSessionNo());
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() == null) {
                     Long lokSabhaSession = masterLSSRepository.findLatestByCreatedBy();
                     entity.setLokSabhaSessionNo(lokSabhaSession);
@@ -1047,7 +1048,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             LocalDate actualDateOfLaying, Integer ministry, Boolean sendToLibrary, Long applicationId) {
         // log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
-        Long houseId = getHouseId();
+        String house = houseAbbr();
 
         if (status != null && status.equalsIgnoreCase("draft")) {
             if (applicationId != null) {
@@ -1060,7 +1061,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     System.out.println(input);
                     if (input != null) {
                         System.out.println("@@@" + input);
-                        if (houseId == 1) {
+                        if (RS.equalsIgnoreCase(house)) {
                             if (input.getRajyaSabhaSessionNo() == null) {
                                 input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
                             }
@@ -1069,7 +1070,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             if (session.isPresent())
                                 input.setRajyaSabhaSession(session.get().getSessionNumber());
                         }
-                        if (houseId == 2) {
+                        if (LS.equalsIgnoreCase(house)) {
                             if (input.getLokSabhaSessionNo() == null) {
                                 input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
                             }
@@ -1158,7 +1159,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             entitys = plotinputRepository.findAll(spec, sort);
             // entitys = plotinputRepository.findAll(spec);
             for (PlotInput entity : entitys) {
-                if (houseId == 1) {
+                if (RS.equalsIgnoreCase(house)) {
                     if (entity.getRajyaSabhaSessionNo() != null) {
                         if (entity.getApplicationInstanceId() != null) {
                             PlotGenerate plot = repository
@@ -1186,7 +1187,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         dto.setRequests(getRequests(dto.getId()));
                         dtoList.add(dto);
                     }
-                } else if (houseId == 2) {
+                } else if (LS.equalsIgnoreCase(house)) {
                     if (entity.getLokSabhaSessionNo() != null) {
                         if (entity.getApplicationInstanceId() != null) {
                             PlotGenerate plot = repository
@@ -1224,7 +1225,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
                     for (PlotInput input : plotInputs) {
                         if (input != null) {
-                            if (houseId == 1) {
+                            if (RS.equalsIgnoreCase(house)) {
                                 if (input.getRajyaSabhaSessionNo() == null) {
                                     input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
                                 }
@@ -1233,7 +1234,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 if (session.isPresent())
                                     input.setRajyaSabhaSession(session.get().getSessionNumber());
                             }
-                            if (houseId == 2) {
+                            if (LS.equalsIgnoreCase(house)) {
                                 if (input.getLokSabhaSessionNo() == null) {
                                     input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
                                 }
@@ -1282,7 +1283,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             paperName, proposedDateOfLaying, actualDateOfLaying, ministry);
                     for (PlotInput input : plotInputs) {
                         if (input != null) {
-                            if (houseId == 1) {
+                            if (RS.equalsIgnoreCase(house)) {
                                 if (input.getRajyaSabhaSessionNo() == null) {
                                     input.setRajyaSabhaSessionNo(mastersRSSRepository.findLatestByCreatedBy());
                                 }
@@ -1291,7 +1292,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                                 if (session.isPresent())
                                     input.setRajyaSabhaSession(session.get().getSessionNumber());
                             }
-                            if (houseId == 2) {
+                            if (LS.equalsIgnoreCase(house)) {
                                 if (input.getLokSabhaSessionNo() == null) {
                                     input.setLokSabhaSessionNo(masterLSSRepository.findLatestByCreatedBy());
                                 }
@@ -1342,7 +1343,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             LocalDate actualDateOfLaying, Integer ministry, Boolean sendToLibrary, Long applicationId) {
         // log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
-        Long houseId = getHouseId();
+        String  house = houseAbbr();
         List<PlotInput> entitys;
         if (isActive == null) {
             isActive = true;
@@ -1389,7 +1390,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         entitys = plotinputRepository.findAll(spec, sort);
         // entitys = plotinputRepository.findAll(spec);
         for (PlotInput entity : entitys) {
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     if (entity.getApplicationInstanceId() != null) {
                         PlotGenerate plot = repository
@@ -1410,7 +1411,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     dto.setRequests(getRequests(dto.getId()));
                     dtoList.add(dto);
                 }
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() != null) {
                     if (entity.getApplicationInstanceId() != null) {
                         PlotGenerate plot = repository
@@ -1561,9 +1562,9 @@ public class PlotInputServiceImpl implements PlotInputService {
         Sort sort = Sort.by(Sort.Direction.DESC, "submissionDate");
         entitys = plotinputRepository.findAll(spec, sort);
         // entitys = plotinputRepository.findAll(spec);
-        Long houseId = getHouseId();
+        String house = houseAbbr();
         for (PlotInput entity : entitys) {
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() != null) {
                     if (entity.getApplicationInstanceId() != null) {
                         PlotGenerate plot = repository
@@ -1589,7 +1590,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     }
                     dtoList.add(dto);
                 }
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() != null) {
                     if (entity.getApplicationInstanceId() != null) {
                         PlotGenerate plot = repository
@@ -1709,7 +1710,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             dbEntity.setHtmlContentEnglish(contentText);
         }
         // Save the updated PlotInput
-        Long houseId = getHouseId();
+        String house =houseAbbr();
         if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
             Long userId = utils.getUserIdFromAuthentication();
             Optional<BaseUser> loginUser = userRepository.findById(userId);
@@ -1740,17 +1741,17 @@ public class PlotInputServiceImpl implements PlotInputService {
                 plot.setStatus(dbEntity.getStatus());
                 plot.setCurrentStatus(dbEntity.getStatus());
                 plot = repository.save(plot);
-                if (houseId == 1) {
+                if (RS.equalsIgnoreCase(house)) {
                     dbEntity.setPendingAt("Table Office");
-                } else if (houseId == 2) {
+                } else if (LS.equalsIgnoreCase(house)) {
                     dbEntity.setPendingAt("Table Office A");
                 }
             }
         } else {
 
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 dbEntity.setPendingAt("Table Office");
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 dbEntity.setPendingAt("Table Office A");
             }
         }
@@ -1763,14 +1764,14 @@ public class PlotInputServiceImpl implements PlotInputService {
                             "No ministry found with ministry code: " + dbEntity.getMinistryId()));
             Optional<PlotDateChart> optionalDateChart;
             // Fetch PlotDateChart based on houseId
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 optionalDateChart = plotDateChartRepository.findByMinistryIdAndRajyaSabhaSessionNo(
                         ministry.getId(), dbEntity.getRajyaSabhaSessionNo());
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 optionalDateChart = plotDateChartRepository.findByMinistryIdAndLokSabhaNoAndLokSabhaSessionNo(
                         ministry.getId(), dbEntity.getLokSabhaNo(), dbEntity.getLokSabhaSessionNo());
             } else {
-                throw new IllegalArgumentException("Invalid houseId: " + houseId);
+                throw new IllegalArgumentException("Invalid house: " + house);
             }
             if (optionalDateChart.isPresent()) {
                 PlotDateChart dateChartEntity = optionalDateChart.get();
@@ -1896,6 +1897,10 @@ public class PlotInputServiceImpl implements PlotInputService {
         PlotDateChart savedEntity = plotDateChartRepository.findById(id).get();
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
     }
+    public String houseAbbr()
+    {
+        return plotinputRepository.fetchHouseAbbrByhouseId(getHouseId());
+    }
 
     @Override
     public List<PlotDateChartDTO> getAllDateCharts(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
@@ -1906,7 +1911,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         Long lokSabhaSessionNoId=null;
         Long rajyaSabhaSessionNoId=null;
         
-        Long houseId = getHouseId();
+        String house= houseAbbr();
         if (isActive == null) {
             isActive = true;
         }
@@ -1955,7 +1960,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
         System.out.println("existingMinistries ::" + existingMinistries);
-        String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, houseId, lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
+        String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, house, lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
         if (ministryId != null) {
             spec = spec.and(DateChartSpec.hasMinistryId(ministryId));
         }
@@ -1967,12 +1972,12 @@ public class PlotInputServiceImpl implements PlotInputService {
         List<PlotDateChartDTO> dtoList = new ArrayList<>();
         for (PlotDateChart entity : listOfDateCharts) {
             boolean shouldAdd = true;
-            if (houseId == 1) {
+            if (RS.equalsIgnoreCase(house)) {
                 if (entity.getRajyaSabhaSessionNo() == null) {
                     shouldAdd = false;
                     continue;
                 }
-            } else if (houseId == 2) {
+            } else if (LS.equalsIgnoreCase(house)) {
                 if (entity.getLokSabhaSessionNo() == null) {
                     shouldAdd = false;
                     continue;
@@ -2023,239 +2028,6 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         return ministry.get().getMinistryCode();
     }
-
-    // // question api
-    // public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo,
-    // String rajyaSabhaNo,
-    // List<Long> existingMinistries, Long houseId) {
-    // List<PlotDateChart> entityList = new ArrayList<>();
-    // if (houseId == 1) {
-    // String url = sansadUrl + "/api_rs/question/ministry-group-sitting?session="
-    // + rajyaSabhaNo;
-    // String token = getTokenFromRequest();
-    // HttpHeaders headers = new HttpHeaders();
-    // headers.setContentType(MediaType.APPLICATION_JSON);
-    // // Add the Authorization token if available
-    // if (token != null && !token.isEmpty()) {
-    // headers.set("Authorization", "Bearer " + token);
-    // } else {
-    // throw new RuntimeException("JWT Token is missing. Cannot proceed with the API
-    // request.");
-    // }
-    // // Create request entity with headers
-    // HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-    // try {
-    // ResponseEntity<List<QuesBranchApiDtoRS>> response = restTemplate.exchange(
-    // url,
-    // HttpMethod.GET,
-    // requestEntity,
-    // new ParameterizedTypeReference<List<QuesBranchApiDtoRS>>() {
-    // });
-    // List<QuesBranchApiDtoRS> quesDtoList = response.getBody();
-    // for (QuesBranchApiDtoRS quesDto : quesDtoList) {
-    // // Define date format
-    // // "2024-07-03 00:00:00.0"
-    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd
-    // HH:mm:ss.S");
-    // List<Map<String, Object>> datesList = quesDto.getSittingDates().stream()
-    // .map(date -> {
-    // LocalDate proposedDate = LocalDate.parse(date, formatter);
-    // LocalDate submissionDate = proposedDate.minusDays(2);
-    // // Create the JSON-like structure
-    // Map<String, Object> dateMap = new HashMap<>();
-    // dateMap.put("proposedDateOfLaying", proposedDate.toString());
-    // dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
-    // dateMap.put("actualDateOfLaying", "");
-    // return dateMap;
-    // })
-    // .collect(Collectors.toList());
-    // // String[] ministries = quesDto.getMinistriesDepartments().split(";");
-    // for (String ministry : quesDto.getMinistries()) {
-    // ministry = ministry.toUpperCase();
-    // ministry = ministry.trim();
-    // if (ministry.equalsIgnoreCase("communications")) {
-    // System.out.println("ministry " + ministry);
-    // ministry = "COMMUNICATION";
-    // }
-    // Optional<Ministries> optionalMinistries = ministriesRepository
-    // .findByMinistryName(ministry);
-    // if (optionalMinistries.isPresent()) {
-    // Long ministryId = optionalMinistries.get().getId();
-    // PlotDateChartDTO dto = PlotDateChartDTO.builder()
-    // .dates(datesList)
-    // .groupName(quesDto.getGroup())
-    // .ministryId(ministryId)
-    // .build();
-    // Optional<MastersRajyaSabha> optionalSession = mastersRSSRepository
-    // .findBySessionNumber(rajyaSabhaNo);
-    // if (optionalSession.isPresent()) {
-    // MastersRajyaSabha session = optionalSession.get();
-    // dto.setRajyaSabhaSessionNo(session.getId());
-    // }
-    // dto.setMinistryId(optionalMinistries.get().getId());
-    // PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
-    // // Check if ministryId already exists in the list
-    // if (existingMinistries.contains(ministryId)) {
-    // List<PlotDateChart> existingDateChart = plotDateChartRepository
-    // .findByMinistryId(ministryId);
-    // for (PlotDateChart existDC : existingDateChart)
-    // {
-    // if (existDC.getLokSabhaSessionNo() == null)
-    // {
-    // List<Map<String, Object>> datesExisting = existDC.getDates();
-    // boolean hasValidDate = false;
-    // for (Map<String, Object> dateList : datesExisting)
-    // {
-    // Object actualDateObj = dateList.get("actualDateOfLaying");
-    // Object proposedDate=dateList.get("proposedDateOfLaying");
-    // if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty())
-    // {
-    // // At least one actualDateOfLaying is non-null and non-empty → break
-    // // immediately
-    // hasValidDate = true;
-    // break;
-    // }
-    // }
-    // // If no valid actualDateOfLaying was found in the entire loop
-    // if (!hasValidDate) {
-    // existDC.setDates(datesList);
-    // entityList.add(existDC);
-    // break;
-    // }
-    // }
-    // }
-    // System.out.println("ministry " + ministry);
-    // continue; // Skip adding entry if ministryId is already present
-    // }
-    // entityList.add(entity);
-    // }
-    // }
-    // }
-    // entityList = plotDateChartRepository.saveAll(entityList);
-    // return "saved";
-    // } catch (HttpClientErrorException e) {
-    // System.err.println("API Error: " + e.getStatusCode() + " - " +
-    // e.getResponseBodyAsString());
-    // throw new RuntimeException("Failed to call external API", e);
-    // }
-    // } else {
-    // String url = sansadUrl +
-    // "/integration-gateway/question-branch-api/get-question-chart?lsNo="
-    // + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
-    // String token = getTokenFromRequest();
-    // HttpHeaders headers = new HttpHeaders();
-    // headers.setContentType(MediaType.APPLICATION_JSON);
-    // // Add the Authorization token if available
-    // if (token != null && !token.isEmpty()) {
-    // headers.set("Authorization", "Bearer " + token);
-    // } else {
-    // throw new RuntimeException("JWT Token is missing. Cannot proceed with the API
-    // request.");
-    // }
-    // // Create request entity with headers
-    // HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-    // try {
-    // ResponseEntity<List<QuesBranchApiDto>> response = restTemplate.exchange(
-    // url,
-    // HttpMethod.GET,
-    // requestEntity,
-    // new ParameterizedTypeReference<List<QuesBranchApiDto>>() {
-    // });
-    // List<QuesBranchApiDto> quesDtoList = response.getBody();
-    // for (QuesBranchApiDto quesDto : quesDtoList) {
-    // // Define date format
-    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-    // // Convert to List<Map<String, Object>>
-    // List<Map<String, Object>> datesList = Arrays
-    // .stream(quesDto.getDateOfAnsweringQuestions().split(","))
-    // .map(String::trim)
-    // .map(date -> {
-    // LocalDate proposedDate = LocalDate.parse(date, formatter);
-    // LocalDate submissionDate = proposedDate.minusDays(2);
-    // // Create the JSON-like structure
-    // Map<String, Object> dateMap = new HashMap<>();
-    // dateMap.put("proposedDateOfLaying", proposedDate.toString());
-    // dateMap.put("dateofSubmissionOfPapers", submissionDate.toString());
-    // dateMap.put("actualDateOfLaying", "");
-    // return dateMap;
-    // })
-    // .collect(Collectors.toList());
-    // String ministriesStr = quesDto.getMinistriesDepartments();
-    // String[] ministries;
-
-    // if (ministriesStr.contains(";")) {
-    // ministries = ministriesStr.split(";");
-    // } else {
-    // ministries = new String[] { ministriesStr }; // Store as a single-element
-    // array
-    // }
-    // // String[] ministries = quesDto.getMinistriesDepartments().split(";");
-    // for (String ministry : ministries) {
-    // ministry = ministry.toUpperCase();
-    // ministry = ministry.trim();
-    // if (ministry.equalsIgnoreCase("communications"))
-    // ministry = "COMMUNICATION";
-    // Optional<Ministries> optionalMinistries = ministriesRepository
-    // .findByMinistryName(ministry);
-    // if (optionalMinistries.isPresent()) {
-    // Long ministryId = optionalMinistries.get().getId();
-    // // Check if ministryId already exists in the list
-    // if (existingMinistries.contains(ministryId)) {
-    // List<PlotDateChart> existingDateChart = plotDateChartRepository
-    // .findByMinistryId(ministryId);
-    // for (PlotDateChart existDC : existingDateChart) {
-    // if (existDC.getRajyaSabhaSessionNo() == null) {
-    // List<Map<String, Object>> datesExisting = existDC.getDates();
-    // boolean hasValidDate = false;
-    // for (Map<String, Object> dateList : datesExisting) {
-    // Object actualDateObj = dateList.get("actualDateOfLaying");
-    // if (actualDateObj != null && !actualDateObj.toString().trim().isEmpty()) {
-    // // At least one actualDateOfLaying is non-null and non-empty → break
-    // // immediately
-    // hasValidDate = true;
-    // break;
-    // }
-    // }
-
-    // // If no valid actualDateOfLaying was found in the entire loop
-    // if (!hasValidDate) {
-    // existDC.setDates(datesList);
-    // entityList.add(existDC);
-    // break;
-    // }
-    // }
-    // }
-    // continue;
-    // // Skip adding entry if ministryId is already present
-    // }
-    // PlotDateChartDTO dto = PlotDateChartDTO.builder()
-    // .dates(datesList)
-    // .groupName(quesDto.getGroup())
-    // .ministryId(ministryId)
-    // .build();
-    // Optional<MastersLokSabhaSession> optionalSession = masterLSSRepository
-    // .findById(Long.parseLong(lokSabhaSessionNo));
-    // if (optionalSession.isPresent()) {
-    // MastersLokSabhaSession session = optionalSession.get();
-    // dto.setLokSabhaNo(session.getLokSabha().getId());
-    // dto.setLokSabhaSessionNo(session.getId());
-    // }
-    // dto.setMinistryId(optionalMinistries.get().getId());
-    // PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
-    // entityList.add(entity);
-    // }
-    // }
-    // }
-    // entityList = plotDateChartRepository.saveAll(entityList);
-    // return "saved";
-    // } catch (HttpClientErrorException e) {
-    // System.err.println("API Error: " + e.getStatusCode() + " - " +
-    // e.getResponseBodyAsString());
-    // throw new RuntimeException("Failed to call external API", e);
-    // }
-    // }
-
-    // }
 
     private String getJwtTokenOrThrow() {
         String token = getTokenFromRequest();
@@ -2446,11 +2218,11 @@ private boolean isValidDate(String dateStr) {
     // }
 
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
-            List<Long> existingMinistries, Long houseId,Long lokSabhaNoId,Long lokSabhaSessionNoId,Long rajyaSabhaSessionNoId) {
+            List<Long> existingMinistries, String house,Long lokSabhaNoId,Long lokSabhaSessionNoId,Long rajyaSabhaSessionNoId) {
         List<PlotDateChart> entityList = new ArrayList<>();
         String token = getJwtTokenOrThrow();
 
-        if (houseId == 1) {
+        if (RS.equalsIgnoreCase(house)) {
             // Rajya Sabha
             String url = sansadUrl + "/api_rs/question/ministry-group-sitting?session=" + rajyaSabhaNo;
             List<QuesBranchApiDtoRS> rsDtos = fetchFromApi(url, token, new ParameterizedTypeReference<>() {
