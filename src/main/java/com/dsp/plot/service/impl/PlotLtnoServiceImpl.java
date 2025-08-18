@@ -71,8 +71,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
     @Autowired
     private MasterLSSRepository masterLSSRepository;
 
-      @Autowired
-    private PlotInputRepository inputRepository;
+      
 
      private static final String LS="LS";
     private static final String RS="RS";
@@ -478,7 +477,7 @@ public class PlotLtnoServiceImpl implements PlotLtnoService {
     }
       public String houseAbbr()
     {
-        return inputRepository.fetchHouseAbbrByhouseId(getHouseId());
+        return ltnoRepo.fetchHouseAbbrByhouseId(getHouseId());
     }
 
     // delete draft entry
