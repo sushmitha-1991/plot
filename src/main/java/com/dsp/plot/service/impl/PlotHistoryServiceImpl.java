@@ -11,6 +11,7 @@ import com.dsp.plot.dto.PlotHistoryDTO;
 import com.dsp.plot.entity.PlotHistory;
 import com.dsp.plot.mapper.PlotHistoryMapper;
 import com.dsp.plot.repository.PlotHistoryRepository;
+import com.dsp.plot.repository.PlotInputRepository;
 import com.dsp.plot.service.PlotHistoryService;
 
 @Service
@@ -18,6 +19,11 @@ public class PlotHistoryServiceImpl implements PlotHistoryService {
 
     @Autowired
     private PlotHistoryRepository plotHistoryRepository;
+      @Autowired
+    private PlotInputRepository inputRepository;
+
+     private static final String LS="LS";
+    private static final String RS="RS";
     @Override
     public List<PlotHistoryDTO> createPlotHistory(List<PlotHistoryDTO> plotHistoryDTO) {
         List<PlotHistory> entities = plotHistoryDTO.stream()

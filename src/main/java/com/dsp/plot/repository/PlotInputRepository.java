@@ -32,5 +32,7 @@ public interface PlotInputRepository extends JpaRepository<PlotInput, Long>, Jpa
         void updateApplicationNoByUUID(@Param("uuid") String uuid, @Param("applicationNo") String applicationNo);
 
         Optional<PlotInput> findByRefNo(String applicationNo);
+        @Query(value = "Select h.abbr from master.houses where h.id=:id")
+        String fetchHouseAbbrByhouseId(Long id);
 
 }
