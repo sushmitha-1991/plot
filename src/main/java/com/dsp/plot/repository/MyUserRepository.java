@@ -22,6 +22,6 @@ public interface MyUserRepository extends JpaRepository<BaseUser, Long> {
 	BaseUser findByEmail(String email);
 
 	BaseUser findByPhone(String phone);
-	@Query(value="SELECT h.abbr FROM master.houses h where h.id=:id and h.is_active =true limit 1",nativeQuery=true)
+	@Query(value="SELECT abbr FROM master.houses where id=:id and is_active =true limit 1 ",nativeQuery=true)
 	Optional<String> findHouseAbbrById(Long id);
 }

@@ -90,8 +90,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String masterServiceUrl;
     @Value("${workflow.service.url}")
     private String draftUrl;
-    private static final String LS="LS";
-    private static final String RS="RS";
+    private static final String LS = "LS";
+    private static final String RS = "RS";
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
@@ -176,14 +176,13 @@ public class PlotInputServiceImpl implements PlotInputService {
                 Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
                 if (existEntity.isPresent())
                     return update(plotinputDTO.getId(), plotinputDTO);
-                else
-                {
-                    Optional<PlotInput> existingEntity = plotinputRepository.findByRefNo(plotinputDTO.getApplicationNo());
-                     if (existEntity.isPresent())
-                     {
+                else {
+                    Optional<PlotInput> existingEntity = plotinputRepository
+                            .findByRefNo(plotinputDTO.getApplicationNo());
+                    if (existEntity.isPresent()) {
                         plotinputDTO.setId(existEntity.get().getId());
                         return update(existEntity.get().getId(), plotinputDTO);
-                     }
+                    }
                 }
             }
             // Convert DTO to entity
@@ -250,7 +249,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // generate content
             String contentText = formatPaperDetails(entity.getPaperDetails(),
                     optionalAuthority.get().getAuthorityName(), departmentName, abbr,
-                    entity.getApplicationNo());
+                    entity.getApplicationNo(), entity.getMinistryId());
             entity.setContent(contentText);
             entity.setHtmlContentEnglish(contentText);
             entity = plotinputRepository.save(entity);
@@ -294,7 +293,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     private String formatPaperDetails(List<Map<String, Object>> paperDetails, String Authenticator, String department,
             String abbr,
-            String applicationNo) {
+            String applicationNo, Integer ministryCode) {
         if (Authenticator == null) {
             throw new IllegalArgumentException("Authenticator details cannot be null.");
         }
@@ -330,7 +329,8 @@ public class PlotInputServiceImpl implements PlotInputService {
                         formattedString = getFormattedReportDetails(paper, applicationNo);
                         break;
                     case "PLOT_NOTIFICATION":
-                        formattedString = getFormattedNotificationDetails(paper, applicationNo);
+                        formattedString = getFormattedNotificationDetails(paper, applicationNo, ministryCode,
+                                department);
                         break;
                     case "PLOT_OTHER":
                         formattedString = getFormattedOtherPaperDetails(paper, applicationNo);
@@ -532,7 +532,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
     // notification
-    private String getFormattedNotificationDetails(Map<String, Object> paper, String applicationNo) {
+    private String getFormattedNotificationDetails(Map<String, Object> paper, String applicationNo,
+            Integer ministryCode, String departmentName) {
         Object paperDocs = paper.get("documents");
         List<String> docLangType = new ArrayList<>();
 
@@ -587,19 +588,26 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperTitle = stringValue;
             }
         }
-        // String template = "A copy of the Notification No. {0} of the {1} {2} named {3}, published in {4} {5} on {6}"
-        //         + "  {7},  for the period of {11}, under sub-section {8} of {9} of the {10} Act.";
-String template ="";
-template= "A copy of the Notification No. {0} of the {1} named {3}, published in {5} on {6}"
-                + ", under sub-section {8} of the {10} and {9} Act of the {11}.";
+        // String template = "A copy of the Notification No. {0} of the {1} {2} named
+        // {3}, published in {4} {5} on {6}"
+        // + " {7}, for the period of {11}, under sub-section {8} of {9} of the {10}
+        // Act.";
+        // Changes done by Akshay
+        String template = "";
+        template = "A copy in {0} ";
+        String template1 = "of the {1} ({2}) ";
 
-                /*  
-                 * 
-                 * if SubSection N?A
-                 * 
-                 * we need to add it as secondly
-                 * sub section
-                 */
+        String template2 = "Notification No. {3} named {4}, published in {5} on {6}"
+                + ", under sub-section {7} and section {8} of the Representation of the {9}"
+                + ", for {10}.";
+
+        /*
+         * 
+         * if SubSection N?A
+         * 
+         * we need to add it as secondly
+         * sub section
+         */
         // Long publishedId = Long.parseLong(paper.get("publishedIn").toString());
         // Long gazetteDetailsId =
         // Long.parseLong(paper.get("gazetteDetails").toString());
@@ -613,14 +621,16 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                 System.out.println("Invalid publishedIn value: " + paper.get("publishedIn"));
             }
         }
-        Long gazetteDetailsId = null;
-        if (paper.get("gazetteDetails") != null && !paper.get("gazetteDetails").toString().isBlank()) {
-            try {
-                gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid gazetteDetails value: " + paper.get("gazetteDetails"));
-            }
-        }
+        // Long gazetteDetailsId = null;
+        // if (paper.get("gazetteDetails") != null &&
+        // !paper.get("gazetteDetails").toString().isBlank()) {
+        // try {
+        // gazetteDetailsId = Long.parseLong(paper.get("gazetteDetails").toString());
+        // } catch (NumberFormatException e) {
+        // System.out.println("Invalid gazetteDetails value: " +
+        // paper.get("gazetteDetails"));
+        // }
+        // }
         LocalDate dateOfPublication = null;
         if (paper.get("dateOfPublication") != null && !paper.get("dateOfPublication").toString().isBlank()) {
             try {
@@ -632,31 +642,58 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
         String publicationDate = formatDateWithSuffix(dateOfPublication);
         System.out.println(publicationDate);
         String publishedIn = "";
-        String gazetteDetails = "";
+        // String gazetteDetails = "";
         if (publishedId != null) {
             Optional<MasterCode> publishedAbbr = codeRepository.findById(publishedId);
             if (publishedAbbr.isPresent())
                 publishedIn = publishedAbbr.get().getCode();
         }
-        if (gazetteDetailsId != null) {
-            Optional<MasterCode> publishedAbbr = codeRepository.findById(gazetteDetailsId);
-            if (publishedAbbr.isPresent())
-                gazetteDetails = publishedAbbr.get().getCode();
+        // if (gazetteDetailsId != null) {
+        // Optional<MasterCode> publishedAbbr =
+        // codeRepository.findById(gazetteDetailsId);
+        // if (publishedAbbr.isPresent())
+        // gazetteDetails = publishedAbbr.get().getCode();
+        // }
+        String ministryName = "";
+        if (ministryCode != null) {
+            ministryName = ministriesRepository.findByMinistryCode(ministryCode)
+                    .or(() -> ministriesRepository.findById(ministryCode.longValue()))
+                    .map(Ministries::getMinistryName)
+                    .orElse("");
+
+            if (StringUtils.isNotBlank(departmentName)) {
+                template1 = " of the Ministry of {1} ({2}) ";
+            } else {
+                template1 = " of the Ministry of {1} ";
+            }
+        } else {
+            if (StringUtils.isNotBlank(departmentName)) {
+                template1 = " of the Department {2} ";
+            } else {
+                template1 = " ";
+            }
         }
 
+        template += template1 + " " + template2;
+        System.out.println();
+        // template= "A copy in {0} of the {1} ({2}) "
+        // +"Notification No. {3} named {4}, published in {5} on {6}"
+        // + ", under sub-section {7} and section {8} of the Representation of the {9}"
+        // +", {10}.";
         String formattedString = MessageFormat.format(template,
-                escapeHtml(paper.get("notificationNumber")),
-                escapeHtml(paperTitle),
                 escapeHtml(languageType),
+                escapeHtml(ministryName),
+                escapeHtml(departmentName),
+                escapeHtml(paper.get("notificationNumber")),
                 escapeHtml(paper.get("shortTitle")),
-                escapeHtml(paper.get("paperTitle")),
+                // escapeHtml(paper.get("paperTitle")),
                 escapeHtml(publishedIn),
                 escapeHtml(publicationDate),
-                escapeHtml(gazetteDetails),
-                escapeHtml(paper.get("periodSpecified")),
-                escapeHtml(paper.get("layingSection")),
+                // escapeHtml(gazetteDetails),
                 escapeHtml(paper.get("issuingSection")),
-                escapeHtml(paper.get("laidUnderAct")));
+                escapeHtml(paper.get("layingSection")),
+                escapeHtml(paper.get("laidUnderAct")),
+                escapeHtml(paper.get("periodSpecified")));
         return formattedString;
     }
 
@@ -1302,7 +1339,7 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
             LocalDate actualDateOfLaying, Integer ministry, Boolean sendToLibrary, Long applicationId) {
         // log.debug("Entering getAll Plots");
         List<PlotInputDTO> dtoList = new ArrayList<>();
-        String  house = houseAbbr();
+        String house = houseAbbr();
         List<PlotInput> entitys;
         if (isActive == null) {
             isActive = true;
@@ -1664,12 +1701,12 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                 abbr = paperAbbr.get().getAbbr();
             String contentText = formatPaperDetails(dbEntity.getPaperDetails(),
                     optionalAuthority.get().getAuthorityName(), departmentName, abbr,
-                    dbEntity.getApplicationNo());
+                    dbEntity.getApplicationNo(), plotinputDTO.getMinistryId());
             dbEntity.setContent(contentText);
             dbEntity.setHtmlContentEnglish(contentText);
         }
         // Save the updated PlotInput
-        String house =houseAbbr();
+        String house = houseAbbr();
         if (dbEntityNew.getStatus().equalsIgnoreCase("returned")) {
             Long userId = utils.getUserIdFromAuthentication();
             Optional<BaseUser> loginUser = userRepository.findById(userId);
@@ -1856,8 +1893,8 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
         PlotDateChart savedEntity = plotDateChartRepository.findById(id).get();
         return PlotInputMapper.dateChartMapToDTO(savedEntity);
     }
-    public String houseAbbr()
-    {
+
+    public String houseAbbr() {
         return plotinputRepository.fetchHouseAbbrByhouseId(getHouseId());
     }
 
@@ -1866,11 +1903,11 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
             Boolean isActive, LocalDate startDate, LocalDate endDate, String status, Long ministryId, String groupName,
             LocalDate dateofSubmissionOfPapers, LocalDate actualDateOfLaying) {
         String[] sessionRoman = { "0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII" };
-        Long lokSabhaNoId=null;
-        Long lokSabhaSessionNoId=null;
-        Long rajyaSabhaSessionNoId=null;
-        
-        String house= houseAbbr();
+        Long lokSabhaNoId = null;
+        Long lokSabhaSessionNoId = null;
+        Long rajyaSabhaSessionNoId = null;
+
+        String house = houseAbbr();
         if (isActive == null) {
             isActive = true;
         }
@@ -1889,13 +1926,14 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                 System.out.println("ls no " + lsno);
                 Optional<MastersLokSabha> lokSabha = lsRepository.findByLokSabhaNumber(lokSabhaNo);
                 if (lokSabha.isEmpty())
-                throw new ResourceNotFoundException("Specified ls no: "+lokSabhaNo+" is not available in database ");
+                    throw new ResourceNotFoundException(
+                            "Specified ls no: " + lokSabhaNo + " is not available in database ");
                 System.out.println("lokSabha " + lokSabha.get());
-                lokSabhaNoId=lokSabha.get().getId();
+                lokSabhaNoId = lokSabha.get().getId();
                 Optional<MastersLokSabhaSession> lokSabhaSession = masterLSSRepository
                         .findBySessionNumberAndLokSabhaMasterId("%" + session + "%", lokSabha.get().getId());
                 System.out.println("lokSabhaSession " + lokSabhaSession.get());
-                lokSabhaSessionNoId=lokSabhaSession.get().getId();
+                lokSabhaSessionNoId = lokSabhaSession.get().getId();
                 spec = spec.and(DateChartSpec.hasLokSabhaSessionNo(lokSabhaSession.get().getId()));
             } catch (Exception e) {
                 System.out.println("Mentioned LokSabhaSession no is not in Database");
@@ -1909,7 +1947,7 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                 Optional<MastersRajyaSabha> rajyaSabha = mastersRSSRepository.findBySessionNumber(rajyaSabhaNo);
                 System.out.println("rajyaSabha ::" + rajyaSabha.get());
                 spec = spec.and(DateChartSpec.hasRajyaSabhaSessionNo(rajyaSabha.get().getId()));
-                rajyaSabhaSessionNoId=rajyaSabha.get().getId();
+                rajyaSabhaSessionNoId = rajyaSabha.get().getId();
             } catch (Exception e) {
                 System.out.println("Mentioned RajyaSabha no is not in Database");
             }
@@ -1919,7 +1957,8 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                 .map(PlotDateChart::getMinistryId)
                 .collect(Collectors.toList());
         System.out.println("existingMinistries ::" + existingMinistries);
-        String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, house, lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
+        String response = questionBranchApi(lokSabhaNo, lokSabhaSessionNo, rajyaSabhaNo, existingMinistries, house,
+                lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
         if (ministryId != null) {
             spec = spec.and(DateChartSpec.hasMinistryId(ministryId));
         }
@@ -2028,7 +2067,8 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
 
     private void processMinistries(List<String> ministries, String groupName, List<Long> existingMinistries,
             List<Map<String, Object>> datesList, String lsSessionNo,
-            String rsSessionNo, boolean isRajyaSabha, List<PlotDateChart> entityList,Long lokSabhaNoId,Long lokSabhaSessionNoId,Long rajyaSabhaSessionNoId) {
+            String rsSessionNo, boolean isRajyaSabha, List<PlotDateChart> entityList, Long lokSabhaNoId,
+            Long lokSabhaSessionNoId, Long rajyaSabhaSessionNoId) {
         for (String ministry : ministries) {
             System.out.println("ministry " + ministry);
             ministry = ministry.trim().toUpperCase();
@@ -2064,11 +2104,11 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
                         .build();
 
                 if (isRajyaSabha) {
- dto.setRajyaSabhaSessionNo(rajyaSabhaSessionNoId);
+                    dto.setRajyaSabhaSessionNo(rajyaSabhaSessionNoId);
                 } else {
-                        dto.setLokSabhaSessionNo(lokSabhaSessionNoId);
-                        dto.setLokSabhaNo(lokSabhaNoId);
-                    
+                    dto.setLokSabhaSessionNo(lokSabhaSessionNoId);
+                    dto.setLokSabhaNo(lokSabhaNoId);
+
                 }
 
                 PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
@@ -2077,107 +2117,106 @@ template= "A copy of the Notification No. {0} of the {1} named {3}, published in
         }
     }
 
-
-
     public List<Map<String, Object>> updateDatesListWithLatestProposedDates(
-        List<Map<String, Object>> datesList,
-        List<Map<String, Object>> chart) {
+            List<Map<String, Object>> datesList,
+            List<Map<String, Object>> chart) {
 
-    System.out.println("datesList  " + datesList);
-    System.out.println("chart  " + chart);
+        System.out.println("datesList  " + datesList);
+        System.out.println("chart  " + chart);
 
-    int minSize = Math.min(datesList.size(), chart.size());
+        int minSize = Math.min(datesList.size(), chart.size());
 
-    // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
-    for (int i = 0; i < minSize; i++) {
-        Map<String, Object> datesEntry = datesList.get(i);
-        Map<String, Object> chartEntry = chart.get(i);
+        // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
+        for (int i = 0; i < minSize; i++) {
+            Map<String, Object> datesEntry = datesList.get(i);
+            Map<String, Object> chartEntry = chart.get(i);
 
-        Object datesPropObj = datesEntry.get("proposedDateOfLaying");
-        Object chartPropObj = chartEntry.get("proposedDateOfLaying");
+            Object datesPropObj = datesEntry.get("proposedDateOfLaying");
+            Object chartPropObj = chartEntry.get("proposedDateOfLaying");
 
-        String datesPropStr = datesPropObj != null ? datesPropObj.toString().trim() : "";
-        String chartPropStr = chartPropObj != null ? chartPropObj.toString().trim() : "";
+            String datesPropStr = datesPropObj != null ? datesPropObj.toString().trim() : "";
+            String chartPropStr = chartPropObj != null ? chartPropObj.toString().trim() : "";
 
-        if (!datesPropStr.isEmpty() && !chartPropStr.isEmpty()
-                && isValidDate(datesPropStr) && isValidDate(chartPropStr)) {
+            if (!datesPropStr.isEmpty() && !chartPropStr.isEmpty()
+                    && isValidDate(datesPropStr) && isValidDate(chartPropStr)) {
 
-            LocalDate datesDate = LocalDate.parse(datesPropStr);
-            LocalDate chartDate = LocalDate.parse(chartPropStr);
+                LocalDate datesDate = LocalDate.parse(datesPropStr);
+                LocalDate chartDate = LocalDate.parse(chartPropStr);
 
-            if (chartDate.isAfter(datesDate)) {
-                datesList.set(i, new HashMap<>(chartEntry));
-            }
-        } else {
-            if (!isValidDate(chartPropStr)) {
-                System.out.println("Invalid chart proposedDateOfLaying: " + chartPropStr);
-            }
-            if (!isValidDate(datesPropStr)) {
-                System.out.println("Invalid datesList proposedDateOfLaying: " + datesPropStr);
+                if (chartDate.isAfter(datesDate)) {
+                    datesList.set(i, new HashMap<>(chartEntry));
+                }
+            } else {
+                if (!isValidDate(chartPropStr)) {
+                    System.out.println("Invalid chart proposedDateOfLaying: " + chartPropStr);
+                }
+                if (!isValidDate(datesPropStr)) {
+                    System.out.println("Invalid datesList proposedDateOfLaying: " + datesPropStr);
+                }
             }
         }
+        // Step 2: Append extra entries from chart to datesList
+        for (int i = minSize; i < chart.size(); i++) {
+            Map<String, Object> chartEntry = chart.get(i);
+            Object chartPropObj = chartEntry.get("proposedDateOfLaying");
+            String chartPropStr = chartPropObj != null ? chartPropObj.toString().trim() : "";
+            if (chartPropStr.isEmpty() || isValidDate(chartPropStr)) {
+                datesList.add(new HashMap<>(chartEntry));
+            } else {
+                System.out.println("Skipped invalid extra chart entry at index " + i + ": " + chartPropStr);
+            }
+        }
+
+        return datesList;
     }
-    // Step 2: Append extra entries from chart to datesList
-    for (int i = minSize; i < chart.size(); i++) {
-        Map<String, Object> chartEntry = chart.get(i);
-        Object chartPropObj = chartEntry.get("proposedDateOfLaying");
-        String chartPropStr = chartPropObj != null ? chartPropObj.toString().trim() : "";
-        if (chartPropStr.isEmpty() || isValidDate(chartPropStr)) {
-            datesList.add(new HashMap<>(chartEntry));
-        } else {
-            System.out.println("Skipped invalid extra chart entry at index " + i + ": " + chartPropStr);
+
+    // Helper method to validate date strings
+    private boolean isValidDate(String dateStr) {
+        try {
+            LocalDate.parse(dateStr);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
         }
     }
-
-    return datesList;
-}
-
-// Helper method to validate date strings
-private boolean isValidDate(String dateStr) {
-    try {
-        LocalDate.parse(dateStr);
-        return true;
-    } catch (DateTimeParseException e) {
-        return false;
-    }
-}
     // public List<Map<String, Object>> updateDatesListWithLatestProposedDates(
-    //         List<Map<String, Object>> datesList,
-    //         List<Map<String, Object>> chart) {
-    //     System.out.println(" datesList  " + datesList);
-    //     System.out.println(" chart  " + chart);
-    //     int minSize = Math.min(datesList.size(), chart.size());
+    // List<Map<String, Object>> datesList,
+    // List<Map<String, Object>> chart) {
+    // System.out.println(" datesList " + datesList);
+    // System.out.println(" chart " + chart);
+    // int minSize = Math.min(datesList.size(), chart.size());
 
-    //     // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
-    //     for (int i = 0; i < minSize; i++) {
-    //         Map<String, Object> datesEntry = datesList.get(i);
-    //         Map<String, Object> chartEntry = chart.get(i);
+    // // Step 1: Compare aligned indices and prefer latest proposedDateOfLaying
+    // for (int i = 0; i < minSize; i++) {
+    // Map<String, Object> datesEntry = datesList.get(i);
+    // Map<String, Object> chartEntry = chart.get(i);
 
-    //         Object datesPropObj = datesEntry.get("proposedDateOfLaying");
-    //         Object chartPropObj = chartEntry.get("proposedDateOfLaying");
+    // Object datesPropObj = datesEntry.get("proposedDateOfLaying");
+    // Object chartPropObj = chartEntry.get("proposedDateOfLaying");
 
-    //         if (datesPropObj != null && chartPropObj != null &&
-    //                 !datesPropObj.toString().isBlank() && !chartPropObj.toString().isBlank()) {
+    // if (datesPropObj != null && chartPropObj != null &&
+    // !datesPropObj.toString().isBlank() && !chartPropObj.toString().isBlank()) {
 
-    //             LocalDate datesDate = LocalDate.parse(datesPropObj.toString());
-    //             LocalDate chartDate = LocalDate.parse(chartPropObj.toString());
+    // LocalDate datesDate = LocalDate.parse(datesPropObj.toString());
+    // LocalDate chartDate = LocalDate.parse(chartPropObj.toString());
 
-    //             if (chartDate.isAfter(datesDate)) {
-    //                 datesList.set(i, new HashMap<>(chartEntry));
-    //             }
-    //         }
-    //     }
+    // if (chartDate.isAfter(datesDate)) {
+    // datesList.set(i, new HashMap<>(chartEntry));
+    // }
+    // }
+    // }
 
-    //     // Step 2: Append extra entries from chart to datesList
-    //     for (int i = minSize; i < chart.size(); i++) {
-    //         datesList.add(new HashMap<>(chart.get(i)));
-    //     }
+    // // Step 2: Append extra entries from chart to datesList
+    // for (int i = minSize; i < chart.size(); i++) {
+    // datesList.add(new HashMap<>(chart.get(i)));
+    // }
 
-    //     return datesList;
+    // return datesList;
     // }
 
     public String questionBranchApi(String lokSabhaNo, String lokSabhaSessionNo, String rajyaSabhaNo,
-            List<Long> existingMinistries, String house,Long lokSabhaNoId,Long lokSabhaSessionNoId,Long rajyaSabhaSessionNoId) {
+            List<Long> existingMinistries, String house, Long lokSabhaNoId, Long lokSabhaSessionNoId,
+            Long rajyaSabhaSessionNoId) {
         List<PlotDateChart> entityList = new ArrayList<>();
         String token = getJwtTokenOrThrow();
 
@@ -2195,7 +2234,7 @@ private boolean isValidDate(String dateStr) {
             // Lok Sabha
             String url = sansadUrl + "/integration-gateway/question-branch-api/get-question-chart?lsNo="
                     + lokSabhaNo + "&sesNo=" + lokSabhaSessionNo;
-                    System.out.println("url "+url);
+            System.out.println("url " + url);
             List<QuesBranchApiDto> lsDtos = fetchFromApi(url, token, new ParameterizedTypeReference<>() {
             });
             for (QuesBranchApiDto dto : lsDtos) {
@@ -2203,7 +2242,8 @@ private boolean isValidDate(String dateStr) {
                         Arrays.asList(dto.getDateOfAnsweringQuestions().split(",")),
                         "dd MMMM yyyy");
                 processMinistries(Arrays.asList(dto.getMinistriesDepartments().split(";")), dto.getGroup(),
-                        existingMinistries, datesList, lokSabhaSessionNo, null, false, entityList, lokSabhaNoId, lokSabhaSessionNoId, rajyaSabhaSessionNoId);
+                        existingMinistries, datesList, lokSabhaSessionNo, null, false, entityList, lokSabhaNoId,
+                        lokSabhaSessionNoId, rajyaSabhaSessionNoId);
             }
         }
         System.out.println("entity list " + entityList);
