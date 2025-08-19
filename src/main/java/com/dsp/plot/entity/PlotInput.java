@@ -108,7 +108,7 @@ public class PlotInput extends InputInstance {
     @Column(name = "nodal_officer_id")
     private Long nodalOfficerId;
 
-    @Column(name = "nodal_officer_designation", length = 30)
+    @Column(name = "nodal_officer_designation")
     private String nodalOfficerDesignation;
 
     @Column(name = "nodal_officer_phone_no", length = 13)
