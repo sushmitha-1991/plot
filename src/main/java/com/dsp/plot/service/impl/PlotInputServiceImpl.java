@@ -423,7 +423,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         Object paperNameData = paper.get("paperName");
         Long paperType = null;
-        String paperTitle = "";
+        String paperTypeTitle = "";
         if (paperNameData instanceof Map<?, ?> paperNameMap) {
             Object valueObj = paperNameMap.get("value"); // Extract "value" field
             Object labelObj = paperNameMap.get("label"); // Extract "value" field
@@ -431,7 +431,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 paperType = numberValue.longValue();
             }
             if (labelObj instanceof String stringValue) {
-                paperTitle = stringValue;
+                paperTypeTitle = stringValue;
             }
         }
         String formattedString = "";
@@ -463,22 +463,31 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
         switch (abbr) {
             case "PLOT_RPT_1":
-                template = "A copy of the Report Type {0} {1} of the {2}, laid under {3},{4} for the {5} year {6}";
+                template = "A copy of the {0} {1} of {2}, laid under Article {4}, Section {3} for {5} for the year {6}";
                 String nameAndPlace = escapeHtml(paper.get("constitutionalBody")) + ", "
                         + escapeHtml(paper.get("headquarters"));
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paperTitle),
+                        escapeHtml(paperTypeTitle),
                         escapeHtml(languageType),
-                        escapeHtml(paper.get("paperTitle")),
+                        escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("section")),
                         escapeHtml(paper.get("laidUnderArticle")),
                         nameAndPlace,
                         escapeHtml(paper.get("year")));
                 break;
             case "PLOT_RPT_2":
-                template = "A copy of the Report Type {0} {10} of the {1}, for the type of {2} and No. {3}, {4}, Laying under {5},of Act {6} in the year {7}, informed in Office on {8}, and forwarded to LS Secretariat on {9}";
+                template = "A copy of the {0} {10} of the {1}, for the type of {2} and No. {3}, {4},"+ 
+                            "laid under Article {6}, Section {5} in year {7}";
+
+                if(paper.get("informedToMinistryOfParliamentaryAffarisOnDate")!=null){
+                    template += ", informed in Office on {8}";
+                }
+                if(paper.get("DateOnWhichforwardedToLSSecretariat")!=null){
+                    template += ", and forwarded to LS Secretariat on {9}";
+                }
+
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paperTitle),
+                        escapeHtml(paperTypeTitle),
                         escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("reportType")),
                         escapeHtml(paper.get("reportNumber")),
@@ -492,22 +501,22 @@ public class PlotInputServiceImpl implements PlotInputService {
 
                 break;
             case "PLOT_RPT_3":
-                template = "A copy of the {0} {1} of the {2}, {3} for the year {4}, under Section {5}, of the {6} ";
+                template = "A copy of the {0} {1} of the {2}, {3} for the year {4}, laid under Section {6}, Section {5}";
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paperTitle),
+                        escapeHtml(paperTypeTitle),
                         escapeHtml(languageType),
-                        escapeHtml(paper.get("paperTitle")),
+                        escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("companyHeadquarters")),
                         escapeHtml(paper.get("financialYear")),
                         escapeHtml(paper.get("subSection")),
                         escapeHtml(paper.get("layingSection")));
                 break;
             case "PLOT_RPT_4":
-                template = "A copy of the {0} {1} of the {2}, in {3} for the year {4}, laid under {5}, {6}, under Act {7}";
+                template = "A copy of the {0} {1} of the {2}, in {3} for the year {4}, laid under {5}, Section {6}, under Act {7}";
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paperTitle),
+                        escapeHtml(paperTypeTitle),
                         escapeHtml(languageType),
-                        escapeHtml(paper.get("paperTitle")),
+                        escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("bankHeadquarters")),
                         escapeHtml(paper.get("financialYear")),
                         escapeHtml(paper.get("subSection")),
@@ -517,9 +526,9 @@ public class PlotInputServiceImpl implements PlotInputService {
             case "PLOT_RPT_5":
                 template = "A copy of the {0} {1} of the {2}, in the {3}, for the year {4}";
                 formattedString = MessageFormat.format(template,
-                        escapeHtml(paperTitle),
+                        escapeHtml(paperTypeTitle),
                         escapeHtml(languageType),
-                        escapeHtml(paper.get("paperTitle")),
+                        escapeHtml(paper.get("paperTiltle")),
                         escapeHtml(paper.get("headquarters")),
                         escapeHtml(paper.get("financialYear")));
                 break;
