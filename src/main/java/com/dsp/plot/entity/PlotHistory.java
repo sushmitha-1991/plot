@@ -1,5 +1,7 @@
 package com.dsp.plot.entity;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,7 +40,7 @@ public class PlotHistory extends Auditable {
     @Column(name = "status")
     private String status;
 
-
+    @AllowHtml
     @Column(name = "added_text", columnDefinition = "TEXT")
     private String addedText;
 }

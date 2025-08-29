@@ -4,6 +4,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +25,9 @@ public class PlotGenerateDTO {
     private String location;
     private Boolean draftFlag;
     private String status;
+    @AllowHtml
     private String content;
+    @AllowHtml
     private String footNote;
     private List<Map<String, Object>> referenceFiles;
     private String paperType;

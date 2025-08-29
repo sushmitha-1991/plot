@@ -1,5 +1,6 @@
 package com.dsp.plot.dto;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class TemplatesDTO {
     private Long applicationId;
     private String templateName;
     private String abbr;
+    @AllowHtml
     private String content;
     private String language; 
     private Long lokSabhaNo;

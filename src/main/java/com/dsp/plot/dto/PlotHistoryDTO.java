@@ -1,5 +1,7 @@
 package com.dsp.plot.dto;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +20,6 @@ public class PlotHistoryDTO {
     private String status;
     private Long plotInputId;
     private Long ministryId;
+    @AllowHtml
     private String addedText;
 }

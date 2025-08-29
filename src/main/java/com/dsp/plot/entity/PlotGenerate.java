@@ -8,6 +8,7 @@ import java.util.Map;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
 import com.dsp.plot.util.JsonMapConverter;
 
 import jakarta.persistence.Column;
@@ -58,8 +59,12 @@ public class PlotGenerate extends ApplicationInstance {
     private Boolean draftFlag;
     @Column(name = "status")
     private String status;
+    
+    @AllowHtml
     @Column(name = "content", columnDefinition = "text")
     private String content;
+    
+    @AllowHtml
     @Column(name = "foot_note", columnDefinition = "text")
     private String footNote;
     @Convert(converter = JsonMapConverter.class)
@@ -70,6 +75,8 @@ public class PlotGenerate extends ApplicationInstance {
     private String paperType;
     @Column(name = "paper_name", length = 255)
     private String paperName;
+    
+    @AllowHtml
     @Column(name = "remarks", length = 200)
     private String remarks;
     @Column(name = "is_send_to_library")
