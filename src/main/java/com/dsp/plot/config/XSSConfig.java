@@ -1,9 +1,7 @@
 package com.dsp.plot.config;
 
-import com.dsp.resumeofwork.config.XSSConfig;
-import com.dsp.resumeofwork.config.XSSConfig.AllowHtml;
-import com.dsp.resumeofwork.config.XSSConfig.NoEscape;
-import com.dsp.resumeofwork.config.XSSConfig.XssParamSanitizerFilter.SanitizingRequestWrapper;
+import com.dsp.plot.config.XSSConfig;
+
 import com.fasterxml.jackson.core.JsonGenerator; 
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JsonSerializer;
