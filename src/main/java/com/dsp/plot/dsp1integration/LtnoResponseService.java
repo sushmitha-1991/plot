@@ -34,6 +34,18 @@ public class LtnoResponseService {
             spec = spec.and(PlotLtnoSpec.hasPaperName(reportType));
 
         }
+        System.out.println(house);
+        if("LS".equalsIgnoreCase(house))
+        {
+            spec=spec.and(PlotLtnoSpec.hasRajyaSabhaSessionNoNULL());
+
+       
+        }
+        if("RS".equalsIgnoreCase(house))
+        {
+            spec=spec.and(PlotLtnoSpec.hasLokSabhaNoNULL());
+            spec=spec.and(PlotLtnoSpec.hasLokSabhaSessionNoNULL());
+        }
         Sort sort = Sort.by(Sort.Direction.DESC, "ltnoDate");
         entitys = ltnoRepo.findAll(spec, sort);
         // entitys = ltnoRepo.findAll(spec);
@@ -44,7 +56,7 @@ public class LtnoResponseService {
 
             addInResponse = isInLsAndRs(house, loksabha, session, ltno);
             LtnoResponseDTO dto = mapToDTO(ltno, house);
-            System.out.println("min code "+minCodes);
+            // System.out.println("min code "+minCodes);
             if (minCodes != null) {
                 addInResponse = compareIntegerValues(minCodes, dto.getMinistryCode());
                 System.out.println("add in resp if ministry code" + addInResponse);
@@ -69,11 +81,13 @@ public class LtnoResponseService {
 
     private Boolean isInLsAndRs(String house, String loksabha, String session, PlotLtno ltno) {
         if (house == null)
-            return false;
+            return true;
+        //     System.out.println("loksabha");
 
-        System.out.println(loksabha);
+        // System.out.println(loksabha);
         switch (house.toUpperCase()) {
             case "LS":
+            System.out.println("LS");
                 boolean lsMatch = true;
                 if (loksabha != null) {
                     lsMatch &= compareValues(loksabha, ltno.getLokSabhaSession());
@@ -81,12 +95,12 @@ public class LtnoResponseService {
                 if (session != null) {
                     lsMatch &= compareValues(session, ltno.getLokSabhaSessionNumber());
                 }
-
+                System.out.println("ls match "+lsMatch);
                 return lsMatch;
 
             case "RS":
+            System.out.println("RS");
                 return session == null || compareValues(session, ltno.getRajyaSabhaSession());
-
             default:
                 return false;
         }
@@ -101,10 +115,16 @@ public class LtnoResponseService {
 
     private LtnoResponseDTO mapToDTO(PlotLtno entity, String house) {
         String session = "";
-        if (house.equalsIgnoreCase("LS"))
-            session = entity.getLokSabhaSessionNumber();
-        else if (house.equalsIgnoreCase("RS"))
-            session = entity.getRajyaSabhaSession();
+        String lsNo="";
+        System.out.println("entity "+entity);
+        if ("LS".equalsIgnoreCase(house) && entity.getLokSabhSessionDetails()!=null)
+        {
+            lsNo = entity.getLokSabhSessionDetails().getLokSabha().getLokSabhaNumber();
+                session = entity.getLokSabhSessionDetails().getSessionNumber();
+        }
+        else if ("RS".equalsIgnoreCase(house) && entity.getRajyaSabhaSessionDetails()!=null)
+        
+            session = entity.getRajyaSabhaSessionDetails().getSessionNumber();
 
         String ministryName = "";
         Integer ministryCode = null;
@@ -115,7 +135,7 @@ public class LtnoResponseService {
         return LtnoResponseDTO.builder()
                 .title(entity.getTitle())
                 .date(dateFormatToString(entity.getLtnoDate()))
-                .loksabha(entity.getLokSabhaSession())
+                .loksabha(lsNo)
                 .ministry(ministryName)
                 .ministryCode(ministryCode)
                 .reportType(entity.getPaperType())

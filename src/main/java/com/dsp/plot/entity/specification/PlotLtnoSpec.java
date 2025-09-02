@@ -45,6 +45,21 @@ public class PlotLtnoSpec {
                 ? criteriaBuilder.equal(root.get("rajyaSabhaSessionNo"), rajyaSabhaSessionNo)
                 : null;
     }
+    public static Specification<PlotLtno> hasLokSabhaNoNULL() {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.isNull(root.get("lokSabhaNo"));
+    }
+   
+    public static Specification<PlotLtno> hasLokSabhaSessionNoNULL() {
+        return (root, query, criteriaBuilder) ->
+                 criteriaBuilder.isNull(root.get("lokSabhaSessionNo"));
+    }
+
+    public static Specification<PlotLtno> hasRajyaSabhaSessionNoNULL() {
+        return (root, query, criteriaBuilder) -> 
+                 criteriaBuilder.isNull(root.get("rajyaSabhaSessionNo"));
+              
+    }
 
     public static Specification<PlotLtno> hasStatus(String status) {
         return (root, query, criteriaBuilder) -> status != null ? criteriaBuilder.equal(root.get("status"), status)
