@@ -172,6 +172,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         try {
+
             if (plotinputDTO.getId() != null || StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
 //                Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
 //                if (existEntity.isPresent())
@@ -180,7 +181,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             	System.out.println("entered loop");
             	Optional<PlotInput> existingEntity = plotinputRepository
                             .findByRefNo(plotinputDTO.getApplicationNo());
-            	
             	if (existingEntity.isPresent()) {
             			System.out.println("id {}"+existingEntity.get().getId());    
             			plotinputDTO.setId(existingEntity.get().getId());
