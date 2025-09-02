@@ -4,6 +4,9 @@ import java.time.LocalDate;
 
 import org.hibernate.envers.Audited;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
+import com.dsp.plot.config.XSSConfig.NoEscape;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,6 +49,7 @@ public class InputInstance  extends Auditable{
     @Column(name = "process_instance_id", length = 255)
     private String processInstanceId;
 
+    @NoEscape
     @Column(name = "published_document_url", length = 255)
     private String publishedDocumentUrl;
 
@@ -87,9 +91,13 @@ public class InputInstance  extends Auditable{
 
     @Column(name = "application_instance_id")
     private Long applicationInstanceId;
+    
+    @AllowHtml
     @Column(name = "html_content_en", columnDefinition = "text")
 	private String htmlContentEnglish;
-	@Column(name = "html_content_hi", columnDefinition = "text")
+	
+    @AllowHtml
+    @Column(name = "html_content_hi", columnDefinition = "text")
 	private String htmlContentHindi;
 
 }

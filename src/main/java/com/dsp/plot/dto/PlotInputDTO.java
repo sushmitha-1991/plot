@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,8 +48,10 @@ public class PlotInputDTO {
     private String nodalOfficerPhoneNo;
     private String nodalOfficerMobileNo;
     private LocalDate prevPaperLaidDate;
+    @AllowHtml
     private String content;
     private Boolean sendToLibrary;
+    @AllowHtml
     private String note;
 
     //changes

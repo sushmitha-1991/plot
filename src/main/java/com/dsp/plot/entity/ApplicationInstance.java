@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.hibernate.envers.Audited;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
 import com.dsp.plot.util.MapJsonConverter;
 
 import jakarta.persistence.Column;
@@ -79,8 +80,11 @@ public class ApplicationInstance extends Auditable{
 	@Column(name = "other_info", columnDefinition = "jsonb")
 	private Map<String, Object> otherInfo;
 
+	@AllowHtml
 	@Column(name = "html_content_en", columnDefinition = "text")
 	private String htmlContentEnglish;
+	
+	@AllowHtml
 	@Column(name = "html_content_hi", columnDefinition = "text")
 	private String htmlContentHindi;
 	@Column(name = "parent_instance_id")

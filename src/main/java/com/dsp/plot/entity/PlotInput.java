@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.hibernate.envers.Audited;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
 import com.dsp.plot.util.JsonMapConverter;
 
 import jakarta.persistence.Column;
@@ -65,6 +66,8 @@ public class PlotInput extends InputInstance {
 
     @Column(name = "generated_plot_id")
     private Long generatedPlotId;
+    
+    @AllowHtml
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 

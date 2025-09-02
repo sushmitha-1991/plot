@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.hibernate.envers.Audited;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
 import com.dsp.plot.util.JsonMapConverter;
 
 import jakarta.persistence.Column;
@@ -58,8 +59,10 @@ public class PlotIndex extends Auditable {
     @Column(name = "ref_no")
     private String refNo;
 
+    @AllowHtml
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
+    
     @Convert(converter = JsonMapConverter.class)
     @Column(name = "index_details", columnDefinition = "JSONB")
     private List<Map<String, Object>> indexDetails;

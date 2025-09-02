@@ -2,6 +2,8 @@ package com.dsp.plot.dto;
 
 import java.time.LocalDate;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +24,9 @@ public class ApplicationInstanceDTO {
     private String lokSabhaSession;
     private String lokSabhaSessionNumber;
     private String rajyaSabhaSession;
+    @AllowHtml
     private String htmlContentEnglish;
+    @AllowHtml
     private String htmlContentHindi;
     private Long parentInstanceId;
     // private String startingPageNo;

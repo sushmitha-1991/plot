@@ -172,19 +172,21 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
         }
         try {
-            if (plotinputDTO.getId() != null && StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
-                Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
-                
-                if (existEntity.isPresent())
-                    return update(plotinputDTO.getId(), plotinputDTO);
-                else {
-                    Optional<PlotInput> existingEntity = plotinputRepository
+
+            if (plotinputDTO.getId() != null || StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
+//                Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
+//                if (existEntity.isPresent())
+//                    return update(plotinputDTO.getId(), plotinputDTO);
+//                else {
+            	System.out.println("entered loop");
+            	Optional<PlotInput> existingEntity = plotinputRepository
                             .findByRefNo(plotinputDTO.getApplicationNo());
-                    if (existEntity.isPresent()) {
-                        plotinputDTO.setId(existEntity.get().getId());
-                        return update(existEntity.get().getId(), plotinputDTO);
+            	if (existingEntity.isPresent()) {
+            			System.out.println("id {}"+existingEntity.get().getId());    
+            			plotinputDTO.setId(existingEntity.get().getId());
+                        return update(existingEntity.get().getId(), plotinputDTO);
                     }
-                }
+//                }
             }
             // Convert DTO to entity
             PlotInput entity = PlotInputMapper.toEntity(plotinputDTO);

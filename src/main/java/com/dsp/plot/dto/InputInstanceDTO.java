@@ -3,6 +3,8 @@ package com.dsp.plot.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.dsp.plot.config.XSSConfig.AllowHtml;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +28,8 @@ public class InputInstanceDTO {
 	private String rajyaSabhaSession;
 	private String pendingAt;
 	private Long applicationInstanceId;
+    @AllowHtml
 	private String htmlContentEnglish;
-	private String htmlContentHindi;
+    @AllowHtml
+    private String htmlContentHindi;
 }
