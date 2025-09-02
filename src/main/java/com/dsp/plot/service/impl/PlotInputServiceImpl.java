@@ -174,6 +174,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         try {
             if (plotinputDTO.getId() != null && StringUtils.isNotBlank(plotinputDTO.getApplicationNo())) {
                 Optional<PlotInput> existEntity = plotinputRepository.findById(plotinputDTO.getId());
+                
                 if (existEntity.isPresent())
                     return update(plotinputDTO.getId(), plotinputDTO);
                 else {

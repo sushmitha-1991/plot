@@ -41,23 +41,30 @@ public class LtnoResponseService {
         System.out.println("entity " + entitys);
         for (PlotLtno ltno : entitys) {
             Boolean addInResponse = true;
-            
+
             addInResponse = isInLsAndRs(house, loksabha, session, ltno);
-            LtnoResponseDTO dto=mapToDTO(ltno, house);
-            if(minCodes!=null)
-            {    
-            addInResponse=compareValues(minCodes.toString(), dto.getMinistryCode().toString());  
-                System.out.println("add in resp if ministry code"+addInResponse);
+            LtnoResponseDTO dto = mapToDTO(ltno, house);
+            System.out.println("min code "+minCodes);
+            if (minCodes != null) {
+                addInResponse = compareIntegerValues(minCodes, dto.getMinistryCode());
+                System.out.println("add in resp if ministry code" + addInResponse);
             }
-             if(ministryNames!=null)
-            {    
-            addInResponse=compareValues(ministryNames.trim(), dto.getMinistry().trim());  
-                System.out.println("add in resp if ministry code"+addInResponse);
+            if (ministryNames != null) {
+                addInResponse = compareValues(ministryNames.trim(), dto.getMinistry().trim());
+                System.out.println("add in resp if ministry code" + addInResponse);
             }
             if (addInResponse)
                 dtoList.add(dto);
         }
         return dtoList;
+    }
+
+    private Boolean compareIntegerValues(Integer minCodes, Integer ministryCode) {
+        // TODO Auto-generated method stub
+        if (minCodes.equals(ministryCode))
+            return true;
+        else
+            return false;
     }
 
     private Boolean isInLsAndRs(String house, String loksabha, String session, PlotLtno ltno) {
