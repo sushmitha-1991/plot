@@ -160,8 +160,4 @@ public class PlotInput extends InputInstance {
     @JoinColumn(name = "department_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Departments departments;
 
-    @ManyToOne
-    @JoinColumn(name = "submitted_by_id",referencedColumnName = "id",insertable = false, updatable =false)
-    private BaseUser submittedUserDetails;
-
 }
