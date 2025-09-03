@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.dsp.plot.entity.*;
+import com.dsp.plot.repository.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,38 +47,12 @@ import com.dsp.plot.dto.RequestDTO;
 import com.dsp.plot.dto.SerialNumberRequest;
 import com.dsp.plot.dto.SerialNumberResponse;
 import com.dsp.plot.dto.UserDetailsDTO;
-import com.dsp.plot.entity.BaseUser;
-import com.dsp.plot.entity.Departments;
-import com.dsp.plot.entity.MasterCode;
-import com.dsp.plot.entity.MastersLokSabha;
-import com.dsp.plot.entity.MastersLokSabhaSession;
-import com.dsp.plot.entity.MastersRajyaSabha;
-import com.dsp.plot.entity.Ministries;
-import com.dsp.plot.entity.MinistryAuthority;
-import com.dsp.plot.entity.PlotDateChart;
-import com.dsp.plot.entity.PlotGenerate;
-import com.dsp.plot.entity.PlotHistory;
-import com.dsp.plot.entity.PlotInput;
-import com.dsp.plot.entity.Request;
 import com.dsp.plot.entity.specification.DateChartSpec;
 import com.dsp.plot.entity.specification.PlotInputSpec;
 import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotInputMapper;
 import com.dsp.plot.mapper.RequestMapper;
-import com.dsp.plot.repository.AuthorityRepository;
-import com.dsp.plot.repository.CodeRepository;
-import com.dsp.plot.repository.DepartmentRepository;
-import com.dsp.plot.repository.MasterLSSRepository;
-import com.dsp.plot.repository.MasterLsRepository;
-import com.dsp.plot.repository.MastersRSSRepository;
-import com.dsp.plot.repository.MinistriesRepository;
-import com.dsp.plot.repository.MyUserRepository;
-import com.dsp.plot.repository.PlotDateChartRepository;
-import com.dsp.plot.repository.PlotGenerateRepository;
-import com.dsp.plot.repository.PlotHistoryRepository;
-import com.dsp.plot.repository.PlotInputRepository;
-import com.dsp.plot.repository.RequestRepository;
 import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotInputService;
 import com.dsp.plot.util.UserUtils;
@@ -136,6 +112,10 @@ public class PlotInputServiceImpl implements PlotInputService {
     @Autowired
 
     private AuthorityRepository authorityRepository;
+
+
+    @Autowired
+    private InputWorkflowRepository inputHistoryRepository;
 
     @Transactional
     @Override
@@ -263,6 +243,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             // update Application No in DocumentMetadata table using Uuid
             updateAppNo(entity.getDocuments(), entity.getApplicationNo());
             // Convert saved entity back to DTO
+
+            // >>> NEW: write input workflow history (same pattern as Bulletin2)
+            createInputHistory(entity, "Created");
+
+
             PlotInputDTO responseDTO = PlotInputMapper.toDTO(entity);
             // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
             // responseDTO,entity);
@@ -282,6 +267,61 @@ public class PlotInputServiceImpl implements PlotInputService {
             throw new CustomDatabaseException("An error occurred while saving plot input", e);
         }
     }
+    // for the input history
+    private void createInputHistory(PlotInput input, String actionTaken) {
+        InputWorkflowHistory history = InputWorkflowHistory.builder()
+                .applicationId(input.getApplicationId())
+                .inputInstanceId(input.getId())
+                .actionTakenBy(input.getUpdatedBy())
+                .actionTakenByName(getActionTakenBy(input))
+                .status(input.getStatus())
+                .actionTaken(actionTaken)
+                .applicationRecordId(input.getId())
+                .pendingWith(null)
+                .pendingWithName(input.getPendingAt())
+                .actionTakenOn(input.getCreatedAt())
+                .commentForDisplay(input.getRemarks())
+                // .ipAddress(getClientIp(httpRequest)) // optional, if you have request
+                .referenceFiles(input.getDocuments()) // mirrors Bulletin2: referenceFiles(...)
+                .build();
+
+        inputHistoryRepository.save(history);
+    }
+
+
+    private String getActionTakenBy(PlotInput input) {
+        BaseUser user = input.getSubmittedUserDetails();
+        System.out.println("Baseuser: " + user);
+
+        if (user == null && input.getSubmittedById() != null) {
+            user = userRepository.findById(input.getSubmittedById()).orElse(null);
+            System.out.println("Fetched user: " + input.getId() + " " + user);
+        }
+        if (user == null) return null;
+
+        String userName = user.getFirstName() + " " +
+                (user.getMiddleName() != null ? (user.getMiddleName() + " ") : "") +
+                (user.getLastName() != null ? user.getLastName() : "");
+        return userName;
+    }
+
+
+
+    private String getClientIp(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
+    }
+
+
+
+
+
+
+
+
 
     private PlotInput updateRefId(Long id) {
         Optional<PlotInput> entity = plotinputRepository.findById(id);
@@ -1804,6 +1844,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
             // Save updated date chart
         }
+
+        // for the input status
+        dbEntity.setCurrentStatus(dbEntity.getStatus());
+
+
         dbEntity.setCurrentStatus(dbEntity.getStatus());
         dbEntity.setDocumentDate(dbEntity.getSubmissionDate());
         dbEntity.setHtmlContentEnglish(dbEntity.getContent());
