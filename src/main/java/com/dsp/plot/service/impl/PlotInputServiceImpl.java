@@ -245,7 +245,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // Convert saved entity back to DTO
 
             // >>> NEW: write input workflow history (same pattern as Bulletin2)
-            createInputHistory(entity, "Created");
+            createInputHistory(entity, "Created",entity.getPendingAt());
 
 
             PlotInputDTO responseDTO = PlotInputMapper.toDTO(entity);
@@ -268,17 +268,18 @@ public class PlotInputServiceImpl implements PlotInputService {
         }
     }
     // for the input history
-    private void createInputHistory(PlotInput input, String actionTaken) {
+    private void createInputHistory(PlotInput input, String actionTaken,String pendingWith) {
         InputWorkflowHistory history = InputWorkflowHistory.builder()
                 .applicationId(input.getApplicationId())
                 .inputInstanceId(input.getId())
                 .actionTakenBy(input.getUpdatedBy())
-                .actionTakenByName(getActionTakenBy(input))
+                .actionTakenByName(getActionTakenBy())
+                .actionTakenBy(utils.getUserId())
                 .status(input.getStatus())
                 .actionTaken(actionTaken)
                 .applicationRecordId(input.getId())
                 .pendingWith(null)
-                .pendingWithName(input.getPendingAt())
+                .pendingWithName(pendingWith)
                 .actionTakenOn(input.getCreatedAt())
                 .commentForDisplay(input.getRemarks())
                 // .ipAddress(getClientIp(httpRequest)) // optional, if you have request
@@ -289,20 +290,14 @@ public class PlotInputServiceImpl implements PlotInputService {
     }
 
 
-    private String getActionTakenBy(PlotInput input) {
-        BaseUser user = input.getSubmittedUserDetails();
-        System.out.println("Baseuser: " + user);
-
-        if (user == null && input.getSubmittedById() != null) {
-            user = userRepository.findById(input.getSubmittedById()).orElse(null);
-            System.out.println("Fetched user: " + input.getId() + " " + user);
-        }
+    private String getActionTakenBy() {
+        Optional<BaseUser> userOpt = userRepository.findById(utils.getUserId());
+        BaseUser user = userOpt.orElse(null);
         if (user == null) return null;
 
-        String userName = user.getFirstName() + " " +
-                (user.getMiddleName() != null ? (user.getMiddleName() + " ") : "") +
+        return user.getFirstName() + " " +
+                (user.getMiddleName() != null ? user.getMiddleName() + " " : "") +
                 (user.getLastName() != null ? user.getLastName() : "");
-        return userName;
     }
 
 
