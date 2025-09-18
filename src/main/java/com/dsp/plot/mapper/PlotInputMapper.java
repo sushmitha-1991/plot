@@ -217,33 +217,98 @@ public class PlotInputMapper {
                         List<Map<String,Object>> paperDetails=entity.getPaperDetails();
                         for(Map<String,Object> paper:paperDetails)
                         {
-                                if(paper.containsKey("paperTitle"))
-                                {
-                                        System.out.println("paperTitle "+paper.get("paperTitle"));
-                                        Long id=getLongValue(paper,"paperTitle");
-                                        paper.put("paperTitleName",getCodeFromId(id));
-                                }
-                                if(paper.containsKey("gazetteDetails"))
-                                {
-                                        System.out.println("gazetteDetails "+paper.get("gazetteDetails"));
-                                        Long id=getLongValue(paper,"gazetteDetails");
-                                        paper.put("gazetteDetailsName",
-                                        getCodeFromId(id));
-                                }
-                                if(paper.containsKey("publishedIn"))
-                                {
-                                        System.out.println("publishedIn "+paper.get("publishedIn"));
-                                        Long id=getLongValue(paper,"publishedIn");
-                                        paper.put("publishedInName",
-                                        getCodeFromId(id));
-                                }
-                                if(paper.containsKey("department"))
-                                {
-                                        System.out.println("department "+paper.get("department"));
-                                        Long id=getLongValue(paper,"department");
-                                        paper.put("department",
-                                        getDepartmentById(id));   
-                                }
+                                if (paper.containsKey("paperTitle")) {
+    Object value = paper.get("paperTitle");
+
+    if (value instanceof Long) {
+        // Case 1: It's already a Long
+        Long id = (Long) value;
+        paper.put("paperTitleName", getCodeFromId(id));
+    } 
+    else if (value instanceof String) {
+        // Case 2: It's a String
+        String strVal = (String) value;
+        if (strVal == null || strVal.trim().isEmpty()) {
+            paper.put("paperTitleName", "");  // keep empty/null as is
+        } else {
+            paper.put("paperTitleName", strVal);  // just put the string back
+        }
+    } 
+    else {
+        // Case 3: Some unexpected type
+        paper.put("paperTitleName", "");
+    }
+}
+if (paper.containsKey("publishedIn")) {
+    Object value = paper.get("publishedIn");
+
+    if (value instanceof Long) {
+        // Case 1: It's already a Long
+        Long id = (Long) value;
+        paper.put("publishedInName", getCodeFromId(id));
+    } 
+    else if (value instanceof String) {
+        // Case 2: It's a String
+        String strVal = (String) value;
+        if (strVal == null || strVal.trim().isEmpty()) {
+            paper.put("publishedInName", "");  // keep empty/null as is
+        } else {
+            paper.put("publishedInName", strVal);  // just put the string back
+        }
+    } 
+    else {
+        // Case 3: Some unexpected type
+        paper.put("publishedInName", "");
+    }
+}
+if (paper.containsKey("department")) {
+    Object value = paper.get("department");
+
+    if (value instanceof Long) {
+        // Case 1: It's already a Long
+        Long id = (Long) value;
+        paper.put("departmentName", getCodeFromId(id));
+    } 
+    else if (value instanceof String) {
+        // Case 2: It's a String
+        String strVal = (String) value;
+        if (strVal == null || strVal.trim().isEmpty()) {
+            paper.put("departmentName", "");  // keep empty/null as is
+        } else {
+            paper.put("departmentName", strVal);  // just put the string back
+        }
+    } 
+    else {
+        // Case 3: Some unexpected type
+        paper.put("departmentName", "");
+    }
+}
+
+
+if (paper.containsKey("gazetteDetails")) {
+    Object value = paper.get("gazetteDetails");
+
+    if (value instanceof Long) {
+        // Case 1: It's already a Long
+        Long id = (Long) value;
+        paper.put("gazetteDetailsName", getCodeFromId(id));
+    } 
+    else if (value instanceof String) {
+        // Case 2: It's a String
+        String strVal = (String) value;
+        if (strVal == null || strVal.trim().isEmpty()) {
+            paper.put("gazetteDetailsName", "");  // keep empty/null as is
+        } else {
+            paper.put("gazetteDetailsName", strVal);  // just put the string back
+        }
+    } 
+    else {
+        // Case 3: Some unexpected type
+        paper.put("gazetteDetailsName", "");
+    }
+}
+                            
+                               
                                 System.out.println("paper "+paper);
                         }
                         System.out.println("paper details "+paperDetails);
