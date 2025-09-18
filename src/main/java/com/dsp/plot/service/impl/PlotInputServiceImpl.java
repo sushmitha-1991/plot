@@ -79,6 +79,8 @@ public class PlotInputServiceImpl implements PlotInputService {
     private MastersRSSRepository mastersRSSRepository;
 
     @Autowired
+    private PlotInputMapper plotinputMap;
+    @Autowired
     private CodeRepository codeRepository;
     @Autowired
     private MinistriesRepository ministriesRepository;
@@ -169,7 +171,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 //                }
             }
             // Convert DTO to entity
-            PlotInput entity = PlotInputMapper.toEntity(plotinputDTO);
+            PlotInput entity = plotinputMap.toEntity(plotinputDTO);
             log.debug("Converted PlotInputDTO to entity: {}", entity);
             // Save PlotInput entity
             SerialNumberRequest serialNumberRequest = new SerialNumberRequest();
@@ -248,7 +250,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             createInputHistory(entity, "Created",entity.getPendingAt());
 
 
-            PlotInputDTO responseDTO = PlotInputMapper.toDTO(entity);
+            PlotInputDTO responseDTO = plotinputMap.toDTO(entity);
             // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
             // responseDTO,entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
@@ -1150,7 +1152,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             input.setPaperTypes(paperTypeOptional.get());
                         }
                         System.out.println("@@@" + input);
-                        PlotInputDTO draftDto = PlotInputMapper.toDTO(input);
+                        PlotInputDTO draftDto = plotinputMap.toDTO(input);
                         dtoList.add(draftDto);
                     }
                 }
@@ -1226,7 +1228,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             }
                         }
                         entity = plotinputRepository.save(entity);
-                        PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                        PlotInputDTO dto = plotinputMap.toDTO(entity);
                         dto.setRequests(getRequests(dto.getId()));
                         dtoList.add(dto);
                     }
@@ -1254,7 +1256,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             }
                         }
                         entity = plotinputRepository.save(entity);
-                        PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                        PlotInputDTO dto = plotinputMap.toDTO(entity);
                         dto.setRequests(getRequests(dto.getId()));
                         dtoList.add(dto);
                     }
@@ -1313,7 +1315,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                                         .findByMinistryAuthId(input.getAuthenticatedById());
                                 input.setAuthenticatorDetails(authOptional.get());
                             }
-                            dtoList.add(PlotInputMapper.toDTO(input));
+                            dtoList.add(plotinputMap.toDTO(input));
                         }
                     }
                 }
@@ -1368,7 +1370,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             // codeRepository.findById(input.getPaperTypeId());
                             // input.setPaperTypes(paperTypeOptional.get());
                             // }
-                            dtoList.add(PlotInputMapper.toDTO(input));
+                            dtoList.add(plotinputMap.toDTO(input));
                         }
                     }
                 }
@@ -1450,7 +1452,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         }
                     }
                     entity = plotinputRepository.save(entity);
-                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    PlotInputDTO dto = plotinputMap.toDTO(entity);
                     dto.setRequests(getRequests(dto.getId()));
                     dtoList.add(dto);
                 }
@@ -1471,7 +1473,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                         }
                     }
                     entity = plotinputRepository.save(entity);
-                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    PlotInputDTO dto = plotinputMap.toDTO(entity);
                     dto.setRequests(getRequests(dto.getId()));
                     dtoList.add(dto);
                 }
@@ -1516,7 +1518,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                     for (DraftDataDTO dto : draftDataDTOs) {
                         System.out.println("dto");
                         System.out.println(dto);
-                        PlotInput inputEntity = PlotInputMapper.mapDraftToEntity(dto, lokSabhaNo, lokSabhaSessionNo,
+                        PlotInput inputEntity = plotinputMap.mapDraftToEntity(dto, lokSabhaNo, lokSabhaSessionNo,
                                 rajyaSabhaSessionNo, startDate, endDate, status, submissionDate,
                                 department, paperType, paperName, proposedDateOfLaying,
                                 actualDateOfLaying, ministry);
@@ -1622,7 +1624,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             }
                         }
                     }
-                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    PlotInputDTO dto = plotinputMap.toDTO(entity);
                     dto.setRequests(getRequests(dto.getId()));
                     List<PlotHistory> histories = plotHistoryRepository
                             .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
@@ -1648,7 +1650,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                             }
                         }
                     }
-                    PlotInputDTO dto = PlotInputMapper.toDTO(entity);
+                    PlotInputDTO dto = plotinputMap.toDTO(entity);
                     List<PlotHistory> histories = plotHistoryRepository
                             .findAllByPlotInputIdOrderByCreatedAtAsc(dto.getId());
                     for (PlotHistory history : histories) {
@@ -1691,7 +1693,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             dBEntity.setCurrentStatus("Submitted");
         }
         dBEntity = plotinputRepository.save(dBEntity);
-        PlotInputDTO dto = PlotInputMapper.toDTO(dBEntity);
+        PlotInputDTO dto = plotinputMap.toDTO(dBEntity);
         dto.setRequests(getRequests(dto.getId()));
         return dto;
     }
@@ -1715,7 +1717,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 .orElseThrow(() -> new ResourceNotFoundException("PlotInput not found with id: " + id));
         // Update only the fields you want to update: TODO. Default -> All parameters
         // are updated
-        PlotInput dbEntityNew = PlotInputMapper.toEntity(plotinputDTO);
+        PlotInput dbEntityNew = plotinputMap.toEntity(plotinputDTO);
         Field[] fields = dbEntityNew.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true); // Allow access to private fields
@@ -1857,7 +1859,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             plot = repository.save(plot);
         }
         // Prepare the response DTO
-        PlotInputDTO dto = PlotInputMapper.toDTO(savedInput);
+        PlotInputDTO dto = plotinputMap.toDTO(savedInput);
         dto.setRequests(getRequests(dto.getId()));
         return dto;
     }
@@ -1895,7 +1897,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     // date chart Services
     @Override
     public PlotDateChartDTO addDateChart(PlotDateChartDTO dto) {
-        PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+        PlotDateChart entity = plotinputMap.dateChartMapToEntity(dto);
         Optional<PlotDateChart> optionalEntity;
         // Optional<PlotDateChart> optionalEntity =
         // plotDateChartRepository.findByMinistryId(entity.getMinistryId());
@@ -1931,11 +1933,11 @@ public class PlotInputServiceImpl implements PlotInputService {
             // System.out.println("Existing entity");
             // System.out.println(existingEntity);
             existingEntity = plotDateChartRepository.save(existingEntity);
-            return PlotInputMapper.dateChartMapToDTO(existingEntity);
+            return plotinputMap.dateChartMapToDTO(existingEntity);
         } else {
 
             entity = plotDateChartRepository.save(entity);
-            return PlotInputMapper.dateChartMapToDTO(entity);
+            return plotinputMap.dateChartMapToDTO(entity);
         }
     }
 
@@ -1943,7 +1945,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     public PlotDateChartDTO getDateChartById(Long id) {
         // TODO Auto-generated method stub
         PlotDateChart savedEntity = plotDateChartRepository.findById(id).get();
-        return PlotInputMapper.dateChartMapToDTO(savedEntity);
+        return plotinputMap.dateChartMapToDTO(savedEntity);
     }
 
     public String houseAbbr() {
@@ -2062,7 +2064,7 @@ public class PlotInputServiceImpl implements PlotInputService {
                 }
             }
             if (shouldAdd) {
-                PlotDateChartDTO dto = PlotInputMapper.dateChartMapToDTO(entity);
+                PlotDateChartDTO dto = plotinputMap.dateChartMapToDTO(entity);
                 dto.setMinistryCode(getMinistryCodeById(dto.getMinistryId()));
                 dtoList.add(dto);
                 // Stop checking further dates for this entity once added
@@ -2163,7 +2165,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
                 }
 
-                PlotDateChart entity = PlotInputMapper.dateChartMapToEntity(dto);
+                PlotDateChart entity = plotinputMap.dateChartMapToEntity(dto);
                 entityList.add(entity);
             });
         }

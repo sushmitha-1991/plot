@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.dsp.plot.dto.ApproverDTO;
 import com.dsp.plot.dto.DepartmentDTO;
 import com.dsp.plot.dto.DraftDataDTO;
@@ -19,16 +22,30 @@ import com.dsp.plot.dto.MinistriesDTO;
 import com.dsp.plot.dto.MinistryAuthorityDTO;
 import com.dsp.plot.dto.PlotDateChartDTO;
 import com.dsp.plot.dto.PlotInputDTO;
+import com.dsp.plot.entity.Departments;
+import com.dsp.plot.entity.MasterCode;
 import com.dsp.plot.entity.PlotDateChart;
 import com.dsp.plot.entity.PlotInput;
+import com.dsp.plot.repository.CodeRepository;
+import com.dsp.plot.repository.DepartmentRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@Component
 
 public class PlotInputMapper {
 
         private static final ObjectMapper objectMapper = new ObjectMapper();
 
-        public static PlotInput toEntity(PlotInputDTO dto) {
+         @Autowired
+        public   CodeRepository codeRepository;
+        
+         @Autowired
+        public   DepartmentRepository departmentRepository;
+        public  PlotInput toEntity(PlotInputDTO dto) {
                 return PlotInput.builder()
                                 .id(dto.getId())
                                 .ministryId(dto.getMinistryId())
@@ -70,7 +87,7 @@ public class PlotInputMapper {
                                 .paperName(dto.getPaperName()).build();
         }
 
-        public static PlotInputDTO toDTO(PlotInput entity) {
+        public  PlotInputDTO toDTO(PlotInput entity) {
                 PlotInputDTO dto = PlotInputDTO.builder()
                                 .id(entity.getId())
                                 .ministryId(entity.getMinistryId())
@@ -90,7 +107,7 @@ public class PlotInputMapper {
                                 .sendToLibrary(entity.getSendToLibrary())
                                 .remarks(entity.getRemarks())
                                 .nodalOfficerEmail(entity.getNodalOfficerEmail())
-                                .paperDetails(entity.getPaperDetails())
+                                // .paperDetails(entity.getPaperDetails())
                                 .documents(entity.getDocuments())
                                 .proposedDateOfLaying(entity.getProposedDateOfLaying())
                                 .note(entity.getNote())
@@ -195,23 +212,67 @@ public class PlotInputMapper {
                                                         + " " + entity.getNodalOfficerDetails().getLastName())
                                         .build());
                 }
+                if(entity.getPaperDetails()!=null)
+                {
+                        List<Map<String,Object>> paperDetails=entity.getPaperDetails();
+                        for(Map<String,Object> paper:paperDetails)
+                        {
+                                if(paper.containsKey("paperTitle"))
+                                {
+                                        System.out.println("paperTitle "+paper.get("paperTitle"));
+                                        Long id=getLongValue(paper,"paperTitle");
+                                        paper.put("paperTitleName",getCodeFromId(id));
+                                }
+                                if(paper.containsKey("gazetteDetails"))
+                                {
+                                        System.out.println("gazetteDetails "+paper.get("gazetteDetails"));
+                                        Long id=getLongValue(paper,"gazetteDetails");
+                                        paper.put("gazetteDetailsName",
+                                        getCodeFromId(id));
+                                }
+                                if(paper.containsKey("publishedIn"))
+                                {
+                                        System.out.println("publishedIn "+paper.get("publishedIn"));
+                                        Long id=getLongValue(paper,"publishedIn");
+                                        paper.put("publishedInName",
+                                        getCodeFromId(id));
+                                }
+                                if(paper.containsKey("department"))
+                                {
+                                        System.out.println("department "+paper.get("department"));
+                                        Long id=getLongValue(paper,"department");
+                                        paper.put("department",
+                                        getDepartmentById(id));   
+                                }
+                                System.out.println("paper "+paper);
+                        }
+                        System.out.println("paper details "+paperDetails);
+                        dto.setPaperDetails(paperDetails);
+                }
                 return dto;
-                // .paperTiltle(entity.getPaperTiltle())
-                // .article(entity.getArticle())
-                // .placeOfPublished(entity.getPlaceOfPublished())
-                // .actualDateOfLaid(entity.getActualDateOfLaid())
-                // .section(entity.getSection())
-                // .subSection(entity.getSubSection())
-                // .constitutionalBody(entity.getConstitutionalBody())
-                // .headQuaters(entity.getHeadQuaters())
-                // .year(entity.getYear())
-                // .content(entity.getContent())
-                // .paperPresentInRS(entity.getPaperPresentInRS())
-                // .dateOfRS(entity.getDateOfRS())
-                // .informedDate(entity.getInformedDate())
-                // .isModifiedByHouse(entity.getIsModifiedByHouse())
-                // .actAndSection(entity.getActAndSection())
-                // .build();
+        }
+
+        public   String getDepartmentById(Long id)
+        {
+                Optional<Departments> department = departmentRepository.findById(id);
+                if(department.isPresent())
+                {
+                    Departments d=department.get();
+                    return d.getDepartmentName();    
+                }
+
+                return "";
+        }
+        public  String getCodeFromId(Long id)
+        {
+                Optional<MasterCode> publishedAbbr = codeRepository.findById(id);
+                if(publishedAbbr.isPresent())
+                {
+                    MasterCode code=publishedAbbr.get();
+                    return code.getCode();    
+                }
+
+                return "";
         }
 
         public static PlotDateChartDTO dateChartMapToDTO(PlotDateChart entity) {
