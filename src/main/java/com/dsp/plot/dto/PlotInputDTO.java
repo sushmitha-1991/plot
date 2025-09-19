@@ -74,6 +74,8 @@ public class PlotInputDTO {
     private String ministryName;
     private String departmentName;
     private Integer departmentCode;
+   private String dsp2Key;
+
     private ApproverDTO nodalOfficerDTO;
 
     private MinistryAuthorityDTO authenticatorDTO;
