@@ -12,11 +12,12 @@ import lombok.Setter;
 @Setter
 @Getter
 public class DocumentDTO {
-    private Long id;
-    private LocalDate date;
-    private Long applicationId;
-    private String applicationNo;
-    private String currentStatus;
-    private String note;
-    private String footNote;
+	private Long id;
+	private LocalDate date;
+	private Long applicationId;
+	private String applicationNo;
+	private String currentStatus;
+	private String note;
+	private String footNote;
+	private String dsp2Key;
 }
