@@ -62,8 +62,8 @@ public class OnlyOfficeService {
     }
 
     public DocumentConfigDTO getOnlyOfficeConfig(DocumentRequestDTO requestDTO) {
-        // String url = serviceUrl + "/only-office/config";
-        String url =   "http://localhost:8222/only-office/config";
+        String url = serviceUrl + "/only-office/config";
+        // String url =   "http://localhost:8222/only-office/config";
         String token = getTokenFromRequest();
         if (token == null) {
             throw new IllegalStateException("Authorization token is missing");
