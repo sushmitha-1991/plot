@@ -92,7 +92,7 @@ public class ApplicationInstance extends Auditable{
 	@Column(name = "starting_page_no")
     private Long startingPageNo;
 	@Column(name = "only_office_dsp2_key")
-	private String dsp2Key;
+	private String onlyOfficeDsp2Key;
 	
 
 }

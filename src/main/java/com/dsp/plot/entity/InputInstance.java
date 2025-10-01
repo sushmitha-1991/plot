@@ -92,7 +92,7 @@ public class InputInstance  extends Auditable{
     @Column(name = "application_instance_id")
     private Long applicationInstanceId;
     @Column(name = "only_office_dsp2_key")
-	private String dsp2Key;
+	private String onlyOfficeDsp2Key;
     @AllowHtml
     @Column(name = "html_content_en", columnDefinition = "text")
 	private String htmlContentEnglish;

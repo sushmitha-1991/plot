@@ -42,7 +42,7 @@ public class PlotGenerateMapper {
                                 .referenceFiles(dto.getReferenceFiles())
                                 .paperType(dto.getPaperType())
                                 .paperName(dto.getPaperName())
-                                .dsp2Key(dto.getDsp2Key())
+                                .onlyOfficeDsp2Key(dto.getDsp2Key())
                                 .remarks(dto.getRemarks())
                                 .sendToLibrary(dto.getSendToLibrary())
                                 .referenceFiles(dto.getReferenceFiles())
@@ -81,7 +81,7 @@ public class PlotGenerateMapper {
                                 .paperType(entity.getPaperType())
                                 .paperName(entity.getPaperName())
                                 .remarks(entity.getRemarks())
-                                .dsp2Key(entity.getDsp2Key())
+                                .dsp2Key(entity.getOnlyOfficeDsp2Key())
                                 // ApplicationInstance
                                 .id((entity.getId()))
                                 
