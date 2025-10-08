@@ -58,7 +58,6 @@ import com.dsp.plot.onlyoffice.DocumentRequestDTO;
 import com.dsp.plot.onlyoffice.service.OnlyOfficeService;
 import com.dsp.plot.response.GenericResponse;
 import com.dsp.plot.service.PlotInputService;
-import com.dsp.plot.util.ConstUtil;
 import com.dsp.plot.util.UserUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -72,9 +71,9 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String draftUrl;
     private static final String LS = "LS";
     private static final String RS = "RS";
-    @Value("${plot.ls.input.template.id}")
+    @Value("${plot.ls.template.id}")
     private String plotLsInputTemplateId;
-    @Value("${plot.rs.input.template.id}")
+    @Value("${plot.rs.template.id}")
     private String plotRsInputTemplateId;
     @Autowired
     private HttpServletRequest httpRequest;
@@ -253,22 +252,16 @@ public class PlotInputServiceImpl implements PlotInputService {
             // only office related Changes
             System.out.println("plot input " + entity);
 
-            DocumentConfigDTO configRes = onlyOfficeService.getOnlyOfficeConfig(getConfigReq(entity, house));
-            System.out.println("config Res " + configRes);
-            entity.setOnlyOfficeDsp2Key(configRes.getDsp2Key());
-            System.out.println("plot input with dsp2Key " + entity);
-
+            // DocumentConfigDTO configRes = onlyOfficeService.getOnlyOfficeConfig(getConfigReq(entity, house));
+            // System.out.println("config Res " + configRes);
+            // entity.setOnlyOfficeDsp2Key(configRes.getDsp2Key());
+            // System.out.println("plot input with dsp2Key " + entity);
             // till here only office
             entity = plotinputRepository.save(entity);
-            // log.info("after plot Input Saved: ID={}, Status={}", entity.getId(),
-            // entity.getStatus());
-            // update Application No in DocumentMetadata table using Uuid
             updateAppNo(entity.getDocuments(), entity.getApplicationNo());
             // Convert saved entity back to DTO
-
             // >>> NEW: write input workflow history (same pattern as Bulletin2)
             createInputHistory(entity, "Created", entity.getPendingAt());
-
             PlotInputDTO responseDTO = plotinputMap.toDTO(entity);
             // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
             // responseDTO,entity);
@@ -376,7 +369,7 @@ public class PlotInputServiceImpl implements PlotInputService {
         // .append(escapeHtml(department))
         // .append(")");
         // }
-        contentBuilder.append("</b> to lay on the Table:<br>");
+        contentBuilder.append("</b> to lay on the Table:<br/>");
 
         // Check if paper details exist
         if (paperDetails == null || paperDetails.isEmpty()) {
@@ -427,7 +420,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // contentBuilder.append(formattedString);
             // }
             // contentBuilder.append(i++).append(")
-            // ").append(formattedString).append("<br>");
+            // ").append(formattedString).append("<br/>");
             // }
             // // notifications
             // else if (abbr.equals("PLOT_NOTIFICATION")) {
@@ -438,7 +431,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // }
             // // Append numbered list item
             // contentBuilder.append(i++).append(")
-            // ").append(formattedString).append("<br>");
+            // ").append(formattedString).append("<br/>");
             // }
             // // others
             // else if (abbr.equals("PLOT_OTHER")) {
@@ -448,7 +441,7 @@ public class PlotInputServiceImpl implements PlotInputService {
             // contentBuilder.append(formattedString);
             // }
             // contentBuilder.append(i++).append(")
-            // ").append(formattedString).append("<br>");
+            // ").append(formattedString).append("<br/>");
             // }
             // }
         }

@@ -15,9 +15,11 @@ public class DocumentRequestDTO {
     private boolean edit;
     private String documentKey;
     private String dsp2Key;
+    private String step;
     private String fileName;
     private String applicationId;
     private Long refId;
     private String templateId;
+    private String content;
 
 }

@@ -257,20 +257,14 @@ public class PlotGenerateController {
             headers.setContentDispositionFormData("inline", "synopsis_roster.pdf");
             return ResponseEntity.ok().headers(headers).contentLength(pdfBytes.length).body(pdfBytes);
         }
-        @PostMapping("/testPath")
-        public  ResponseEntity<GenericResponse<String>> postMethodName(@RequestBody List<PlotContentDTO> dtos) {
-                String content = plotService.generateReorderedContent(dtos);
-                GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
-                                "Updated Content ", content);
-                return new ResponseEntity<>(response, HttpStatus.OK);
-        }
         
-        @PostMapping("/generate-content")
-        public ResponseEntity<GenericResponse<String>> generateContent (
+        
+        @PostMapping("/generate-content/{applicationId}")
+        public ResponseEntity<GenericResponse<String>> generateContent (@PathVariable Long applicationId,
                 @RequestBody List<PlotContentDTO> contents) throws Exception {
 
             System.out.println("Input received");
-            String content = plotService.generateReorderedContent(contents);
+            String content = plotService.generateReorderedContent(contents,applicationId);
             GenericResponse<String> response = new GenericResponse<>(HttpStatus.OK.value(), true,
                                 "Generated reordered content", content);
 

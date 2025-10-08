@@ -18,7 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class PlotContentDTO {
-    private Integer minstryId; 
+    private Integer minstryId;
     @AllowHtml
     private String addedText;
     private Long plotInputId;

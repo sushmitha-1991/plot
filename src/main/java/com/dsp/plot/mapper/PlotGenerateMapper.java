@@ -84,7 +84,6 @@ public class PlotGenerateMapper {
                                 .dsp2Key(entity.getOnlyOfficeDsp2Key())
                                 // ApplicationInstance
                                 .id((entity.getId()))
-                                
                                 .plotParentId(entity.getPlotParentId())
                                 .applicationId(entity.getApplicationId())
                                 .applicationNo(entity.getApplicationNo())

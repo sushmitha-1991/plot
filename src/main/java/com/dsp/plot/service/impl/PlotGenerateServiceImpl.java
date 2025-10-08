@@ -48,6 +48,9 @@ import com.dsp.plot.exception.CustomDatabaseException;
 import com.dsp.plot.exception.NoDataFoundException;
 import com.dsp.plot.exception.ResourceNotFoundException;
 import com.dsp.plot.mapper.PlotGenerateMapper;
+import com.dsp.plot.onlyoffice.DocumentConfigDTO;
+import com.dsp.plot.onlyoffice.DocumentRequestDTO;
+import com.dsp.plot.onlyoffice.service.OnlyOfficeService;
 import com.dsp.plot.repository.MasterLSSRepository;
 import com.dsp.plot.repository.MastersRSSRepository;
 import com.dsp.plot.repository.MinistriesRepository;
@@ -65,6 +68,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
 	private final MinistriesRepository ministriesRepository;
 
+	@Autowired
+	private OnlyOfficeService onlyOfficeService;
+	  @Value("${plot.ls.template.id}")
+    private String plotLsTemplateId;
+    @Value("${plot.rs.template.id}")
+    private String plotRsTemplateId;
 	@Value("${workflow.service.url}")
 	private String draftUrl;
 	private static final String LS = "LS";
@@ -700,7 +709,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 	// }
 
 	@Override
-	public String generateReorderedContent(List<PlotContentDTO> contents) {
+	public String generateReorderedContent(List<PlotContentDTO> contents,Long applicationId) {
 
 		if (contents == null || contents.isEmpty()) {
 			System.out.println("Number of Inputs = 0");
@@ -745,8 +754,29 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 		}
 		String ministryInputData = generateCombinedContent(contents, ministryList);
 
-		return replaceSlash(mapWithTemplate(replaceUneccessary(ministryInputData)));
+		// return replaceSlash(mapWithTemplate(replaceUneccessary(ministryInputData)));
+		String finalContent=replaceSlash(mapWithTemplate(replaceUneccessary(ministryInputData)));
+		
+		//call config and get DSP2 key in Response
+		
+            DocumentConfigDTO configRes = onlyOfficeService
+			.getOnlyOfficeConfig(getConfigReq(applicationId,getHouseAbbr(),null,finalContent));
+            System.out.println("config Res " + configRes);
+
+		return configRes.getDsp2Key();
 	}
+	  // only office Related Changes
+    public DocumentRequestDTO getConfigReq(Long appId,String house,String dsp2Key,String finalContent) {
+        String plotInputTemplateId = "";
+        return DocumentRequestDTO.builder()
+                .empty(0)
+                .edit(true)
+                .dsp2Key(dsp2Key)
+                .fileName("plot_generate.docx")
+                .applicationId(String.valueOf(appId))
+				.content(finalContent)
+                .build();
+    }
 
 	@Override
 	public String fetchTemplate(String abbr) {

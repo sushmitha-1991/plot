@@ -45,5 +45,5 @@ public interface PlotGenerateService {
 
     PlotIndexDTO updateIndexById(Long id, PlotIndexDTO plotIndexDTO);
 
-    String generateReorderedContent(List<PlotContentDTO> contents);
+    String generateReorderedContent(List<PlotContentDTO> contents,Long applicationId);
 }
