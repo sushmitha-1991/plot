@@ -70,12 +70,10 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
 	@Autowired
 	private OnlyOfficeService onlyOfficeService;
-	  @Value("${plot.ls.template.id}")
-    private String plotLsTemplateId;
-    @Value("${plot.rs.template.id}")
-    private String plotRsTemplateId;
+
 	@Value("${workflow.service.url}")
 	private String draftUrl;
+	private static final String fileName="plot_generate.docx";
 	private static final String LS = "LS";
 	private static final String RS = "RS";
 	private static final Logger log = LoggerFactory.getLogger(PlotInputServiceImpl.class);
@@ -139,12 +137,12 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 	public DocumentDTO getDocumentByDate(LocalDate dateOfDoc, String doc) {
 		String house = houseAbbr();
 		try {
-			System.out.println("dateOfDoc   " + dateOfDoc);
+			// System.out.println("dateOfDoc " + dateOfDoc);
 			List<PlotGenerate> entitys = new ArrayList<>();
 			Specification<PlotGenerate> spec = Specification.where(null);
 			spec = spec.and(PlotGenerateSpec.isActive(true));
 			spec = spec.and(PlotGenerateSpec.hasDraftStatus(false));
-			System.out.println("date of doc " + dateOfDoc);
+			// System.out.println("date of doc " + dateOfDoc);
 			if (dateOfDoc == null) {
 				System.out.println("date is null " + dateOfDoc);
 				dateOfDoc = LocalDate.now();
@@ -633,7 +631,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 		if (!StringUtils.isBlank(dto.getRefNo())) {
 			// Get the Draft ID from draft table using appNo
 			String res = deleteDraftEntry(dto.getRefNo());
-			System.out.println("res:::::::" + res);
+			// System.out.println("res:::::::" + res);
 			// /delete-save-as-draft
 		}
 		return responseDto;
@@ -665,58 +663,16 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 		throw new UnsupportedOperationException("Unimplemented method 'getAll'");
 	}
 
-	// @Override
-	// public String generateReorderedContent(List<PlotContentDTO> contents) {
-	//
-	// if (contents == null || contents.isEmpty()) {
-	// return null;
-	// }
-	//
-	// // String lastMinisterName = null;
-	// List<String> ministryList = new ArrayList<>();
-	// int seqNo = 0;
-	// for (int i = 0; i < contents.size(); i++) {
-	// PlotContentDTO x = contents.get(i);
-	// Optional<Ministries>
-	// ministry=ministriesRepository.findByMinistryCode(x.getMinstryId());
-	// System.out.println("@@ x @@@ " + x);
-	// System.out.println("&&&&&&"+ministry.get().getMinistryName());
-	// // Long inputId = x.getPlotInputId();
-	// // PlotInput input = inputRepository.getById(inputId);
-	// // get minister name from input or parse minister name from text
-	// // OR parse the text
-	// String content = x.getAddedText();
-	// System.out.println("@@ content @@@ " + content);
-	// String ministerName = parseMinisterName(content);
-	// System.out.println("@@ ministerName @@@ " + ministerName);
-	// if (ministryList.contains(ministerName)) {
-	// seqNo++; // increase seq no
-	// // remove 'To Lay on the table'.
-	// // newContent = generateTrimmedContent(inputId, seqNo);
-	// String newContent = removeContentBetweenBodyAndFirstBr(content);
-	// System.out.println("@@ newContent @@@ " + newContent);
-	// if (seqNo > 1)
-	// newContent = replaceNumber(newContent, seqNo);
-	// x.setAddedText(newContent);
-	// } else {
-	// ministryList.add(ministerName);
-	// seqNo = 0;
-	// }
-	// System.out.println("@@@ ministryList @@ " + ministryList);
-	// // ministryList.add(ministerName);
-	// }
-	// return generateCombinedContent(contents);
-	// }
 
 	@Override
-	public String generateReorderedContent(List<PlotContentDTO> contents,Long applicationId) {
+	public String generateReorderedContent(List<PlotContentDTO> contents, Long applicationId) {
 
 		if (contents == null || contents.isEmpty()) {
-			System.out.println("Number of Inputs = 0");
+			// System.out.println("Number of Inputs = 0");
 			return mapWithTemplate(null);
 			// return null;
 		}
-		System.out.println("Number of Inputs: " + contents.size());
+		// System.out.println("Number of Inputs: " + contents.size());
 		// String lastMinisterName = null;
 		int seqNo = 0;
 		List<String> ministryList = new ArrayList<>();
@@ -728,7 +684,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 			// if (ministerName.equals(lastMinisterName)) {
 			if (ministryList.contains(ministerName)) {
 				++seqNo; // increase seq no
-				System.out.println("Seq no: " + seqNo);
+				// System.out.println("Seq no: " + seqNo);
 				// remove 'To Lay on the table'.
 				// newContent = generateTrimmedContent(inputId, seqNo);
 				String newContent = removeContentBetweenBodyAndFirstBr(content);
@@ -737,46 +693,65 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 				x.setAddedText(newContent);
 			} else {
 				seqNo = 0;
-				System.out.println("content " + content);
+				// System.out.println("content " + content);
 
 				System.out.println("contains  " + content.contains("</ol>"));
 				content = content.replace("</ol>", "");
-				System.out.println("content " + content);
+				// System.out.println("content " + content);
 			}
 			// lastMinisterName = ministerName;
 			ministryList.add(ministerName);
-			System.out.println("ministerName  " + ministerName);
-
-			System.out.println("ministryList  " + ministryList);
-
+			// System.out.println("ministerName  " + ministerName);
+			// System.out.println("ministryList  " + ministryList);
 			x.setAddedText(removeBodyHtmlTags(x.getAddedText()));
-
 		}
 		String ministryInputData = generateCombinedContent(contents, ministryList);
-
-		// return replaceSlash(mapWithTemplate(replaceUneccessary(ministryInputData)));
-		String finalContent=replaceSlash(mapWithTemplate(replaceUneccessary(ministryInputData)));
+		String replaceUnneccessary=replaceUneccessary(ministryInputData);
 		
-		//call config and get DSP2 key in Response
-		
-            DocumentConfigDTO configRes = onlyOfficeService
-			.getOnlyOfficeConfig(getConfigReq(applicationId,getHouseAbbr(),null,finalContent));
-            System.out.println("config Res " + configRes);
 
+		String mappedWithTemple=mapWithTemplate(replaceUnneccessary);
+
+		String finalContent = replaceSlash(mappedWithTemple);
+		// call config and get DSP2 key in Response
+		// finalContent = finalContent. // remove tags that never close
+
+		DocumentConfigDTO configRes = onlyOfficeService
+				.getOnlyOfficeConfig(getConfigReq(applicationId, finalContent));
+
+				String finalContentFixes=fixUnclosedTags(finalContent);
+				finalContentFixes =finalContentFixes.replaceAll("<([a-z]+)(?=[^>]*$)", "");
+				System.out.println(finalContentFixes);
+
+				onlyOfficeService
+				.uloadAndUpdateMetadata(finalContentFixes,configRes.getDsp2Key(),configRes.getDocument().getUrl()
+				,fileName,String.valueOf(applicationId));
+		// System.out.println("config Res " + configRes);
+		// return finalContent;
+ 		// return ministryInputData;
 		return configRes.getDsp2Key();
 	}
-	  // only office Related Changes
-    public DocumentRequestDTO getConfigReq(Long appId,String house,String dsp2Key,String finalContent) {
-        String plotInputTemplateId = "";
-        return DocumentRequestDTO.builder()
-                .empty(0)
-                .edit(true)
-                .dsp2Key(dsp2Key)
-                .fileName("plot_generate.docx")
-                .applicationId(String.valueOf(appId))
-				.content(finalContent)
-                .build();
-    }
+	
+	public static String fixUnclosedTags(String html) {
+    if (html == null) return "";
+
+    // Fix <br>, <hr>, <img> that are not self-closed
+    html = html.replaceAll("(?i)<br(?!/)>", "<br/>");
+    html = html.replaceAll("(?i)<hr(?!/)>", "<hr/>");
+    html = html.replaceAll("(?i)<img([^>]*)>", "<img$1/>");
+
+    return html;
+}
+
+	// only office Related Changes
+	public DocumentRequestDTO getConfigReq(Long appId, String finalContent) {
+		return DocumentRequestDTO.builder()
+				.empty(0)
+				.edit(true)
+				.fileName(fileName)
+				.applicationId(String.valueOf(appId))
+				// .content(finalContent)
+				.build();
+	}
 
 	@Override
 	public String fetchTemplate(String abbr) {
@@ -801,7 +776,7 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 
 			if (response != null && response.getBody() != null && response.getBody().getData() != null) {
 				TemplatesDTO dtoRes = response.getBody().getData();
-				System.out.println(dtoRes.getContent());
+				// System.out.println(dtoRes.getContent());
 				return dtoRes.getContent();
 			}
 			return "";
@@ -815,22 +790,27 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 	@Override
 	public String mapWithTemplate(String data) {
 		String house = getHouseAbbr();
-		System.out.println("house abbr " + house);
+		// System.out.println("house abbr " + house);
 		String fetchTemplate = "";
 		String abbr = "PLOT_" + house;
-		System.out.println("abbr " + abbr);
+		// System.out.println("abbr " + abbr);
 		if (StringUtils.isBlank(data))
 			data = "";
 		fetchTemplate = replacePlaceHoders(abbr, data);
+		fetchTemplate=fetchTemplate
+		.replaceAll("&nbsp;", " ")
+		.replaceAll("<br>", "<br/>");
 		return fetchTemplate;
 	}
 
 	private String replacePlaceHoders(String abbr, String data) {
 		String today = getTodayFormat();
 		String template = fetchTemplate(abbr);
+		// System.out.println("tem "+template);
+		// System.out.println("data "+data);
 		template = template.replace("$today", today).replace("$input-content", data);
-		System.out.println("template");
-		System.out.println(template);
+		// System.out.println("template");
+		// System.out.println(template);
 		return template;
 	}
 
@@ -840,17 +820,17 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.ENGLISH);
 		String formattedDate = date.format(formatter);
 
-		System.out.println(formattedDate); // Output: Wednesday, July 9, 2025
+		// System.out.println(formattedDate); // Output: Wednesday, July 9, 2025
 		return formattedDate;
 	}
 
 	private String getHouseAbbr() {
 		Long houseId = getHouseId();
-		System.out.println("house id " + houseId);
+		// System.out.println("house id " + houseId);
 		Optional<String> abbr = myUserRepository.findHouseAbbrById(houseId);
 		// if(abbr.isEmpty())
 		// throw
-		System.out.println("house abbr " + abbr);
+		// System.out.println("house abbr " + abbr);
 
 		return abbr.get();
 	}
@@ -859,35 +839,46 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 		StringBuilder finalContent = new StringBuilder();
 		contents.forEach(x -> {
 			finalContent.append(x.getAddedText());
-			finalContent.append("<br>");
+			finalContent.append("<br/>");
 		});
 		finalContent.append("</body></html>");
 		log.info("final Content  {}", finalContent);
 		String finalResponse = finalContent.toString();
-		System.out.println("finalResponse  " + finalResponse);
+		// System.out.println("finalResponse " + finalResponse);
 		// for (String ministryName : ministryList) {
 		// System.out.println("minister in content " + ministryName);
-		finalResponse = finalResponse.replace("</li><br></body>", "</li></ol><br></body>")
-				.replace("</li><br><b>", "</li></ol><br><b>").replace("</li></ol><br><br><li>", "</li><br><li>")
-				.replace("</li></ol><br><li>", "</li><br><li>").replace("</li><br><br><b>", "</li></ol><br><b>");
+		finalResponse=finalResponse
+		.replaceAll("<br>", "<br/>")
+		.replaceAll("<br >", "<br/>")
+		.replaceAll("</br>","<br/>")
+            .replaceAll("<br />", "<br/>")
+            .replaceAll("<br></br>", "<br/>")
+			.replace("<br> </br>", "<br/>");
+		finalResponse = finalResponse
+				.replace("</li><br/></body>", "</li></ol><br/></body>")
+				.replace("</li><br/><b>", "</li></ol><br/><b>")
+				.replace("</li><br/><br/><b>", "</li></ol><br/><b>")
+				.replace("</li></ol><br/><br/>li>", "</li><br/><li>")
+				.replace("</li></ol><br/><li>", "</li><br/><li>")
+				.replace("<br>", "<br/>");
 		// }
-		System.out.println("finalResponse after replacing </ol> " + finalResponse);
+		// System.out.println("finalResponse after replacing </ol> " + finalResponse);
 
 		return finalResponse;
 	}
 
 	private static String parseMinisterName(String htmlString) {
-		System.out.println("Input: " + htmlString);
+		// System.out.println("Input: " + htmlString);
 		String plainText = htmlString.replaceAll("<[^>]*>", "");
-		System.out.println("Plain text: " + plainText);
+		// System.out.println("Plain text: " + plainText);
 		String targetPhrase = "to lay on the Table:";
 		int index = plainText.indexOf(targetPhrase);
-		System.out.println("Match index: " + index);
+		// System.out.println("Match index: " + index);
 		String mname = null;
 		if (index != -1) {
 			mname = plainText.substring(0, index).trim();
 		}
-		System.out.println("Min Name: " + mname);
+		// System.out.println("Min Name: " + mname);
 		if (mname != null)
 			return mname.trim();
 		return mname;
@@ -896,15 +887,17 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 	private static String removeContentBetweenBodyAndFirstBr(String html) {
 		log.info("html " + html);
 		int bodyStart = html.indexOf("<body>");
-		int firstBr = html.indexOf("<br>", bodyStart);
+		int firstBr = html.indexOf("<br/>", bodyStart);
 		if (bodyStart == -1 || firstBr == -1) {
 			return html;
 		}
-		String beforeBody = html.substring(0, bodyStart + 6); // Keep opening <body> tag
-		String afterBr = html.substring(firstBr); // Keep content from the first <br> onwards
+		String beforeBody = html.substring(0, bodyStart + 6); // 
+		String afterBr = html.substring(firstBr); // 
 		log.info("html " + html);
-		afterBr = afterBr.replace("<ol>", "").replace("</ol>", "").replace("</li></ol><br><br><li>",
-				"</li><br><br><li>");
+		afterBr = afterBr.replace("<ol>", "")
+		.replace("</ol>", "")
+		.replace("</li></ol><br/><br/><li>",
+				"</li><br/><br/><li>");
 		log.info("html " + html);
 		return beforeBody + afterBr;
 	}
@@ -912,27 +905,35 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 	private static String replaceNumber(String html, int number) {
 		// Replace "1)" with the input number followed by ")"
 		String afterReplacement = html.replace("1)", number + "");
-		System.out.println("after no replacement: " + afterReplacement);
+		// System.out.println("after no replacement: " + afterReplacement);
 		return afterReplacement;
 	}
 
 	private static String removeBodyHtmlTags(String input) {
-		String cleaned = input.replace("<html>", "").replace("</html>", "").replace("<body>", "").replace("</body>",
+		String cleaned = input.replace("<html>", "")
+		.replace("</html>", "")
+		.replace("<body>", "")
+		.replace("</body>",
 				"");
-		System.out.println("Cleaned: " + cleaned);
+		// System.out.println("Cleaned: " + cleaned);
 		return cleaned;
 	}
 
 	private static String replaceUneccessary(String input) {
-		String cleaned = input.replace("<html>", "").replace("</html>", "").replace("<body>", "").replace("</body>", "")
-				.replace("\r", "").replace("\n", "");
-		System.out.println("Cleaned: " + cleaned);
+		String cleaned = input
+				.replace("<html>", "")
+				.replace("</html>", "")
+				.replace("<body>", "")
+				.replace("</body>", "")
+				.replace("\r", "")
+				.replace("\n", "");
+		// System.out.println("Cleaned: " + cleaned);
 		return cleaned;
 	}
 
 	private static String replaceSlash(String input) {
 		String cleaned = input.replace("\r", "").replace("\n", "");
-		System.out.println("Cleaned: " + cleaned);
+		// System.out.println("Cleaned: " + cleaned);
 		return cleaned;
 	}
 

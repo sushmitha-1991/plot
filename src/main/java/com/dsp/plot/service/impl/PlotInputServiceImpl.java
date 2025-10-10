@@ -71,10 +71,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String draftUrl;
     private static final String LS = "LS";
     private static final String RS = "RS";
-    @Value("${plot.ls.template.id}")
-    private String plotLsInputTemplateId;
-    @Value("${plot.rs.template.id}")
-    private String plotRsInputTemplateId;
+    
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
@@ -248,23 +245,12 @@ public class PlotInputServiceImpl implements PlotInputService {
             entity.setHtmlContentEnglish(contentText);
             entity = plotinputRepository.save(entity);
             entity.setRefId(entity.getId());
-
             // only office related Changes
             System.out.println("plot input " + entity);
-
-            // DocumentConfigDTO configRes = onlyOfficeService.getOnlyOfficeConfig(getConfigReq(entity, house));
-            // System.out.println("config Res " + configRes);
-            // entity.setOnlyOfficeDsp2Key(configRes.getDsp2Key());
-            // System.out.println("plot input with dsp2Key " + entity);
-            // till here only office
             entity = plotinputRepository.save(entity);
             updateAppNo(entity.getDocuments(), entity.getApplicationNo());
-            // Convert saved entity back to DTO
-            // >>> NEW: write input workflow history (same pattern as Bulletin2)
             createInputHistory(entity, "Created", entity.getPendingAt());
             PlotInputDTO responseDTO = plotinputMap.toDTO(entity);
-            // log.info("Returning PlotInputDTO: {} and saved Entity: {}",
-            // responseDTO,entity);
             log.debug("Returning PlotInputDTO: {}", responseDTO);
             if (!StringUtils.isBlank(plotinputDTO.getApplicationNo())) {
                 // Get the Draft ID from draft table using appNo
@@ -284,18 +270,14 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     // only office Related Changes
     public DocumentRequestDTO getConfigReq(PlotInput plotInput, String house) {
-        String plotInputTemplateId = "";
-        if (LS.equalsIgnoreCase(house))
-            plotInputTemplateId = plotLsInputTemplateId;
-        else if (RS.equalsIgnoreCase(house))
-            plotInputTemplateId = plotRsInputTemplateId;
+       
         return DocumentRequestDTO.builder()
                 .empty(0)
                 .refId(plotInput.getId())
-                .templateId(plotInputTemplateId)
                 .edit(true)
                 .dsp2Key(plotInput.getOnlyOfficeDsp2Key())
                 .fileName("plotInput.docx")
+                .templateId("0")
                 .applicationId(String.valueOf(plotInput.getApplicationId()))
                 .build();
     }
@@ -406,44 +388,6 @@ public class PlotInputServiceImpl implements PlotInputService {
             }
 
             contentBuilder.append("</ol>"); // End ordered list
-
-            // int i = 1; // Initialize numbering for list items
-            // for (Map<String, Object> paper : paperDetails) {
-            // if (paper == null || paper.isEmpty())
-            // continue; // Skip null/empty entries
-            // // Create formatted output for each paper
-            // // Reports
-            // if (abbr.equals("PLOT_REPORT")) {
-            // String formattedString = getFormattedReportDetails(paper, applicationNo);
-            // // Append numbered list item
-            // if (StringUtils.isBlank(formattedString)) {
-            // contentBuilder.append(formattedString);
-            // }
-            // contentBuilder.append(i++).append(")
-            // ").append(formattedString).append("<br/>");
-            // }
-            // // notifications
-            // else if (abbr.equals("PLOT_NOTIFICATION")) {
-            // String formattedString = getFormattedNotificationDetails(paper,
-            // applicationNo);
-            // if (StringUtils.isBlank(formattedString)) {
-            // contentBuilder.append(formattedString);
-            // }
-            // // Append numbered list item
-            // contentBuilder.append(i++).append(")
-            // ").append(formattedString).append("<br/>");
-            // }
-            // // others
-            // else if (abbr.equals("PLOT_OTHER")) {
-            // String formattedString = getFormattedOtherPaperDetails(paper, applicationNo);
-            // // Append numbered list item
-            // if (StringUtils.isBlank(formattedString)) {
-            // contentBuilder.append(formattedString);
-            // }
-            // contentBuilder.append(i++).append(")
-            // ").append(formattedString).append("<br/>");
-            // }
-            // }
         }
         contentBuilder.append("</body></html>");
         return contentBuilder.toString();
