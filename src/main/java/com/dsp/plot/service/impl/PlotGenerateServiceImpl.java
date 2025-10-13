@@ -668,9 +668,22 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 	public String generateReorderedContent(List<PlotContentDTO> contents, Long applicationId) {
 
 		if (contents == null || contents.isEmpty()) {
-			// System.out.println("Number of Inputs = 0");
-			return mapWithTemplate(null);
-			// return null;
+			String finalContent=mapWithTemplate(null);
+
+        DocumentConfigDTO configRes = onlyOfficeService
+                .getOnlyOfficeConfig(getConfigReq(applicationId, finalContent));
+
+                String finalContentFixes=fixUnclosedTags(finalContent);
+                finalContentFixes =finalContentFixes.replaceAll("<([a-z]+)(?=[^>]*$)", "");
+                System.out.println(finalContentFixes);
+
+                onlyOfficeService
+                .uloadAndUpdateMetadata(finalContentFixes,configRes.getDsp2Key(),configRes.getDocument().getUrl()
+                ,fileName,String.valueOf(applicationId));
+        // System.out.println("config Res " + configRes);
+        // return finalContent;
+        // return ministryInputData;
+        return configRes.getDsp2Key();
 		}
 		// System.out.println("Number of Inputs: " + contents.size());
 		// String lastMinisterName = null;
