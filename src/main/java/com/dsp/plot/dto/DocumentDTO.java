@@ -20,4 +20,8 @@ public class DocumentDTO {
 	private String note;
 	private String footNote;
 	private String dsp2Key;
+	private String lokSabhaNo;
+	private String lokSabhaSessionNo;
+	private String rajyaSabhaSessionNo;
+	
 }

@@ -161,6 +161,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 			DocumentDTO dtoRes = DocumentDTO.builder().id(entity.getId()).date(entity.getPlotDate())
 					.applicationId(entity.getApplicationId()).applicationNo(entity.getApplicationNo())
 					.currentStatus(entity.getCurrentStatus()).note(entity.getContent()).footNote(entity.getFootNote())
+					.lokSabhaNo(entity.getLokSabhaSession()).lokSabhaSessionNo(entity.getLokSabhaSessionNumber())
+					.rajyaSabhaSessionNo(entity.getRajyaSabhaSession())
 					.dsp2Key(entity.getOnlyOfficeDsp2Key()).build();
 			if (RS.equalsIgnoreCase(house) & entity.getRajyaSabhaSessionNo() != null) {
 				return dtoRes;

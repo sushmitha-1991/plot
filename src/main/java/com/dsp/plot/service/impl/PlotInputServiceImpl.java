@@ -71,7 +71,7 @@ public class PlotInputServiceImpl implements PlotInputService {
     private String draftUrl;
     private static final String LS = "LS";
     private static final String RS = "RS";
-    
+
     @Autowired
     private HttpServletRequest httpRequest;
     @Autowired
@@ -270,7 +270,7 @@ public class PlotInputServiceImpl implements PlotInputService {
 
     // only office Related Changes
     public DocumentRequestDTO getConfigReq(PlotInput plotInput, String house) {
-       
+
         return DocumentRequestDTO.builder()
                 .empty(0)
                 .refId(plotInput.getId())
@@ -1216,6 +1216,10 @@ public class PlotInputServiceImpl implements PlotInputService {
                                         entity.setPendingAt(" ");
                                         entity.setStatus(plot.getCurrentStatus());
                                         entity.setCurrentStatus(plot.getCurrentStatus());
+                                    } else {
+                                        entity.setPendingAt(" ");
+                                        entity.setStatus("Approved");
+                                        entity.setCurrentStatus("Approved");
                                     }
                                 }
                             }
@@ -1640,17 +1644,24 @@ public class PlotInputServiceImpl implements PlotInputService {
         if (dBEntity.getApplicationInstanceId() != null) {
             PlotGenerate plot = repository
                     .findById(dBEntity.getApplicationInstanceId()).get();
+            
             if (!plot.getCurrentStatus().equalsIgnoreCase("returned")
                     || !plot.getCurrentStatus().equalsIgnoreCase("draft")) {
-                if (plot.getCurrentStatus().equalsIgnoreCase("published")
-                        || plot.getCurrentStatus().equalsIgnoreCase("approved")) {
-                    dBEntity.setPendingAt(" ");
+                if (!plot.getCurrentStatus().equalsIgnoreCase("published")) {
+                    if (plot.getCurrentStatus().equalsIgnoreCase("Approved"))
+                        dBEntity.setPendingAt(" ");
                     dBEntity.setStatus(plot.getCurrentStatus());
                     dBEntity.setCurrentStatus(plot.getCurrentStatus());
                 } else {
-                    // entity.setPendingAt("Table Office");
-                    dBEntity.setStatus("In Progress");
-                    dBEntity.setCurrentStatus("In Progress");
+                    if (dBEntity.getSendToLibrary() != null && dBEntity.getSendToLibrary()) {
+                        dBEntity.setPendingAt(" ");
+                        dBEntity.setStatus(plot.getCurrentStatus());
+                        dBEntity.setCurrentStatus(plot.getCurrentStatus());
+                    } else {
+                        dBEntity.setPendingAt(" ");
+                        dBEntity.setStatus("Approved");
+                        dBEntity.setCurrentStatus("Approved");
+                    }
                 }
             }
         } else {
