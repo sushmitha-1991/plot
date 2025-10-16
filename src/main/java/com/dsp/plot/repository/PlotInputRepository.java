@@ -1,6 +1,7 @@
 package com.dsp.plot.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,11 +36,6 @@ public interface PlotInputRepository extends JpaRepository<PlotInput, Long>, Jpa
         @Query(value = "Select abbr from master.houses where id=:id",nativeQuery = true)
         String fetchHouseAbbrByhouseId(Long id);
 
-        @Query(value="select m.ministryName,d.departmentName from PlotInput pi "+
-        "join Ministries m on m.id=pi.ministryId "+
-        "join Departments d on d.id=pi.departmentId "+
-        "where pi.id=:id")
-       Map<String,Object> findMinisterAndDepartmentById(Long id);
        @Query("SELECT m.ministryName, d.departmentName " +
        "FROM PlotInput pi " +
        "JOIN Ministry m ON m.id = pi.ministryId " +

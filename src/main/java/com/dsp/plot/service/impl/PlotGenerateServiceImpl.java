@@ -93,6 +93,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 	@Autowired
 	private PlotIndexRepository plotIndexRepo;
 	@Autowired
+	private PlotInputServiceImpl plotInputServiceImpl;
+	@Autowired
 	private PlotInputRepository inputRepository;
 	@Autowired
 	private RestTemplate restTemplate;
@@ -161,6 +163,8 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 			DocumentDTO dtoRes = DocumentDTO.builder().id(entity.getId()).date(entity.getPlotDate())
 					.applicationId(entity.getApplicationId()).applicationNo(entity.getApplicationNo())
 					.currentStatus(entity.getCurrentStatus()).note(entity.getContent()).footNote(entity.getFootNote())
+					.lokSabhaNo(entity.getLokSabhaSession()).lokSabhaSessionNo(entity.getLokSabhaSessionNumber())
+					.rajyaSabhaSessionNo(entity.getRajyaSabhaSession())
 					.dsp2Key(entity.getOnlyOfficeDsp2Key()).build();
 			if (RS.equalsIgnoreCase(house) & entity.getRajyaSabhaSessionNo() != null) {
 				return dtoRes;
@@ -251,8 +255,13 @@ public class PlotGenerateServiceImpl implements PlotGenerateService {
 						existingInput.setId(id);
 						existingInput.setGeneratedPlotId(entity.getId());
 						existingInput.setApplicationInstanceId(entity.getId());
+						existingInput.setStatus("In Progress");
+						existingInput.setCurrentStatus("In Progress");
+						
 						try {
-							inputRepository.save(existingInput);
+							existingInput=inputRepository.save(existingInput);
+							plotInputServiceImpl.createInputHistory(existingInput, "Generated",plotInputServiceImpl.getActionTakenBy() , plotInputServiceImpl.getActionTakenBy());
+							
 						} catch (Exception e) {
 							log.error("Error in updating plot id in lob input", existingInput);
 
